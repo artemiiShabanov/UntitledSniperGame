@@ -220,10 +220,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 ## 10. Save System
 
 ### 10.1 Local Save
-- [ ] Save data structure (credits, XP, ammo inventory, upgrades, skills, unlocks, stats)
-- [ ] File I/O (read/write to user data directory)
-- [ ] Auto-save (after each extraction and hub purchase)
-- [ ] Multiple save slots
+- [x] Save data structure (credits, XP, ammo inventory, upgrades, skills, unlocks, stats)
+- [x] File I/O (read/write to user data directory)
+- [x] Auto-save (after each extraction and hub purchase)
+- [x] Multiple save slots
 
 ### 10.2 Stats Tracking
 - [ ] Lifetime stats (total kills, total extractions, total deaths)
@@ -274,7 +274,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 ## 13. UI & Menus
 
 ### 13.1 HUD
-- [ ] Crosshair
+- [x] Crosshair
 - [ ] Ammo counter (type + remaining)
 - [ ] Lives indicator
 - [ ] Run timer / threat meter
