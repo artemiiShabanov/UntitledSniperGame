@@ -1,6 +1,7 @@
-[gd_scene load_steps=24 format=3 uid="uid://c4adr8nhu3lui"]
+[gd_scene load_steps=25 format=3 uid="uid://c4adr8nhu3lui"]
 
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://bekdmpmob6j7c" path="res://scenes/world/zipline.tscn" id="2_zipline"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -166,3 +167,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Zipline1" parent="." instance=ExtResource("2_zipline")]
+point_a = Vector3(-8, 3.5, -11.6)
+point_b = Vector3(15, 8.75, -15)

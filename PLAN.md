@@ -13,7 +13,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] Jump
 - [x] Crouch
 - [x] Slide (sprint + crouch)
-- [ ] Ziplines (approach + E to attach/detach)
+- [x] Ziplines (approach + E to attach/detach)
 > **Depends on:** nothing (foundation layer)
 > **Priority:** high
 
