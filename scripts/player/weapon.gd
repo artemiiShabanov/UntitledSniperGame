@@ -268,6 +268,9 @@ func _spawn_bullet() -> void:
 	# Add to scene tree (not as child of player so it persists independently)
 	get_tree().root.add_child(bullet)
 
+	# Sound propagation — alert nearby enemies to the gunshot
+	_propagate_gunshot_sound(camera.global_position)
+
 
 func try_reload() -> void:
 	if not can_reload():
@@ -291,3 +294,14 @@ func _start_inspect() -> void:
 	is_scoped = false
 	state_timer = inspect_duration
 	_set_state(State.INSPECTING)
+
+
+## ── Sound propagation ────────────────────────────────────────────────────────
+
+const GUNSHOT_LOUDNESS: float = 50.0  ## How far the sound carries
+
+func _propagate_gunshot_sound(origin: Vector3) -> void:
+	var enemies := get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		if enemy.has_method("hear_sound"):
+			enemy.hear_sound(origin, GUNSHOT_LOUDNESS)

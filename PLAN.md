@@ -83,8 +83,8 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 ## 3. Level System
 
 ### 3.1 Level Framework
-- [ ] Base level scene (terrain, spawn points, extraction zone, lighting)
-- [ ] Level data (name, difficulty, available phases)
+- [x] Base level scene (terrain, spawn points, extraction zone, lighting)
+- [x] Level data (name, difficulty, available phases)
 - [ ] Level loader (pick level based on progression)
 > **Depends on:** 2.1
 > **Priority:** high
@@ -104,14 +104,14 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 ## 4. Enemy AI
 
 ### 4.1 Detection System
-- [ ] Line of sight + sound reaction (gunshots, impacts, ally eliminations)
-- [ ] Alert states (Unaware → Suspicious → Alert → Searching)
+- [x] Line of sight + sound reaction (gunshots, impacts, ally eliminations)
+- [x] Alert states (Unaware → Suspicious → Alert → Searching)
 - [ ] Scope glint / laser sight on enemies (visible warning to player)
 > **Depends on:** 1.3, 3.1
 > **Priority:** high
 
 ### 4.2 Enemy Types
-- [ ] Lookout (basic sniper, stationary, low awareness, slow reaction)
+- [x] Lookout (basic sniper, stationary, low awareness, slow reaction)
 - [ ] Marksman (repositions between nests, medium awareness, decent accuracy)
 - [ ] Countersniper (scope glint visible, actively scans for player, accurate and fast)
 - [ ] Heavy Sniper (armored, requires AP ammo or headshot, high damage)

@@ -310,11 +310,19 @@ func _on_shot_fired() -> void:
 
 func _update_weapon_display() -> void:
 	const STATE_NAMES := ["IDLE", "AIMING", "BOLT_CYCLING", "RELOADING", "INSPECTING"]
-	weapon_state_label.text = "%s | %d/%d" % [
+	weapon_state_label.text = "%s | %d/%d | $%d" % [
 		STATE_NAMES[weapon.state],
 		weapon.ammo_in_magazine,
 		weapon.ammo_reserve,
+		RunManager.get_run_credits(),
 	]
+
+
+## ── Damage ───────────────────────────────────────────────────────────────────
+
+func on_bullet_hit(_bullet: Node, _collision: KinematicCollision3D) -> void:
+	## Called by Bullet when an enemy projectile hits the player.
+	RunManager.take_hit()
 
 
 ## ── Lives callbacks ──────────────────────────────────────────────────────────

@@ -1,10 +1,11 @@
-[gd_scene load_steps=28 format=3 uid="uid://c4adr8nhu3lui"]
+[gd_scene load_steps=29 format=3 uid="uid://c4adr8nhu3lui"]
 
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://bekdmpmob6j7c" path="res://scenes/world/zipline.tscn" id="2_zipline"]
 [ext_resource type="Script" uid="uid://6gd4xuinew4i" path="res://scripts/world/base_level.gd" id="3_base_level"]
 [ext_resource type="Script" uid="uid://bt0op02i13jd1" path="res://scripts/world/spawn_point.gd" id="4_spawn_point"]
 [ext_resource type="PackedScene" path="res://scenes/world/extraction_zone.tscn" id="5_extraction"]
+[ext_resource type="PackedScene" path="res://scenes/enemy/enemy_lookout.tscn" id="6_lookout"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -194,3 +195,12 @@ point_b = Vector3(15, 8.75, -15)
 
 [node name="ExtractionZone" parent="." instance=ExtResource("5_extraction")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, 10)
+
+[node name="Lookout1" parent="." instance=ExtResource("6_lookout")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -20)
+
+[node name="Lookout2" parent="." instance=ExtResource("6_lookout")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 8.5, -15)
+
+[node name="Lookout3" parent="." instance=ExtResource("6_lookout")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -8, 3.25, -12)
