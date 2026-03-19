@@ -24,11 +24,11 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 > **Priority:** high
 
 ### 1.3 Shooting
-- [ ] Projectile-based bullets
-- [ ] Bullet lifetime and collision
-- [ ] Bullet drop & travel time
-- [ ] Scope sway / hold breath to steady
-- [ ] Reload mechanic
+- [x] Projectile-based bullets
+- [x] Bullet lifetime and collision
+- [x] Bullet drop & travel time
+- [x] Scope sway / hold breath to steady
+- [x] Reload mechanic
 - [ ] Ammo types (standard, armor-piercing, high-damage — different damage and penetration)
 > **Depends on:** 1.2
 > **Priority:** high

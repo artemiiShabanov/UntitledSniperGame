@@ -26,15 +26,41 @@ enum State { IDLE, AIMING, BOLT_CYCLING, RELOADING, INSPECTING }
 ## Inspect
 @export var inspect_duration: float = 2.0
 
+## Sway
+@export var sway_amplitude: float = 0.003  ## Base sway strength (radians)
+@export var sway_speed: float = 1.5  ## Sway oscillation speed
+@export var sway_penalty_mult: float = 2.5  ## Sway multiplier after breath exhaustion
+
+## Hold breath
+@export var breath_max: float = 3.0  ## Seconds of hold breath
+@export var breath_recharge_rate: float = 0.75  ## Seconds of breath regained per second
+@export var breath_penalty_duration: float = 1.5  ## Extra-sway penalty time after exhaustion
+@export var breath_sway_mult: float = 0.1  ## Sway multiplier while holding breath
+
+## Hipfire
+@export var hipfire_spread_deg: float = 2.0  ## Spread angle in degrees when unscoped
+
+## Bullet
+@export var bullet_scene: PackedScene = preload("res://scenes/projectile/bullet.tscn")
+@export var muzzle_velocity: float = 300.0
+@export var bullet_gravity: float = 9.8
+
 ## ── State ────────────────────────────────────────────────────────────────────
 
 var state: State = State.IDLE
 var is_scoped: bool = false
 var state_timer: float = 0.0
 
-## Ammo (managed here for now, will integrate with SaveManager in Layer 3)
+## Ammo
 var ammo_in_magazine: int = 5
 var ammo_reserve: int = 20
+
+## Sway & breath
+var sway_time: float = 0.0
+var sway_offset: Vector2 = Vector2.ZERO  ## Current applied sway (to undo next frame)
+var breath_remaining: float = 3.0
+var is_holding_breath: bool = false
+var breath_exhausted_timer: float = 0.0  ## > 0 means penalty sway active
 
 ## ── Signals ──────────────────────────────────────────────────────────────────
 
@@ -51,11 +77,14 @@ signal state_changed(new_state: State)
 
 func _ready() -> void:
 	assert(camera != null, "Weapon must be a child of Camera3D")
+	breath_remaining = breath_max
 
 
 func _process(delta: float) -> void:
 	_process_state_timer(delta)
 	_process_scope(delta)
+	_process_sway(delta)
+	_process_breath(delta)
 	_process_input()
 
 
@@ -148,6 +177,66 @@ func _process_input() -> void:
 		_start_inspect()
 
 
+## ── Sway ─────────────────────────────────────────────────────────────────────
+
+func _process_sway(delta: float) -> void:
+	# Remove previous frame's sway offset
+	camera.rotation.x -= sway_offset.x
+	camera.rotation.y -= sway_offset.y
+
+	if not is_scoped:
+		sway_time = 0.0
+		sway_offset = Vector2.ZERO
+		return
+
+	sway_time += delta * sway_speed
+
+	var sway_mult := 1.0
+	if is_holding_breath:
+		sway_mult = breath_sway_mult
+	elif breath_exhausted_timer > 0.0:
+		sway_mult = sway_penalty_mult
+
+	sway_offset.x = sin(sway_time * 1.1) * sway_amplitude * sway_mult
+	sway_offset.y = sin(sway_time * 0.7) * sway_amplitude * 0.6 * sway_mult
+
+	# Apply new sway offset
+	camera.rotation.x += sway_offset.x
+	camera.rotation.y += sway_offset.y
+
+
+## ── Hold Breath ──────────────────────────────────────────────────────────────
+
+func _process_breath(delta: float) -> void:
+	# Holding breath: sprint key while scoped
+	var wants_hold := Input.is_action_pressed("sprint") and is_scoped and breath_remaining > 0.0 \
+		and breath_exhausted_timer <= 0.0
+
+	if wants_hold and not is_holding_breath:
+		is_holding_breath = true
+	elif not wants_hold and is_holding_breath:
+		is_holding_breath = false
+
+	if is_holding_breath:
+		breath_remaining -= delta
+		if breath_remaining <= 0.0:
+			breath_remaining = 0.0
+			is_holding_breath = false
+			breath_exhausted_timer = breath_penalty_duration
+	else:
+		# Recharge breath
+		breath_remaining = minf(breath_remaining + breath_recharge_rate * delta, breath_max)
+
+	# Tick exhaustion penalty
+	if breath_exhausted_timer > 0.0:
+		breath_exhausted_timer -= delta
+
+
+func get_breath_ratio() -> float:
+	## Returns 0.0 (empty) to 1.0 (full) for HUD display.
+	return breath_remaining / breath_max
+
+
 ## ── Actions ──────────────────────────────────────────────────────────────────
 
 func try_shoot() -> void:
@@ -155,11 +244,29 @@ func try_shoot() -> void:
 		return
 
 	ammo_in_magazine -= 1
+	_spawn_bullet()
 	shot_fired.emit()
 
 	# Enter bolt cycling
 	state_timer = bolt_cycle_time
 	_set_state(State.BOLT_CYCLING)
+
+
+func _spawn_bullet() -> void:
+	var bullet: CharacterBody3D = bullet_scene.instantiate()
+	# Spawn at camera position, pointing forward
+	bullet.global_position = camera.global_position
+	bullet.direction = -camera.global_basis.z
+
+	# Hipfire spread when not scoped
+	if not is_scoped:
+		bullet.spread_angle = deg_to_rad(hipfire_spread_deg)
+
+	bullet.muzzle_velocity = muzzle_velocity
+	bullet.bullet_gravity = bullet_gravity
+
+	# Add to scene tree (not as child of player so it persists independently)
+	get_tree().root.add_child(bullet)
 
 
 func try_reload() -> void:

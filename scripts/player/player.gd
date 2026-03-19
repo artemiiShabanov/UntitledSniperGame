@@ -52,6 +52,7 @@ var current_interactable: Interactable = null
 @onready var lives_label: Label = $HUD/LivesLabel
 @onready var hit_flash: ColorRect = $HUD/HitFlash
 @onready var death_overlay: ColorRect = $HUD/DeathOverlay
+@onready var breath_meter: Control = $HUD/BreathMeter
 
 ## Hit flash
 var hit_flash_alpha: float = 0.0
@@ -88,6 +89,13 @@ func _physics_process(delta: float) -> void:
 	if hit_flash_alpha > 0.0:
 		hit_flash_alpha = maxf(hit_flash_alpha - HIT_FLASH_FADE_SPEED * delta, 0.0)
 		hit_flash.color.a = hit_flash_alpha
+
+	# Update breath meter
+	breath_meter.update_breath(
+		weapon.get_breath_ratio(),
+		weapon.breath_exhausted_timer > 0.0,
+		weapon.is_scoped
+	)
 
 	if RunManager.is_dead:
 		velocity = Vector3.ZERO
