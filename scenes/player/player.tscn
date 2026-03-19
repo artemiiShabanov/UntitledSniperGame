@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://cu5r57bea486j"]
+[gd_scene load_steps=5 format=3 uid="uid://cu5r57bea486j"]
 
 [ext_resource type="Script" uid="uid://b81j16jmplds0" path="res://scripts/player/player.gd" id="1_player"]
-[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="2_hud"]
+[ext_resource type="PackedScene" uid="uid://clsw50y4t4k45" path="res://scenes/ui/hud.tscn" id="2_hud"]
+[ext_resource type="Script" uid="uid://c3b6w1ejt1oxw" path="res://scripts/player/weapon.gd" id="3_weapon"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.3
@@ -10,6 +11,16 @@ height = 1.8
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
 script = ExtResource("1_player")
+mouse_sensitivity = null
+move_speed = null
+sprint_speed = null
+jump_velocity = null
+crouch_speed = null
+gravity = null
+slide_min_speed = null
+slide_friction = null
+slide_duration = null
+interact_range = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -23,5 +34,11 @@ target_position = Vector3(0, 1.3, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+
+[node name="InteractionRay" type="RayCast3D" parent="Head/Camera3D"]
+target_position = Vector3(0, 0, -3)
+
+[node name="Weapon" type="Node3D" parent="Head/Camera3D"]
+script = ExtResource("3_weapon")
 
 [node name="HUD" parent="." instance=ExtResource("2_hud")]

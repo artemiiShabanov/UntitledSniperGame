@@ -34,32 +34,70 @@ var zipline_ref: Node3D = null
 var zipline_progress: float = 0.0
 var zipline_direction: float = 1.0
 
+## Interaction
+@export var interact_range: float = 3.0
+var current_interactable: Interactable = null
+
 ## Node references
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var ceiling_ray: RayCast3D = $CeilingRay
+@onready var interaction_ray: RayCast3D = $Head/Camera3D/InteractionRay
+@onready var weapon: Weapon = $Head/Camera3D/Weapon
+@onready var interact_prompt: Label = $HUD/InteractPrompt
+@onready var crosshair: Control = $HUD/Crosshair
+@onready var scope_overlay: Control = $HUD/ScopeOverlay
+@onready var weapon_state_label: Label = $HUD/WeaponState
+@onready var lives_label: Label = $HUD/LivesLabel
+@onready var hit_flash: ColorRect = $HUD/HitFlash
+@onready var death_overlay: ColorRect = $HUD/DeathOverlay
+
+## Hit flash
+var hit_flash_alpha: float = 0.0
+const HIT_FLASH_FADE_SPEED: float = 3.0
 
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	weapon.state_changed.connect(_on_weapon_state_changed)
+	weapon.shot_fired.connect(_on_shot_fired)
+	RunManager.life_lost.connect(_on_life_lost)
+	RunManager.run_failed.connect(_on_run_failed)
+	RunManager.start_run()
+	_update_lives_display()
 
 
 func _input(event: InputEvent) -> void:
+	if RunManager.is_dead:
+		return
+
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_handle_mouse_look(event)
 
 	if event.is_action_pressed("ui_cancel"):
 		_toggle_mouse_capture()
 
+	# Debug: T to simulate taking a hit
+	if event is InputEventKey and event.pressed and event.keycode == KEY_T:
+		RunManager.take_hit()
+
 
 func _physics_process(delta: float) -> void:
+	# Fade hit flash
+	if hit_flash_alpha > 0.0:
+		hit_flash_alpha = maxf(hit_flash_alpha - HIT_FLASH_FADE_SPEED * delta, 0.0)
+		hit_flash.color.a = hit_flash_alpha
+
+	if RunManager.is_dead:
+		velocity = Vector3.ZERO
+		return
+
 	if is_on_zipline:
 		_process_zipline(delta)
 		return
 
-	if Input.is_action_just_pressed("interact"):
-		_try_attach_zipline()
+	_process_interaction()
 
 	_apply_gravity(delta)
 	_process_crouch_and_slide(delta)
@@ -74,8 +112,9 @@ func _physics_process(delta: float) -> void:
 ## ── Input ────────────────────────────────────────────────────────────────────
 
 func _handle_mouse_look(event: InputEventMouseMotion) -> void:
-	rotate_y(-event.relative.x * mouse_sensitivity)
-	head.rotate_x(-event.relative.y * mouse_sensitivity)
+	var sens := mouse_sensitivity * weapon.get_sensitivity_multiplier()
+	rotate_y(-event.relative.x * sens)
+	head.rotate_x(-event.relative.y * sens)
 	head.rotation.x = clampf(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
 
 
@@ -151,7 +190,7 @@ func _process_jump() -> void:
 ## ── Movement ─────────────────────────────────────────────────────────────────
 
 func _process_movement() -> void:
-	var is_sprinting := Input.is_action_pressed("sprint") and is_on_floor() and not is_crouching
+	var is_sprinting := Input.is_action_pressed("sprint") and is_on_floor() and not is_crouching and not weapon.is_scoped
 	var current_speed := crouch_speed if is_crouching else (sprint_speed if is_sprinting else move_speed)
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
@@ -165,24 +204,46 @@ func _process_movement() -> void:
 		velocity.z = move_toward(velocity.z, 0, current_speed)
 
 
+## ── Interaction ──────────────────────────────────────────────────────────────
+
+func _process_interaction() -> void:
+	# Check what the interaction ray is hitting
+	var new_interactable: Interactable = null
+
+	if interaction_ray.is_colliding():
+		var collider := interaction_ray.get_collider()
+		# Walk up the tree to find an Interactable parent
+		var node := collider as Node
+		while node:
+			if node is Interactable:
+				new_interactable = node
+				break
+			node = node.get_parent()
+
+	# Also check ziplines by proximity (they use line math, not collision shapes)
+	if not new_interactable:
+		var ziplines := get_tree().get_nodes_in_group("zipline")
+		for zl in ziplines:
+			if zl is Interactable:
+				var result: Dictionary = zl.get_closest_point(global_position)
+				if result.distance <= zl.attach_radius:
+					new_interactable = zl
+					break
+
+	# Update prompt
+	current_interactable = new_interactable
+	if current_interactable:
+		interact_prompt.text = current_interactable.get_interact_prompt()
+		interact_prompt.visible = true
+	else:
+		interact_prompt.visible = false
+
+	# Fire interaction
+	if current_interactable and Input.is_action_just_pressed("interact"):
+		current_interactable.interact(self)
+
+
 ## ── Zipline ──────────────────────────────────────────────────────────────────
-
-func _try_attach_zipline() -> void:
-	var ziplines := get_tree().get_nodes_in_group("zipline")
-	var best_zl: Node3D = null
-	var best_dist: float = INF
-	var best_progress: float = 0.0
-
-	for zl in ziplines:
-		var result: Dictionary = zl.get_closest_point(global_position)
-		if result.distance < zl.attach_radius and result.distance < best_dist:
-			best_zl = zl
-			best_dist = result.distance
-			best_progress = result.progress
-
-	if best_zl:
-		_attach_to_zipline(best_zl, best_progress)
-
 
 func _attach_to_zipline(zl: Node3D, start_progress: float) -> void:
 	is_on_zipline = true
@@ -217,3 +278,57 @@ func _detach_from_zipline() -> void:
 	velocity = Vector3(0, zipline_ref.detach_upward_boost, 0)
 	velocity += zipline_ref.line_direction * zipline_direction * zipline_ref.speed * 0.3
 	zipline_ref = null
+
+
+## ── Weapon callbacks ─────────────────────────────────────────────────────────
+
+func _on_weapon_state_changed(new_state: int) -> void:
+	# Toggle crosshair / scope overlay
+	var scoped := weapon.is_scoped
+	crosshair.visible = not scoped
+	scope_overlay.visible = scoped
+	if scoped:
+		scope_overlay.queue_redraw()
+
+	# Update debug weapon state label
+	var state_names := ["IDLE", "AIMING", "BOLT_CYCLING", "RELOADING", "INSPECTING"]
+	weapon_state_label.text = "%s | %d/%d" % [
+		state_names[new_state],
+		weapon.ammo_in_magazine,
+		weapon.ammo_reserve,
+	]
+
+
+func _on_shot_fired() -> void:
+	# Update ammo display
+	var state_names := ["IDLE", "AIMING", "BOLT_CYCLING", "RELOADING", "INSPECTING"]
+	weapon_state_label.text = "%s | %d/%d" % [
+		state_names[weapon.state],
+		weapon.ammo_in_magazine,
+		weapon.ammo_reserve,
+	]
+
+
+## ── Lives callbacks ──────────────────────────────────────────────────────────
+
+func _on_life_lost(lives_remaining: int) -> void:
+	_update_lives_display()
+	# Red flash
+	hit_flash_alpha = 0.4
+	hit_flash.color = Color(1, 0, 0, hit_flash_alpha)
+
+
+func _on_run_failed() -> void:
+	_update_lives_display()
+	death_overlay.visible = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _update_lives_display() -> void:
+	var hearts := ""
+	for i in range(RunManager.max_lives):
+		if i < RunManager.lives:
+			hearts += "♥ "
+		else:
+			hearts += "♡ "
+	lives_label.text = hearts.strip_edges()

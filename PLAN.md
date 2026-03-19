@@ -18,8 +18,8 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 > **Priority:** high
 
 ### 1.2 Weapon — Sniper Rifle
-- [ ] Sniper rifle (bolt-action, scope zoom)
-- [ ] Weapon inspect animation (dedicated key, shows rifle + equipped skin)
+- [x] Sniper rifle (bolt-action, scope zoom)
+- [x] Weapon inspect animation (dedicated key, shows rifle + equipped skin)
 > **Depends on:** 1.1
 > **Priority:** high
 
@@ -34,14 +34,14 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 > **Priority:** high
 
 ### 1.4 Player Lives
-- [ ] Lives system (limited lives per run, any enemy hit costs one life)
-- [ ] Death state (all lives lost = run failure, credits + ammo lost, XP kept)
+- [x] Lives system (limited lives per run, any enemy hit costs one life)
+- [x] Death state (all lives lost = run failure, credits + ammo lost, XP kept)
 > **Depends on:** 1.1
 > **Priority:** high
 
 ### 1.5 Interactions
-- [ ] Interaction system (look at object, press E)
-- [ ] Zipline attach/detach
+- [x] Interaction system (look at object, press E)
+- [x] Zipline attach/detach
 > **Depends on:** 1.1
 > **Priority:** medium
 

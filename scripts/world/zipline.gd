@@ -1,4 +1,4 @@
-extends Node3D
+extends Interactable
 
 ## Zipline tuning
 @export var speed: float = 8.0
@@ -62,6 +62,19 @@ func get_closest_point(world_pos: Vector3) -> Dictionary:
 	var closest := a_world + ab * t
 	var dist := world_pos.distance_to(closest)
 	return { "progress": t, "distance": dist }
+
+
+## ── Interactable overrides ────────────────────────────────────────────────────
+
+func interact(player: CharacterBody3D) -> void:
+	# Player handles the actual attach logic
+	var result := get_closest_point(player.global_position)
+	if result.distance <= attach_radius:
+		player._attach_to_zipline(self, result.progress)
+
+
+func get_interact_prompt() -> String:
+	return "[E] Zipline"
 
 
 ## Returns the natural ride direction: downhill (toward lower endpoint).
