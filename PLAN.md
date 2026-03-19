@@ -50,10 +50,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 ## 2. Extraction Run Structure
 
 ### 2.1 Run Lifecycle
-- [ ] Run state machine (HUB → DEPLOYING → IN_RUN → EXTRACTING → RESULT)
-- [ ] Hub → level transition with loading screen
-- [ ] Run timer (countdown, forced death at zero)
-- [ ] Death handling (lives ≤ 0, lose all credits + ammo)
+- [x] Run state machine (HUB → DEPLOYING → IN_RUN → EXTRACTING → RESULT)
+- [x] Hub → level transition with loading screen
+- [x] Run timer (countdown, forced death at zero)
+- [x] Death handling (lives ≤ 0, lose all credits + ammo)
 > **Depends on:** 1.1, 1.3
 > **Priority:** high
 
