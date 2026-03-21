@@ -106,7 +106,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 ### 4.1 Detection System
 - [x] Line of sight + sound reaction (gunshots, impacts, ally eliminations)
 - [x] Alert states (Unaware → Suspicious → Alert → Searching)
-- [ ] Scope glint / laser sight on enemies (visible warning to player)
+- [x] Scope glint / laser sight on enemies (visible warning to player)
 > **Depends on:** 1.3, 3.1
 > **Priority:** high
 
@@ -362,7 +362,7 @@ Each layer depends on the previous ones. Items within the same layer can be buil
 ### Layer 5 — Level & Enemies
 - 3.1 Level Framework
 - 4.1 Detection System
-- 4.2 Enemy Types
+- 4.2 Enemy Types (Lookout only)
 
 ### Layer 6 — Danger & Reward
 - 2.2 Escalating Danger
@@ -381,6 +381,7 @@ Each layer depends on the previous ones. Items within the same layer can be buil
 - 8.6 Level Unlocks
 
 ### Layer 9 — World Population
+- 4.2 Remaining Enemy Types (Marksman, Countersniper, Heavy Sniper, Elite Sniper)
 - 5 Neutral NPCs
 - 6 Non-NPC Targets
 - 7 Events System

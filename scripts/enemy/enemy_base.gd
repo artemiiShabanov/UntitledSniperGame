@@ -42,6 +42,20 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 @export var shot_damage: float = 1.0
 @export var headshot_multiplier: float = 2.0
 
+## ── Exports: Scope Glint ───────────────────────────────────────────────────
+
+@export_group("Scope Glint")
+@export var glint_enabled: bool = true  ## Whether this enemy shows scope glint
+@export var glint_color: Color = Color(1.0, 0.95, 0.7, 1.0)  ## Warm white
+@export var glint_max_energy: float = 3.0  ## Peak OmniLight brightness
+@export var glint_pulse_speed: float = 3.0  ## Pulse oscillation speed
+@export var glint_suspicious_flash: bool = true  ## Flash during late SUSPICIOUS
+@export var glint_suspicious_threshold: float = 0.7  ## Fraction of alert_threshold
+@export var laser_enabled: bool = true  ## Short laser showing aim direction
+@export var laser_color: Color = Color(1.0, 0.1, 0.1, 0.6)  ## Red
+@export var laser_length: float = 3.0  ## Meters before full fade
+@export var laser_width: float = 0.02  ## Beam thickness
+
 ## ── Exports: Rewards ─────────────────────────────────────────────────────────
 
 @export_group("Rewards")
@@ -82,12 +96,28 @@ var _debug_material: StandardMaterial3D
 var _state_indicator: MeshInstance3D
 var _state_mat: StandardMaterial3D
 
+## Scope glint
+var _glint_sprite: Sprite3D
+var _glint_light: OmniLight3D
+var _glint_material: StandardMaterial3D
+var _glint_active: bool = false
+var _glint_time: float = 0.0
+
+## Laser sight
+var _laser_mesh_instance: MeshInstance3D
+var _laser_immediate_mesh: ImmediateMesh
+var _laser_material: StandardMaterial3D
+
 
 func _ready() -> void:
 	add_to_group("enemy")
 	_find_player()
 	if show_debug:
 		_setup_debug_visuals()
+	if glint_enabled:
+		_setup_glint()
+	if laser_enabled:
+		_setup_laser()
 
 
 func _physics_process(delta: float) -> void:
@@ -102,6 +132,8 @@ func _physics_process(delta: float) -> void:
 	_update_line_of_sight()
 	_update_alert_state(delta)
 	_update_combat(delta)
+	_update_glint(delta)
+	_update_laser()
 
 	if show_debug:
 		_update_debug_visuals()
@@ -340,6 +372,10 @@ func _die(headshot: bool) -> void:
 		_debug_mesh_instance.visible = false
 	if _state_indicator:
 		_state_indicator.visible = false
+	# Hide scope glint and laser
+	_set_glint_visible(false)
+	if _laser_mesh_instance:
+		_laser_mesh_instance.visible = false
 
 	# Report to RunManager
 	RunManager.record_shot_hit()
@@ -370,6 +406,163 @@ func _on_death() -> void:
 	var timer := get_tree().create_timer(3.0)
 	await timer.timeout
 	queue_free()
+
+
+## ── Scope Glint ─────────────────────────────────────────────────────────
+
+func _setup_glint() -> void:
+	var glint_pos := Vector3(0, 1.5, -0.2)  ## Eye height, slightly forward
+
+	# Billboard sprite — the visible glint star
+	_glint_sprite = Sprite3D.new()
+	_glint_sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_glint_sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_glint_sprite.position = glint_pos
+	_glint_sprite.pixel_size = 0.005
+	_glint_sprite.visible = false
+
+	# Radial gradient texture (white center → transparent edge)
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color.WHITE)
+	gradient.set_color(1, Color(1, 1, 1, 0))
+	var tex := GradientTexture2D.new()
+	tex.gradient = gradient
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(0.5, 0.0)
+	tex.width = 64
+	tex.height = 64
+	_glint_sprite.texture = tex
+
+	# Additive unshaded material
+	_glint_material = StandardMaterial3D.new()
+	_glint_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_glint_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	_glint_material.albedo_color = glint_color
+	_glint_material.render_priority = 1
+	_glint_sprite.material_override = _glint_material
+
+	add_child(_glint_sprite)
+
+	# OmniLight — subtle local glow on enemy body
+	_glint_light = OmniLight3D.new()
+	_glint_light.position = glint_pos
+	_glint_light.omni_range = 2.0
+	_glint_light.light_color = Color(glint_color.r, glint_color.g, glint_color.b)
+	_glint_light.light_energy = 0.0
+	_glint_light.visible = false
+
+	add_child(_glint_light)
+
+
+func _update_glint(delta: float) -> void:
+	if not glint_enabled or not _glint_sprite:
+		return
+
+	var should_show := false
+
+	if not is_dead:
+		match alert_state:
+			AlertState.ALERT:
+				should_show = can_see_player
+			AlertState.SUSPICIOUS:
+				if glint_suspicious_flash and can_see_player:
+					var ratio := suspicion / alert_threshold
+					if ratio >= glint_suspicious_threshold:
+						should_show = fmod(_glint_time * 4.0, 1.0) > 0.5
+
+	_set_glint_visible(should_show)
+
+	if should_show:
+		_glint_time += delta
+		var pulse := 0.5 + 0.5 * sin(_glint_time * glint_pulse_speed * TAU)
+		_glint_material.albedo_color = glint_color * (0.5 + pulse * 0.5)
+		_glint_light.light_energy = glint_max_energy * pulse
+	else:
+		_glint_time = 0.0
+
+
+func _set_glint_visible(vis: bool) -> void:
+	if _glint_active == vis:
+		return
+	_glint_active = vis
+	if _glint_sprite:
+		_glint_sprite.visible = vis
+	if _glint_light:
+		_glint_light.visible = vis
+
+
+## ── Laser Sight ─────────────────────────────────────────────────────────
+
+func _setup_laser() -> void:
+	_laser_immediate_mesh = ImmediateMesh.new()
+	_laser_mesh_instance = MeshInstance3D.new()
+	_laser_mesh_instance.mesh = _laser_immediate_mesh
+	_laser_mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_laser_mesh_instance.visible = false
+
+	_laser_material = StandardMaterial3D.new()
+	_laser_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_laser_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_laser_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	_laser_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_laser_material.vertex_color_use_as_albedo = true
+	_laser_material.no_depth_test = false
+
+	add_child(_laser_mesh_instance)
+
+
+func _update_laser() -> void:
+	if not laser_enabled or not _laser_immediate_mesh:
+		return
+
+	var should_show := not is_dead
+	_laser_mesh_instance.visible = should_show
+
+	if not should_show:
+		_laser_immediate_mesh.clear_surfaces()
+		return
+
+	# Build two crossing quads along the forward direction for visibility from any angle
+	var eye := Vector3(0, 1.5, -0.2)
+	var forward := -global_basis.z
+	var end := eye + forward * laser_length
+	var hw := laser_width * 0.5  ## Half width
+
+	# Two perpendicular offsets for the cross shape
+	var up := Vector3(0, hw, 0)
+	var right := global_basis.x.normalized() * hw
+
+	var color_start := laser_color
+	var color_end := Color(laser_color.r, laser_color.g, laser_color.b, 0.0)
+
+	_laser_immediate_mesh.clear_surfaces()
+	_laser_immediate_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _laser_material)
+
+	# Quad 1 — vertical cross section
+	_draw_laser_quad(eye - up, eye + up, end + up, end - up, color_start, color_end)
+	# Quad 2 — horizontal cross section
+	_draw_laser_quad(eye - right, eye + right, end + right, end - right, color_start, color_end)
+
+	_laser_immediate_mesh.surface_end()
+
+
+func _draw_laser_quad(a: Vector3, b: Vector3, c: Vector3, d: Vector3,
+		color_start: Color, color_end: Color) -> void:
+	# Triangle 1: a, b, c
+	_laser_immediate_mesh.surface_set_color(color_start)
+	_laser_immediate_mesh.surface_add_vertex(a)
+	_laser_immediate_mesh.surface_set_color(color_start)
+	_laser_immediate_mesh.surface_add_vertex(b)
+	_laser_immediate_mesh.surface_set_color(color_end)
+	_laser_immediate_mesh.surface_add_vertex(c)
+	# Triangle 2: a, c, d
+	_laser_immediate_mesh.surface_set_color(color_start)
+	_laser_immediate_mesh.surface_add_vertex(a)
+	_laser_immediate_mesh.surface_set_color(color_end)
+	_laser_immediate_mesh.surface_add_vertex(c)
+	_laser_immediate_mesh.surface_set_color(color_end)
+	_laser_immediate_mesh.surface_add_vertex(d)
 
 
 ## ── Debug Visualization ──────────────────────────────────────────────────────
