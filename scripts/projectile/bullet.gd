@@ -54,14 +54,15 @@ func _physics_process(delta: float) -> void:
 	var collision := move_and_collide(velocity * delta)
 	if collision:
 		var collider := collision.get_collider()
-		if collider.has_method("on_bullet_hit"):
+		if collider and collider.has_method("on_bullet_hit"):
 			collider.on_bullet_hit(self, collision)
-		elif is_shock and collider.has_method("stun"):
+		elif collider and is_shock and collider.has_method("stun"):
 			# Fallback for objects that have stun() but not on_bullet_hit()
 			collider.stun(stun_duration)
 		# Only player bullets alert enemies to impact sounds
 		if not is_enemy_bullet:
 			_propagate_impact_sound(collision.get_position())
+		## TODO: penetration - continue through enemies instead of queue_free
 		queue_free()
 
 

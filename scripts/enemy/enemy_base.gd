@@ -15,7 +15,7 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 ## ── Exports: Debug ───────────────────────────────────────────────────────────
 
 @export_group("Debug")
-@export var show_debug: bool = true  ## Toggle FOV cone and state indicator
+@export var show_debug: bool = false  ## Toggle FOV cone and state indicator
 
 ## ── Exports: Detection ───────────────────────────────────────────────────────
 
@@ -124,6 +124,9 @@ var _glint_light: OmniLight3D
 var _glint_material: StandardMaterial3D
 var _glint_active: bool = false
 var _glint_time: float = 0.0
+
+## Original materials (saved before stun visual override)
+var _original_materials: Dictionary = {}
 
 ## Laser sight
 var _laser_mesh_instance: MeshInstance3D
@@ -489,7 +492,9 @@ func on_bullet_hit(bullet: Bullet, collision: KinematicCollision3D) -> void:
 	# Getting shot immediately alerts
 	if alert_state != AlertState.ALERT:
 		suspicion = alert_threshold
-		last_known_player_pos = bullet.global_position
+		var players := get_tree().get_nodes_in_group("player")
+		if players.size() > 0:
+			last_known_player_pos = players[0].global_position
 		_set_alert_state(AlertState.ALERT)
 
 	if health <= 0.0:
@@ -527,6 +532,13 @@ func _update_stun_visual(stunned: bool) -> void:
 	if not mesh:
 		return
 	if stunned:
+		# Store original materials before overriding
+		_original_materials.clear()
+		for child in mesh.get_children():
+			if child is MeshInstance3D:
+				_original_materials[child] = child.material_override
+			elif child is CSGShape3D:
+				_original_materials[child] = child.material
 		var mat := StandardMaterial3D.new()
 		mat.albedo_color = Color(0.3, 0.6, 1.0)
 		mat.emission_enabled = true
@@ -538,12 +550,14 @@ func _update_stun_visual(stunned: bool) -> void:
 			elif child is CSGShape3D:
 				child.material = mat
 	else:
-		# Remove override to restore original materials
-		for child in mesh.get_children():
-			if child is MeshInstance3D:
-				child.material_override = null
-			elif child is CSGShape3D:
-				child.material = null
+		# Restore original materials saved before stun
+		for child in _original_materials:
+			if is_instance_valid(child):
+				if child is MeshInstance3D:
+					child.material_override = _original_materials[child]
+				elif child is CSGShape3D:
+					child.material = _original_materials[child]
+		_original_materials.clear()
 
 
 func _die(headshot: bool) -> void:
@@ -583,10 +597,11 @@ func _on_death() -> void:
 	set_deferred("collision_layer", 0)
 	set_deferred("collision_mask", 0)
 
-	# Remove after delay
-	var timer := get_tree().create_timer(3.0)
-	await timer.timeout
-	queue_free()
+	# Remove after delay (safe — no await that can break if node is freed early)
+	var tree := get_tree()
+	if tree:
+		var timer := tree.create_timer(3.0)
+		timer.timeout.connect(func(): if is_instance_valid(self): queue_free())
 
 
 ## ── Scope Glint ─────────────────────────────────────────────────────────

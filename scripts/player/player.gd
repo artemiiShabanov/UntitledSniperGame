@@ -88,7 +88,7 @@ func _input(event: InputEvent) -> void:
 		_toggle_mouse_capture()
 
 	# Debug: T to simulate taking a hit
-	if event is InputEventKey and event.pressed and event.keycode == KEY_T:
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and event.keycode == KEY_T:
 		RunManager.take_hit()
 
 
@@ -363,7 +363,7 @@ func on_bullet_hit(_bullet: Node, _collision: KinematicCollision3D) -> void:
 
 ## ── Lives callbacks ──────────────────────────────────────────────────────────
 
-func _on_life_lost(lives_remaining: int) -> void:
+func _on_life_lost(_lives_remaining: int) -> void:
 	_update_lives_display()
 	# Red flash
 	hit_flash_alpha = 0.4

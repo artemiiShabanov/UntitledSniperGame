@@ -29,8 +29,8 @@ signal enemy_killed_with_info(info: Dictionary)  ## {enemy, headshot, distance, 
 @export var extraction_time: float = 3.0  ## Seconds to extract
 
 ## Threat phase timing (seconds of elapsed time)
-@export var early_phase_duration: float = 15.0   ## First 15s = EARLY (60s for production)
-@export var mid_phase_duration: float = 30.0     ## Next 30s = MID, then LATE (120s for production)
+@export var early_phase_duration: float = 15.0   ## TEST: First 15s = EARLY (60s for production)
+@export var mid_phase_duration: float = 30.0     ## TEST: Next 30s = MID, then LATE (120s for production)
 
 ## ── State ────────────────────────────────────────────────────────────────────
 
@@ -68,7 +68,6 @@ const HIT_COOLDOWN_TIME: float = 1.0
 
 ## Hub and level scene paths
 const HUB_SCENE: String = "res://scenes/hub/hub.tscn"
-const LOADING_SCENE: String = "res://scenes/ui/loading_screen.tscn"
 
 
 func _process(delta: float) -> void:

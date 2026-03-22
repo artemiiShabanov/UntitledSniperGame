@@ -102,6 +102,7 @@ func _load_ammo_types() -> void:
 			if res is AmmoType:
 				available_ammo_types.append(res)
 
+	## TEST: remove when ammo economy is implemented
 	# Initialize reserves — give some of each for testing
 	# (In production, this comes from RunManager.carried_ammo)
 	if ammo_reserves.is_empty():
@@ -350,6 +351,7 @@ func try_shoot() -> void:
 	ammo_in_magazine -= 1
 	_spawn_bullet()
 	shot_fired.emit()
+	RunManager.record_shot_fired()
 
 	# Enter bolt cycling
 	state_timer = bolt_cycle_time
@@ -407,6 +409,10 @@ func _finish_reload() -> void:
 	var available := mini(needed, ammo_reserve)
 	ammo_in_magazine += available
 	ammo_reserve -= available
+	# Sync back to ammo_reserves dict so reserve stays consistent across type switches
+	var current_type := get_current_ammo_type()
+	if current_type:
+		ammo_reserves[current_type.ammo_id] = ammo_reserve
 	reload_complete.emit()
 	_set_state(State.IDLE)
 

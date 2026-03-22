@@ -109,6 +109,12 @@ static func apply_time_of_day(sun: DirectionalLight3D, env: WorldEnvironment, pr
 		env.environment.ambient_light_color = p.ambient_color
 		env.environment.ambient_light_energy = p.ambient_energy
 
+		# Apply sky colors to ProceduralSkyMaterial
+		if env.environment.sky and env.environment.sky.sky_material is ProceduralSkyMaterial:
+			var sky_mat: ProceduralSkyMaterial = env.environment.sky.sky_material
+			sky_mat.sky_top_color = p.sky_top_color
+			sky_mat.sky_horizon_color = p.sky_bottom_color
+
 
 static func apply_weather(env: WorldEnvironment, preset_name: String) -> void:
 	if not weather_presets.has(preset_name):
