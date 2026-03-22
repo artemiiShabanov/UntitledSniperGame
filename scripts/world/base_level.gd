@@ -24,14 +24,20 @@ func _ready() -> void:
 	_setup_run_variation()
 	_place_player_at_spawn()
 
-	# Apply run time override from level data if set
-	if level_data and level_data.run_time_override > 0.0:
-		RunManager.run_timer = level_data.run_time_override
+	# Apply level data overrides
+	if level_data:
+		if level_data.run_time_override > 0.0:
+			RunManager.run_timer = level_data.run_time_override
+			RunManager.run_start_time = level_data.run_time_override
+		if level_data.early_phase_duration > 0.0:
+			RunManager.early_phase_duration = level_data.early_phase_duration
+		if level_data.mid_phase_duration > 0.0:
+			RunManager.mid_phase_duration = level_data.mid_phase_duration
 
 	# If loaded directly (not via deploy), auto-start a run for dev convenience
 	if RunManager.game_state != RunManager.GameState.DEPLOYING and \
 			RunManager.game_state != RunManager.GameState.IN_RUN:
-		RunManager.run_timer = RunManager.default_run_time
+		RunManager.run_timer = RunManager.run_start_time
 		RunManager.lives = RunManager.default_lives
 		RunManager.max_lives = RunManager.default_lives
 		RunManager.is_dead = false
@@ -45,6 +51,7 @@ func _setup_run_variation() -> void:
 	_spawn_enemies()
 	_pick_extraction_zone()
 	_roll_events()
+	_setup_enemy_spawner()
 
 
 func _fill_level_slots() -> void:
@@ -144,6 +151,25 @@ func _roll_events() -> void:
 	runner.name = "LevelEventRunner"
 	runner.setup(selected, rng, self)
 	add_child(runner)
+
+
+func _setup_enemy_spawner() -> void:
+	if not level_data or not level_data.enemy_pool:
+		return
+	if _unused_enemy_spawns.is_empty():
+		return
+
+	var spawner := EnemySpawner.new()
+	spawner.name = "EnemySpawner"
+
+	# Apply phase config from level data
+	spawner.mid_spawn_interval = level_data.mid_spawn_interval
+	spawner.late_spawn_interval = level_data.late_spawn_interval
+	spawner.mid_max_enemies = level_data.mid_max_enemies
+	spawner.late_max_enemies = level_data.late_max_enemies
+
+	add_child(spawner)
+	spawner.setup(self, level_data.enemy_pool, _unused_enemy_spawns)
 
 
 ## ── Spawn helpers ────────────────────────────────────────────────────────────

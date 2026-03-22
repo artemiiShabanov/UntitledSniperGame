@@ -58,16 +58,16 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 > **Priority:** high
 
 ### 2.2 Escalating Danger
-- [ ] Threat clock (elapsed time → phase signals: early/mid/late)
-- [ ] Enemy spawner (listens to threat phase)
-- [ ] Phase config (spawn rates, enemy types per phase)
+- [x] Threat clock (elapsed time → phase signals: early/mid/late)
+- [x] Enemy spawner (listens to threat phase)
+- [x] Phase config (spawn rates, enemy types per phase)
 > **Depends on:** 2.1, 4
 > **Priority:** high
 
 ### 2.3 Risk / Reward Curve
-- [ ] Credit accumulation system (enemy kills + destroyed targets + contract bonus)
+- [x] Credit accumulation system (enemy kills + destroyed targets + contract bonus)
 - [ ] Higher-value targets gated behind later phases
-- [ ] Credits lost on death, kept on extraction
+- [x] Credits lost on death, kept on extraction
 > **Depends on:** 2.2
 > **Priority:** medium
 
@@ -317,6 +317,73 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] Launch build & Steam upload
 > **Depends on:** everything above
 > **Priority:** last phase
+
+---
+
+## 15. Content Production
+
+### 15.1 Levels
+- [ ] Industrial Yard (done — greybox, needs art pass)
+- [ ] Level 2 — TBD theme (castle/fortress?)
+- [ ] Level 3 — TBD theme (urban rooftops?)
+- [ ] Level 4+ — as needed for progression gates
+> Each level needs: theme, 200m+ map, 2-3 wind corridors, sniper nests, repositioning routes, 15-20 enemy spawns, 2-3 extraction zones
+
+### 15.2 Contracts
+- [ ] Contract templates per level (eliminate HVT, destroy target, accuracy challenge)
+- [ ] Contract reward balancing
+- [ ] Contract board variety (enough to feel fresh across runs)
+
+### 15.3 Enemy Visuals
+- [ ] Lookout model (replace capsule placeholder)
+- [ ] Marksman model (distinct silhouette — backpack, mid-weight)
+- [ ] Countersniper model (scope glint visible at range, lean profile)
+- [ ] Heavy Sniper model (bulky, armored, reads as tough)
+- [ ] Elite Sniper model (tactical gear, smoke grenades visible)
+
+### 15.4 Props & Environment Art
+- [ ] Reusable building kit (walls, roofs, floors, stairs, railings)
+- [ ] Industrial props (crates, barrels, containers, pallets, pipes)
+- [ ] Vehicles (trucks, cars — destructible targets)
+- [ ] Equipment (generators, radios, supply caches — destructible targets)
+- [ ] Cover objects (sandbags, concrete barriers, scaffolding)
+- [ ] Vegetation (trees, bushes — sight blockers at range)
+
+### 15.5 VFX
+- [ ] Muzzle flash (player + enemy)
+- [ ] Bullet tracer trail
+- [ ] Hit impact — surface-dependent (metal spark, dirt puff, wood splinter)
+- [ ] Headshot effect
+- [ ] Scope glint shimmer
+- [ ] Extraction zone effect (glow / particle ring)
+- [ ] Death/down effect (enemy ragdoll or collapse)
+- [ ] Smoke grenade (for Elite Sniper)
+- [ ] Weather particles (rain, fog volume)
+
+### 15.6 Audio Assets
+- [ ] Player — rifle shot, bolt cycle, reload, dry fire, scope zoom
+- [ ] Player — footsteps per surface (metal, concrete, wood, dirt)
+- [ ] Bullet — impact per surface (metal, ground, wood, flesh)
+- [ ] Enemy — alert callout, search callout, death sound
+- [ ] Environment — ambient per level theme, time-of-day variation
+- [ ] Music — tension tracks that build with threat phase
+- [ ] UI — menu clicks, extraction countdown, objective complete, deploy whoosh
+
+### 15.7 UI Screens
+- [ ] Main menu (new game, continue, settings, quit)
+- [ ] Save slot selection
+- [ ] Hub layout (navigate between boards/screens)
+- [ ] Contract board
+- [ ] Weapon upgrades screen (rifle preview + parts)
+- [ ] Skill tree screen
+- [ ] Cosmetics screen
+- [ ] Loadout / ammo selection
+- [ ] Level select
+- [ ] Stats screen
+- [ ] Pause menu
+- [ ] Death screen
+- [ ] Run result screen
+- [ ] Settings (controls, audio, video)
 
 ---
 

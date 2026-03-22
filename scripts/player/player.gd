@@ -54,6 +54,7 @@ var current_interactable: Interactable = null
 @onready var death_overlay: ColorRect = $HUD/DeathOverlay
 @onready var breath_meter: Control = $HUD/BreathMeter
 @onready var run_timer_label: Label = $HUD/RunTimer
+@onready var threat_phase_label: Label = $HUD/ThreatPhase
 
 ## Hit flash
 var hit_flash_alpha: float = 0.0
@@ -69,8 +70,10 @@ func _ready() -> void:
 	RunManager.run_started.connect(_on_run_started)
 	RunManager.run_completed.connect(_on_run_completed)
 	RunManager.run_timer_updated.connect(_on_run_timer_updated)
+	RunManager.threat_phase_changed.connect(_on_threat_phase_changed)
 	_update_lives_display()
 	run_timer_label.visible = false
+	threat_phase_label.visible = false
 
 
 func _input(event: InputEvent) -> void:
@@ -336,8 +339,10 @@ func _on_life_lost(lives_remaining: int) -> void:
 
 func _on_run_started() -> void:
 	run_timer_label.visible = true
+	threat_phase_label.visible = true
 	death_overlay.visible = false
 	_update_lives_display()
+	_update_threat_display()
 
 
 func _on_run_failed() -> void:
@@ -348,6 +353,7 @@ func _on_run_failed() -> void:
 
 func _on_run_completed(_success: bool) -> void:
 	run_timer_label.visible = false
+	threat_phase_label.visible = false
 	# For now, auto-return to hub after a delay (result screen will replace this later)
 	await get_tree().create_timer(3.0).timeout
 	RunManager.go_to_hub()
@@ -366,6 +372,22 @@ func _on_run_timer_updated(time_left: float) -> void:
 		run_timer_label.add_theme_color_override("font_color", Color(1, 0.2, 0.2))
 	else:
 		run_timer_label.remove_theme_color_override("font_color")
+
+
+func _on_threat_phase_changed(_phase: RunManager.ThreatPhase) -> void:
+	_update_threat_display()
+
+
+func _update_threat_display() -> void:
+	var phase_name := RunManager.get_threat_phase_name()
+	threat_phase_label.text = "THREAT: %s" % phase_name
+	match RunManager.threat_phase:
+		RunManager.ThreatPhase.EARLY:
+			threat_phase_label.add_theme_color_override("font_color", Color(0.4, 0.8, 0.4))
+		RunManager.ThreatPhase.MID:
+			threat_phase_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.2))
+		RunManager.ThreatPhase.LATE:
+			threat_phase_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
 
 
 func _update_lives_display() -> void:

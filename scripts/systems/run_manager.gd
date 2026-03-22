@@ -5,6 +5,7 @@ extends Node
 ## ── Enums ────────────────────────────────────────────────────────────────────
 
 enum GameState { HUB, DEPLOYING, IN_RUN, EXTRACTING, RESULT }
+enum ThreatPhase { EARLY, MID, LATE }
 
 ## ── Signals ──────────────────────────────────────────────────────────────────
 
@@ -16,12 +17,18 @@ signal extraction_started
 signal run_completed(success: bool)
 signal run_timer_updated(time_left: float)
 signal run_timer_expired
+signal threat_phase_changed(phase: ThreatPhase)
+signal enemy_killed_with_info(info: Dictionary)  ## {enemy, headshot, distance, credits, xp}
 
 ## ── Exports ──────────────────────────────────────────────────────────────────
 
 @export var default_lives: int = 3
 @export var default_run_time: float = 300.0  ## 5 minutes per run
 @export var extraction_time: float = 3.0  ## Seconds to extract
+
+## Threat phase timing (seconds of elapsed time)
+@export var early_phase_duration: float = 15.0   ## First 15s = EARLY (60s for production)
+@export var mid_phase_duration: float = 30.0     ## Next 30s = MID, then LATE (120s for production)
 
 ## ── State ────────────────────────────────────────────────────────────────────
 
@@ -32,7 +39,11 @@ var is_dead: bool = false
 
 ## Run timer
 var run_timer: float = 0.0
+var run_start_time: float = 0.0  ## Actual starting value of run_timer (may differ from default)
 var extraction_timer: float = 0.0
+
+## Threat phase
+var threat_phase: ThreatPhase = ThreatPhase.EARLY
 
 ## Credits earned during this run (lost on death)
 var run_credits: int = 0
@@ -100,6 +111,8 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 	run_xp = 0
 	hit_cooldown = 0.0
 	run_timer = default_run_time
+	run_start_time = default_run_time
+	threat_phase = ThreatPhase.EARLY
 	run_stats = {
 		"kills": 0,
 		"headshots": 0,
@@ -129,8 +142,9 @@ func begin_run() -> void:
 
 func _tick_run_timer(delta: float) -> void:
 	run_timer -= delta
-	run_stats.time_survived = default_run_time - run_timer
+	run_stats.time_survived = run_start_time - run_timer
 	run_timer_updated.emit(run_timer)
+	_update_threat_phase()
 
 	if run_timer <= 0.0:
 		run_timer = 0.0
@@ -143,7 +157,7 @@ func get_run_time_remaining() -> float:
 
 
 func get_run_time_elapsed() -> float:
-	return default_run_time - run_timer
+	return run_start_time - run_timer
 
 
 ## ── Extraction ───────────────────────────────────────────────────────────────
@@ -273,3 +287,83 @@ func record_kill(headshot: bool = false) -> void:
 	run_stats.kills += 1
 	if headshot:
 		run_stats.headshots += 1
+
+
+## ── Threat Phase ────────────────────────────────────────────────────────────
+
+func _update_threat_phase() -> void:
+	var elapsed := get_run_time_elapsed()
+	var new_phase: ThreatPhase
+
+	if elapsed < early_phase_duration:
+		new_phase = ThreatPhase.EARLY
+	elif elapsed < early_phase_duration + mid_phase_duration:
+		new_phase = ThreatPhase.MID
+	else:
+		new_phase = ThreatPhase.LATE
+
+	if new_phase != threat_phase:
+		threat_phase = new_phase
+		threat_phase_changed.emit(threat_phase)
+
+
+func get_threat_phase_name() -> String:
+	match threat_phase:
+		ThreatPhase.EARLY:
+			return "EARLY"
+		ThreatPhase.MID:
+			return "MID"
+		ThreatPhase.LATE:
+			return "LATE"
+	return "UNKNOWN"
+
+
+## ── Distance Bonus ──────────────────────────────────────────────────────────
+
+func calc_distance_multiplier(distance: float) -> float:
+	## Returns credit multiplier based on kill distance.
+	## 1.0x at <100m, 1.5x at 100m, 2.0x at 150m, 3.0x at 200m+
+	if distance < 100.0:
+		return 1.0
+	elif distance < 150.0:
+		return lerpf(1.5, 2.0, (distance - 100.0) / 50.0)
+	elif distance < 200.0:
+		return lerpf(2.0, 3.0, (distance - 150.0) / 50.0)
+	else:
+		return 3.0
+
+
+func record_kill_with_bonus(enemy: Node3D, headshot: bool, base_credits: int, base_xp: int) -> Dictionary:
+	## Records a kill with distance and headshot bonuses applied.
+	## Returns info dict for the kill feed.
+	record_kill(headshot)
+
+	var distance := 0.0
+	var players := get_tree().get_nodes_in_group("player")
+	if players.size() > 0:
+		distance = players[0].global_position.distance_to(enemy.global_position)
+
+	var dist_mult := calc_distance_multiplier(distance)
+	var head_mult := 2.0 if headshot else 1.0
+	var total_mult := dist_mult * head_mult
+
+	var final_credits := int(base_credits * total_mult)
+	var final_xp := int(base_xp * total_mult)
+
+	add_run_credits(final_credits)
+	add_run_xp(final_xp)
+
+	var info := {
+		"enemy": enemy,
+		"headshot": headshot,
+		"distance": distance,
+		"base_credits": base_credits,
+		"final_credits": final_credits,
+		"final_xp": final_xp,
+		"distance_multiplier": dist_mult,
+		"headshot_multiplier": head_mult,
+		"total_multiplier": total_mult,
+	}
+
+	enemy_killed_with_info.emit(info)
+	return info

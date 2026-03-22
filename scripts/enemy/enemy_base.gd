@@ -474,11 +474,9 @@ func _die(headshot: bool) -> void:
 	if _laser_mesh_instance:
 		_laser_mesh_instance.visible = false
 
-	# Report to RunManager
+	# Report to RunManager with distance + headshot bonuses
 	RunManager.record_shot_hit()
-	RunManager.record_kill(headshot)
-	RunManager.add_run_credits(credit_reward)
-	RunManager.add_run_xp(xp_reward)
+	RunManager.record_kill_with_bonus(self, headshot, credit_reward, xp_reward)
 
 	# Visual death — turn red and disable collision
 	_on_death()
