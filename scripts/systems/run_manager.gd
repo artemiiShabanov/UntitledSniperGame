@@ -218,6 +218,9 @@ func _end_run_success() -> void:
 	SaveManager.add_xp(run_xp)
 	SaveManager.increment_stat("total_extractions")
 
+	# Aggregate run stats into lifetime totals, records, and per-level stats
+	SaveManager.commit_run_stats(run_stats, current_level_path, true)
+
 	# Return unused ammo to inventory
 	if not SaveManager.data.has("ammo_inventory"):
 		SaveManager.data["ammo_inventory"] = {}
@@ -242,6 +245,10 @@ func _end_run_failure() -> void:
 	# XP is still kept
 	SaveManager.add_xp(run_xp)
 	SaveManager.increment_stat("total_deaths")
+
+	# Aggregate run stats into lifetime totals, records, and per-level stats
+	SaveManager.commit_run_stats(run_stats, current_level_path, false)
+
 	SaveManager.save()
 
 	run_failed.emit()

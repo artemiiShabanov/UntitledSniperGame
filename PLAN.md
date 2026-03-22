@@ -257,11 +257,11 @@ screens that display it all. Each sub-feature is self-contained and testable.
 
 ### Step 6 — Stats & Level Unlocks (progression gates)
 
-#### F9.2 Stats Tracking [ ]
-- [ ] Lifetime stats (total kills, total extractions, total deaths)
-- [ ] Accuracy stats (overall accuracy, headshot percentage)
-- [ ] Best records (longest survival, most credits in one run)
-- [ ] Per-level stats (times completed, best stats)
+#### F9.2 Stats Tracking [x]
+- [x] Lifetime stats (total runs, kills, headshots, extractions, deaths, shots fired/hit)
+- [x] Accuracy stats (overall accuracy %, headshot %)
+- [x] Best records (survival time, credits in one run, kills in one run, longest kill distance)
+- [x] Per-level stats (runs, extractions, deaths, kills, best time, best credits)
 
 #### F6.6 Level Unlocks [ ]
 - [ ] Progression gates (extraction count or currency/XP thresholds)

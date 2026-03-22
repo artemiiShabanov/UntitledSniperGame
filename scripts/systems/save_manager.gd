@@ -122,6 +122,81 @@ func get_stat(key: String, default: Variant = 0) -> Variant:
 	return data.get("stats", {}).get(key, default)
 
 
+func update_stat_max(key: String, value: Variant) -> void:
+	## Only updates the stat if value exceeds the current record.
+	var stats: Dictionary = data.get("stats", {})
+	if value > stats.get(key, 0):
+		stats[key] = value
+	data["stats"] = stats
+
+
+## ── Run stats aggregation ───────────────────────────────────────────────────
+
+func commit_run_stats(run_stats: Dictionary, level_path: String, success: bool) -> void:
+	## Called at end of every run. Aggregates per-run stats into lifetime
+	## totals, best records, and per-level stats.
+
+	# Lifetime totals
+	increment_stat("total_kills", run_stats.get("kills", 0))
+	increment_stat("total_headshots", run_stats.get("headshots", 0))
+	increment_stat("total_shots_fired", run_stats.get("shots_fired", 0))
+	increment_stat("total_shots_hit", run_stats.get("shots_hit", 0))
+	increment_stat("total_runs", 1)
+
+	# Best records (only update if new value is higher)
+	update_stat_max("best_survival_time", run_stats.get("time_survived", 0.0))
+	update_stat_max("best_credits_one_run", run_stats.get("credits_earned", 0))
+	update_stat_max("best_kills_one_run", run_stats.get("kills", 0))
+	update_stat_max("longest_kill_distance", run_stats.get("longest_kill_distance", 0.0))
+
+	# Per-level stats
+	if level_path != "":
+		var per_level: Dictionary = data.get("per_level_stats", {})
+		if not per_level.has(level_path):
+			per_level[level_path] = {
+				"runs": 0,
+				"extractions": 0,
+				"deaths": 0,
+				"total_kills": 0,
+				"best_time": 0.0,
+				"best_credits": 0,
+			}
+		var ls: Dictionary = per_level[level_path]
+		ls["runs"] = ls.get("runs", 0) + 1
+		if success:
+			ls["extractions"] = ls.get("extractions", 0) + 1
+		else:
+			ls["deaths"] = ls.get("deaths", 0) + 1
+		ls["total_kills"] = ls.get("total_kills", 0) + run_stats.get("kills", 0)
+		if run_stats.get("time_survived", 0.0) > ls.get("best_time", 0.0):
+			ls["best_time"] = run_stats.get("time_survived", 0.0)
+		if run_stats.get("credits_earned", 0) > ls.get("best_credits", 0):
+			ls["best_credits"] = run_stats.get("credits_earned", 0)
+		per_level[level_path] = ls
+		data["per_level_stats"] = per_level
+
+
+func get_accuracy_percent() -> float:
+	## Returns overall accuracy as 0.0 to 100.0.
+	var fired: int = get_stat("total_shots_fired", 0)
+	if fired == 0:
+		return 0.0
+	return float(get_stat("total_shots_hit", 0)) / float(fired) * 100.0
+
+
+func get_headshot_percent() -> float:
+	## Returns headshot percentage as 0.0 to 100.0.
+	var kills: int = get_stat("total_kills", 0)
+	if kills == 0:
+		return 0.0
+	return float(get_stat("total_headshots", 0)) / float(kills) * 100.0
+
+
+func get_level_stats(level_path: String) -> Dictionary:
+	## Returns per-level stats dict, or empty dict if no data.
+	return data.get("per_level_stats", {}).get(level_path, {})
+
+
 ## ── Internal ─────────────────────────────────────────────────────────────────
 
 func _slot_path(slot: int) -> String:
@@ -149,14 +224,17 @@ func _default_data(slot: int) -> Dictionary:
 		"skills": [],
 		"cosmetics": [],
 		"stats": {
+			"total_runs": 0,
 			"total_kills": 0,
+			"total_headshots": 0,
 			"total_extractions": 0,
 			"total_deaths": 0,
-			"accuracy_shots_fired": 0,
-			"accuracy_shots_hit": 0,
-			"headshots": 0,
-			"longest_survival": 0.0,
-			"most_credits_one_run": 0,
+			"total_shots_fired": 0,
+			"total_shots_hit": 0,
+			"best_survival_time": 0.0,
+			"best_credits_one_run": 0,
+			"best_kills_one_run": 0,
+			"longest_kill_distance": 0.0,
 		},
 		"per_level_stats": {},
 	}
