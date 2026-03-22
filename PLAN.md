@@ -13,10 +13,12 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Level Platform      | █████ 100%| Complete (loader moved to Phase 2)       |
 | Enemies             | █████ 100%| Complete (extra types deferred)           |
 | Danger & Reward     | █████ 100%| Complete (phase-gating deferred)         |
+| HUD                 | █████ 100%| Complete (trackers added with F7)        |
+| Save System (core)  | █████ 100%| Complete (stats tracking in Step 6)      |
 | Objectives          | ░░░░░  0% | Contracts, optional objectives           |
 | Global Progression  | ░░░░░  5% | Currency flow, upgrades, skills          |
 | World Population    | ░░░░░  0% | Neutral NPCs, destructible targets       |
-| UI & Menus          | █░░░░ 30% | Main menu, pause, result screens         |
+| UI & Menus          | ░░░░░ 10% | Main menu, pause, hub screens            |
 | Content             | ░░░░░ 10% | Levels, models, props                    |
 | Art & Audio         | ░░░░░  5% | Art pipeline, sounds, music              |
 | Polish & Release    | ░░░░░  0% | Steam, controller, balancing             |
@@ -194,13 +196,34 @@ All features complete. Bug-audited and refactored.
 
 ## Phase 2 — Progression & Depth
 
-### F6. Global Progression ░░░░░ 5%
+Build order: foundation systems first (currency, ammo, menus), then spend
+systems (upgrades, skills), then goals (contracts, objectives), then UI
+screens that display it all. Each sub-feature is self-contained and testable.
+
+### Step 1 — Currency & Ammo Economy (foundation for all spending)
 
 #### F6.1 Currency & Resources [ ]
 - [ ] Credits flow: run → extraction → save (already partially working)
 - [ ] Experience flow: run → always saved
 - [ ] Currency storage in global save
 - [ ] Currency display in hub
+
+#### F6.4 Ammo Economy [ ]
+- [ ] Ammo purchasing with credits at hub
+- [ ] Hub ammo inventory (stored between runs)
+- [ ] Pre-run ammo selection (choose type + amount to bring)
+- [ ] Advanced ammo types unlocked through progression
+- [ ] Ammo lost on death, unused ammo returned on extraction
+
+### Step 2 — Core Menus (independent, unblocks testing)
+
+#### F8.2 Menus [ ]
+- [ ] Main menu (new game, continue, settings, quit)
+- [ ] Save slot selection screen (create, load, delete slots)
+- [ ] Pause menu (resume, settings, abandon run)
+- [ ] Settings (controls, audio, video, sensitivity)
+
+### Step 3 — Weapon Upgrades (primary credit sink)
 
 #### F6.2 Weapon Upgrades [ ]
 - [ ] Barrel (bullet velocity)
@@ -211,6 +234,8 @@ All features complete. Bug-audited and refactored.
 - [ ] Visual model per upgrade tier on rifle
 - [ ] Upgrade UI (spend credits, preview parts)
 
+### Step 4 — Player Skills (secondary XP sink)
+
 #### F6.3 Player Skill Unlocks [ ]
 - [ ] Skill tree (spend XP to unlock passive abilities)
 - [ ] Longer hold breath
@@ -219,24 +244,7 @@ All features complete. Bug-audited and refactored.
 - [ ] Extra life
 - [ ] Skill UI in hub
 
-#### F6.4 Ammo Economy [ ]
-- [ ] Ammo purchasing with credits at hub
-- [ ] Hub ammo inventory (stored between runs)
-- [ ] Pre-run ammo selection (choose type + amount to bring)
-- [ ] Advanced ammo types unlocked through progression
-- [ ] Ammo lost on death, unused ammo returned on extraction
-
-#### F6.5 Cosmetics [ ]
-- [ ] Rifle skins (visual overlays on top of upgrade parts)
-- [ ] Cosmetics UI in hub (preview, equip)
-
-#### F6.6 Level Unlocks [ ]
-- [ ] Progression gates (extraction count or currency/XP thresholds)
-- [ ] Hub level select (locked/unlocked, requirements shown)
-
----
-
-### F7. Objectives & Contracts ░░░░░ 0%
+### Step 5 — Contracts & Objectives (give runs purpose)
 
 #### F7.1 Contracts [ ]
 - [ ] Contract board in hub (pick one contract before deploying)
@@ -247,28 +255,25 @@ All features complete. Bug-audited and refactored.
 - [ ] Optional objectives (all headshots, no alerts, extract before mid-phase, no missed shots, no civilian casualties)
 - [ ] Bonus rewards for completing optional objectives
 
----
+### Step 6 — Stats & Level Unlocks (progression gates)
 
-### F8. UI & Menus █░░░░ 30%
+#### F9.2 Stats Tracking [ ]
+- [ ] Lifetime stats (total kills, total extractions, total deaths)
+- [ ] Accuracy stats (overall accuracy, headshot percentage)
+- [ ] Best records (longest survival, most credits in one run)
+- [ ] Per-level stats (times completed, best stats)
 
-#### F8.1 HUD [~]
-- [x] Crosshair
-- [x] Weapon state + credits display
-- [x] Lives indicator (hearts)
-- [x] Run timer
-- [x] Threat phase indicator
-- [x] Kill feed
-- [x] Breath meter
-- [ ] Ammo counter (type + remaining)
-- [ ] Extraction progress bar
-- [ ] Contract tracker
-- [ ] Optional objective tracker
+#### F6.6 Level Unlocks [ ]
+- [ ] Progression gates (extraction count or currency/XP thresholds)
+- [ ] Hub level select (locked/unlocked, requirements shown)
 
-#### F8.2 Menus [ ]
-- [ ] Main menu (new game, continue, settings, quit)
-- [ ] Save slot selection screen (create, load, delete slots)
-- [ ] Pause menu (resume, settings, abandon run)
-- [ ] Settings (controls, audio, video, sensitivity)
+### Step 7 — Cosmetics (optional spend path, low priority)
+
+#### F6.5 Cosmetics [ ]
+- [ ] Rifle skins (visual overlays on top of upgrade parts)
+- [ ] Cosmetics UI in hub (preview, equip)
+
+### Step 8 — Hub UI (screens for all the above systems)
 
 #### F8.3 Hub UI [ ]
 - [ ] Hub navigation
@@ -282,20 +287,24 @@ All features complete. Bug-audited and refactored.
 
 ---
 
-### F9. Save System [~]
+### Already Complete
+
+#### F8.1 HUD [x]
+- [x] Crosshair
+- [x] Weapon state + credits display
+- [x] Lives indicator (hearts)
+- [x] Run timer
+- [x] Threat phase indicator
+- [x] Kill feed
+- [x] Breath meter
+- [x] Extraction progress bar
+> Contract tracker and objective tracker will be added when F7 is built.
 
 #### F9.1 Local Save [x]
 - [x] Save data structure (credits, XP, ammo inventory, upgrades, skills, unlocks, stats)
 - [x] File I/O (read/write to user data directory)
 - [x] Auto-save (after each extraction and hub purchase)
 - [x] Multiple save slots
-
-#### F9.2 Stats Tracking [ ]
-- [ ] Lifetime stats (total kills, total extractions, total deaths)
-- [ ] Accuracy stats (overall accuracy, headshot percentage)
-- [ ] Best records (longest survival, most credits in one run)
-- [ ] Per-level stats (times completed, best stats)
-- [ ] Stats screen accessible from hub
 
 ---
 
