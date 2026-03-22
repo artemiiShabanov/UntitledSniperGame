@@ -9,10 +9,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Area                | Progress | Next Action                              |
 |---------------------|----------|------------------------------------------|
 | FPS Mechanics       | █████ 100%| Complete                                 |
-| Run Lifecycle       | █████ 95% | Higher-value targets in later phases     |
+| Run Lifecycle       | █████ 100%| Complete                                 |
 | Level Platform      | ███░░ 60% | Level loader, per-run variation          |
 | Enemies             | ██░░░ 40% | Detection + Lookout done; types deferred |
-| Danger & Reward     | ███░░ 70% | Higher-value targets in later phases     |
+| Danger & Reward     | █████ 100%| Complete (phase-gating deferred)         |
 | Objectives          | ░░░░░  0% | Contracts, optional objectives           |
 | Global Progression  | ░░░░░  5% | Currency flow, upgrades, skills          |
 | World Population    | ░░░░░  0% | Neutral NPCs, destructible targets       |
@@ -82,7 +82,7 @@ Make it look, sound, and feel great. Ship it.
 
 ---
 
-### F2. Run Lifecycle █████ 95%
+### F2. Run Lifecycle █████ 100%
 
 #### F2.1 Run State Machine [x]
 - [x] Run state machine (HUB → DEPLOYING → IN_RUN → EXTRACTING → RESULT)
@@ -95,10 +95,10 @@ Make it look, sound, and feel great. Ship it.
 - [x] Enemy spawner (listens to threat phase)
 - [x] Phase config (spawn rates, enemy types per phase)
 
-#### F2.3 Risk / Reward Curve [~]
+#### F2.3 Risk / Reward Curve [x]
 - [x] Credit accumulation system (enemy kills + distance/headshot bonuses)
-- [ ] Higher-value targets gated behind later phases
 - [x] Credits lost on death, kept on extraction
+> Higher-value targets gated behind later phases moved to Phase 4
 
 #### F2.4 Extraction [x]
 - [x] Single extraction point per level (fixed location)
@@ -147,7 +147,7 @@ Make it look, sound, and feel great. Ship it.
 
 ---
 
-### F5. Danger & Reward ███░░ 70%
+### F5. Danger & Reward █████ 100%
 
 - [x] Threat clock with phase transitions (EARLY → MID → LATE)
 - [x] Dynamic enemy spawning per phase
@@ -155,8 +155,7 @@ Make it look, sound, and feel great. Ship it.
 - [x] Headshot bonus (2x, stacks with distance)
 - [x] Kill feed HUD with distance, bonuses, credits
 - [x] Threat phase indicator on HUD
-- [ ] Higher-value targets gated behind later phases
-- [ ] Phase-specific enemy type pools (tougher enemies in LATE)
+> Phase-gated targets and enemy pools moved to Phase 4
 
 ---
 
@@ -367,6 +366,11 @@ later. Pull items back into active phases when/if they become relevant.
 ### Per-Run Variation Extras (from F4.2)
 - [ ] Color palette variation per run
 - [ ] Variable sniper positions (some nests blocked/revealed per run)
+
+### Phase-Gated Rewards (from F2.3, F5)
+- [ ] Higher-value targets gated behind later phases
+- [ ] Phase-specific enemy type pools (tougher enemies in LATE)
+- [ ] Spawn multiplier for credit/XP based on threat phase
 
 ---
 
