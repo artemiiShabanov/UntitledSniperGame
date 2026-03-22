@@ -9,7 +9,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Area                | Progress | Next Action                              |
 |---------------------|----------|------------------------------------------|
 | FPS Mechanics       | █████ 100%| Complete                                 |
-| Run Lifecycle       | ███░░ 70% | Extraction polish (hold E, progress bar) |
+| Run Lifecycle       | █████ 95% | Higher-value targets in later phases     |
 | Level Platform      | ███░░ 60% | Level loader, per-run variation          |
 | Enemies             | ██░░░ 40% | Detection + Lookout done; types deferred |
 | Danger & Reward     | ███░░ 70% | Higher-value targets in later phases     |
@@ -82,7 +82,7 @@ Make it look, sound, and feel great. Ship it.
 
 ---
 
-### F2. Run Lifecycle ███░░ 70%
+### F2. Run Lifecycle █████ 95%
 
 #### F2.1 Run State Machine [x]
 - [x] Run state machine (HUB → DEPLOYING → IN_RUN → EXTRACTING → RESULT)
@@ -100,14 +100,16 @@ Make it look, sound, and feel great. Ship it.
 - [ ] Higher-value targets gated behind later phases
 - [x] Credits lost on death, kept on extraction
 
-#### F2.4 Extraction [ ]
-- [ ] Single extraction point per level (fixed location)
-- [ ] Extraction channel (hold E, progress bar, interrupted by damage or movement)
-- [ ] Extraction success (transfer credits + unused ammo to global save, show result screen)
+#### F2.4 Extraction [x]
+- [x] Single extraction point per level (fixed location)
+- [x] Extraction channel (hold E, progress bar, interrupted by damage)
+- [x] Player frozen during extraction (can look, can't move)
+- [x] Extraction success (transfer credits + unused ammo to global save, show result screen)
 
-#### F2.5 Run Result [ ]
-- [ ] Run result screen (enemies eliminated, accuracy, time survived, credits earned/lost, XP earned)
-- [ ] Death screen (XP earned, credits + ammo lost, return to hub)
+#### F2.5 Run Result [x]
+- [x] Run result screen (enemies eliminated, accuracy, time survived, longest kill, credits earned/lost, XP earned)
+- [x] Death screen (same layout, red title, credits lost)
+- [x] Press E to return to hub
 
 ---
 
