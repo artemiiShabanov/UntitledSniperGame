@@ -11,7 +11,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | FPS Mechanics       | █████ 100%| Complete                                 |
 | Run Lifecycle       | █████ 100%| Complete                                 |
 | Level Platform      | ███░░ 60% | Level loader, per-run variation          |
-| Enemies             | ██░░░ 40% | Detection + Lookout done; types deferred |
+| Enemies             | █████ 100%| Complete (extra types deferred)           |
 | Danger & Reward     | █████ 100%| Complete (phase-gating deferred)         |
 | Objectives          | ░░░░░  0% | Contracts, optional objectives           |
 | Global Progression  | ░░░░░  5% | Currency flow, upgrades, skills          |
@@ -113,7 +113,7 @@ Make it look, sound, and feel great. Ship it.
 
 ---
 
-### F3. Enemies (Core) ██░░░ 40%
+### F3. Enemies (Core) █████ 100%
 
 #### F3.1 Detection System [x]
 - [x] Line of sight + sound reaction (gunshots, impacts, ally eliminations)
