@@ -10,7 +10,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 |---------------------|----------|------------------------------------------|
 | FPS Mechanics       | █████ 100%| Complete                                 |
 | Run Lifecycle       | █████ 100%| Complete                                 |
-| Level Platform      | ███░░ 60% | Level loader, per-run variation          |
+| Level Platform      | █████ 100%| Complete (loader moved to Phase 2)       |
 | Enemies             | █████ 100%| Complete (extra types deferred)           |
 | Danger & Reward     | █████ 100%| Complete (phase-gating deferred)         |
 | Objectives          | ░░░░░  0% | Contracts, optional objectives           |
@@ -129,20 +129,21 @@ Make it look, sound, and feel great. Ship it.
 
 ---
 
-### F4. Level Platform ███░░ 60%
+### F4. Level Platform █████ 100%
 
-#### F4.1 Level Framework [~]
+#### F4.1 Level Framework [x]
 - [x] Base level scene (terrain, spawn points, extraction zone, lighting)
 - [x] Level data (name, difficulty, available phases)
 - [x] Enemy spawner and pool system
 - [x] Run variation infrastructure (slot system, extraction randomization, event runner)
-- [ ] Level loader (pick level based on progression)
+> Level loader (progression-gated) moved to Phase 2 under F6.6
 
-#### F4.2 Per-Run Variation [~]
+#### F4.2 Per-Run Variation [x]
 - [x] Randomized enemy spawn subset
 - [x] Randomized extraction zone selection
-- [ ] Time of day selection (morning, day, evening, night)
-- [ ] Weather selection (clear, fog, rain, overcast)
+- [x] Time of day selection (morning, day, evening, night)
+- [x] Weather selection (clear, snow, rain, overcast)
+- [x] Visibility affects enemy sight range
 > Color palette variation and variable sniper positions moved to Phase 4
 
 ---

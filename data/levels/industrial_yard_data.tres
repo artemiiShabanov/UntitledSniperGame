@@ -12,5 +12,5 @@ enemy_pool = ExtResource("2_pool")
 enemy_count_range = Vector2i(5, 10)
 extraction_count = 1
 max_events_per_run = 2
-available_times_of_day = PackedStringArray("day", "evening")
-available_weather = PackedStringArray("clear", "overcast")
+available_times_of_day = PackedStringArray("morning", "day", "evening", "night")
+available_weather = PackedStringArray("clear", "snow", "rain", "overcast")

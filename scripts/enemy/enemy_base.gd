@@ -176,6 +176,24 @@ func _physics_process(delta: float) -> void:
 
 ## ── Line of Sight ────────────────────────────────────────────────────────────
 
+func _get_effective_sight_range() -> float:
+	## Returns sight range adjusted for weather/time visibility.
+	var level := _get_base_level()
+	if level:
+		return max_sight_range * level.visibility_multiplier
+	return max_sight_range
+
+
+func _get_base_level() -> BaseLevel:
+	## Walk up the tree to find the BaseLevel node.
+	var node := get_parent()
+	while node:
+		if node is BaseLevel:
+			return node
+		node = node.get_parent()
+	return null
+
+
 func _update_line_of_sight() -> void:
 	can_see_player = false
 
@@ -186,8 +204,8 @@ func _update_line_of_sight() -> void:
 	var to_player := _get_player_head_pos() - eye_pos
 	var distance := to_player.length()
 
-	# Range check
-	if distance > max_sight_range:
+	# Range check (adjusted by weather/time visibility)
+	if distance > _get_effective_sight_range():
 		return
 
 	# FOV check — angle between forward direction and direction to player

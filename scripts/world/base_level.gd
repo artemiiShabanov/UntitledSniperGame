@@ -15,6 +15,11 @@ var extraction_zone: ExtractionZone
 var rng: RandomNumberGenerator
 var _unused_enemy_spawns: Array[SpawnPoint] = []  ## Spawns not picked this run
 
+## Current run environment (set during _setup_run_variation)
+var current_time_of_day: String = "day"
+var current_weather: String = "clear"
+var visibility_multiplier: float = 1.0  ## Affects enemy sight range
+
 
 func _ready() -> void:
 	rng = RandomNumberGenerator.new()
@@ -47,11 +52,40 @@ func _ready() -> void:
 ## ── Run variation ───────────────────────────────────────────────────────────
 
 func _setup_run_variation() -> void:
+	_pick_environment()
 	_fill_level_slots()
 	_spawn_enemies()
 	_pick_extraction_zone()
 	_roll_events()
 	_setup_enemy_spawner()
+
+
+func _pick_environment() -> void:
+	if not level_data:
+		return
+
+	# Pick random time of day from available options
+	if level_data.available_times_of_day.size() > 0:
+		current_time_of_day = level_data.available_times_of_day[
+			rng.randi() % level_data.available_times_of_day.size()
+		]
+
+	# Pick random weather from available options
+	if level_data.available_weather.size() > 0:
+		current_weather = level_data.available_weather[
+			rng.randi() % level_data.available_weather.size()
+		]
+
+	# Apply presets
+	EnvironmentConfig.apply_time_of_day(sun, world_env, current_time_of_day)
+	EnvironmentConfig.apply_weather(world_env, current_weather)
+
+	# Cache visibility multiplier (used by enemies to adjust sight range)
+	visibility_multiplier = EnvironmentConfig.get_visibility_multiplier(current_weather)
+
+	# Night also reduces visibility
+	if current_time_of_day == "night":
+		visibility_multiplier *= 0.6
 
 
 func _fill_level_slots() -> void:

@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="LevelData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="LevelData" load_steps=4 format=3 uid="uid://damul4spf4c47"]
 
-[ext_resource type="Script" path="res://scripts/world/level_data.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://blodvmd77hwum" path="res://scripts/world/level_data.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://d4mwdl1gbu6p" path="res://scripts/world/level_event_data.gd" id="2_hkjl5"]
 [ext_resource type="Resource" path="res://data/levels/dev_test_pool.tres" id="2_pool"]
 
 [resource]
@@ -11,6 +12,13 @@ run_time_override = -1.0
 enemy_pool = ExtResource("2_pool")
 enemy_count_range = Vector2i(3, 6)
 extraction_count = 1
+early_phase_duration = -1.0
+mid_phase_duration = -1.0
+mid_spawn_interval = 15.0
+late_spawn_interval = 8.0
+mid_max_enemies = 6
+late_max_enemies = 12
+level_events_pool = Array[ExtResource("2_hkjl5")]([])
 max_events_per_run = 1
-available_times_of_day = PackedStringArray("day")
-available_weather = PackedStringArray("clear")
+available_times_of_day = ["day"]
+available_weather = ["clear"]
