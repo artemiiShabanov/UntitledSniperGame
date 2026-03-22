@@ -54,6 +54,9 @@ func _ready() -> void:
 	weapon.shot_fired.connect(_on_shot_fired)
 	weapon.ammo_type_changed.connect(_on_ammo_type_changed)
 	RunManager.run_completed.connect(_on_run_completed)
+	# Force initial HUD update (weapon._ready() fires before player connects)
+	hud.update_scope_visuals(weapon.is_scoped)
+	hud.update_weapon_display(weapon)
 
 
 func _input(event: InputEvent) -> void:
