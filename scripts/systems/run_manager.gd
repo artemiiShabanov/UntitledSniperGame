@@ -123,6 +123,7 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 		"credits_earned": 0,
 		"xp_earned": 0,
 		"time_survived": 0.0,
+		"longest_kill_distance": 0.0,
 	}
 
 	# Load the level
@@ -362,6 +363,9 @@ func record_kill_with_bonus(enemy: Node3D, headshot: bool, base_credits: int, ba
 	var players := get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		distance = players[0].global_position.distance_to(enemy.global_position)
+
+	if distance > run_stats.longest_kill_distance:
+		run_stats.longest_kill_distance = distance
 
 	var dist_mult := calc_distance_multiplier(distance)
 	var head_mult := 2.0 if headshot else 1.0

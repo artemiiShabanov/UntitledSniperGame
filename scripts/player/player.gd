@@ -51,7 +51,7 @@ var current_interactable: Interactable = null
 @onready var weapon_state_label: Label = $HUD/WeaponState
 @onready var lives_label: Label = $HUD/LivesLabel
 @onready var hit_flash: ColorRect = $HUD/HitFlash
-@onready var death_overlay: ColorRect = $HUD/DeathOverlay
+@onready var result_screen: Control = $HUD/RunResultScreen
 @onready var breath_meter: Control = $HUD/BreathMeter
 @onready var run_timer_label: Label = $HUD/RunTimer
 @onready var threat_phase_label: Label = $HUD/ThreatPhase
@@ -373,23 +373,19 @@ func _on_life_lost(lives_remaining: int) -> void:
 func _on_run_started() -> void:
 	run_timer_label.visible = true
 	threat_phase_label.visible = true
-	death_overlay.visible = false
 	_update_lives_display()
 	_update_threat_display()
 
 
 func _on_run_failed() -> void:
 	_update_lives_display()
-	death_overlay.visible = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _on_run_completed(_success: bool) -> void:
 	run_timer_label.visible = false
 	threat_phase_label.visible = false
-	# For now, auto-return to hub after a delay (result screen will replace this later)
-	await get_tree().create_timer(3.0).timeout
-	RunManager.go_to_hub()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	# Result screen handles display and return to hub
 
 
 ## ── Run timer ────────────────────────────────────────────────────────────────
