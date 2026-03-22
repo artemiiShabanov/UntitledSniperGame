@@ -16,7 +16,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | HUD                 | █████ 100%| Complete (trackers added with F7)        |
 | Save System (core)  | █████ 100%| Complete (stats tracking in Step 6)      |
 | Objectives          | ░░░░░  0% | Contracts, optional objectives           |
-| Global Progression  | ░░░░░  5% | Currency flow, upgrades, skills          |
+| Global Progression  | ██░░░ 30% | Currency + ammo done, upgrades next      |
 | World Population    | ░░░░░  0% | Neutral NPCs, destructible targets       |
 | UI & Menus          | ░░░░░ 10% | Main menu, pause, hub screens            |
 | Content             | ░░░░░ 10% | Levels, models, props                    |
@@ -202,18 +202,20 @@ screens that display it all. Each sub-feature is self-contained and testable.
 
 ### Step 1 — Currency & Ammo Economy (foundation for all spending)
 
-#### F6.1 Currency & Resources [ ]
-- [ ] Credits flow: run → extraction → save (already partially working)
-- [ ] Experience flow: run → always saved
-- [ ] Currency storage in global save
-- [ ] Currency display in hub
+#### F6.1 Currency & Resources [x]
+- [x] Credits flow: run → extraction → save
+- [x] Experience flow: run → always saved
+- [x] Currency storage in global save
+- [x] Currency display in hub (refreshes after runs and purchases)
 
-#### F6.4 Ammo Economy [ ]
-- [ ] Ammo purchasing with credits at hub
-- [ ] Hub ammo inventory (stored between runs)
-- [ ] Pre-run ammo selection (choose type + amount to bring)
-- [ ] Advanced ammo types unlocked through progression
-- [ ] Ammo lost on death, unused ammo returned on extraction
+#### F6.4 Ammo Economy [x]
+- [x] Ammo shop at hub (buy any type with credits, +1/+5/+10 buttons)
+- [x] Hub ammo inventory (stored between runs in save)
+- [x] Pre-run loadout selection (sliders per type, bring what you want)
+- [x] Weapon loads from RunManager.carried_ammo (no more hardcoded test ammo)
+- [x] Ammo lost on death, unused ammo returned on extraction
+- [x] Starter ammo (25 standard) given on first run
+> Unlock gating deferred — all types available for now (unlock_level = 0)
 
 ### Step 2 — Core Menus (independent, unblocks testing)
 

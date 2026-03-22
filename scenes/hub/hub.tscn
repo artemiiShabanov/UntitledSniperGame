@@ -1,10 +1,12 @@
-[gd_scene load_steps=9 format=3 uid="uid://bwh5bc43q01ws"]
+[gd_scene load_steps=12 format=3 uid="uid://bwh5bc43q01ws"]
 
 [ext_resource type="Script" uid="uid://s52rkyeu1kxe" path="res://scripts/hub/hub.gd" id="1_hub"]
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://cmocsbk6rgc2t" path="res://scripts/hub/deploy_board.gd" id="3_deploy"]
 [ext_resource type="Script" uid="uid://bc0rf240lb2ja" path="res://scripts/hub/ammo_crate.gd" id="4_ammo"]
 [ext_resource type="Script" uid="uid://d17fgkr7081ri" path="res://scripts/hub/save_terminal.gd" id="5_save"]
+[ext_resource type="Script" path="res://scripts/hub/ammo_shop.gd" id="6_ammo_shop"]
+[ext_resource type="Script" path="res://scripts/hub/loadout_panel.gd" id="7_loadout"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station1"]
 size = Vector3(1.5, 2, 0.3)
@@ -14,6 +16,8 @@ size = Vector3(1.5, 1, 1.5)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station3"]
 size = Vector3(0.8, 2, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_station4"]
 
 [node name="Hub" type="Node3D"]
 script = ExtResource("1_hub")
@@ -160,50 +164,97 @@ layout_mode = 2
 layout_mode = 2
 text = "Cancel"
 
-[node name="AmmoPanel" type="PanelContainer" parent="StationUI"]
+[node name="AmmoShop" type="PanelContainer" parent="StationUI"]
 visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -150.0
-offset_right = 200.0
-offset_bottom = 150.0
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("6_ammo_shop")
 
-[node name="VBox" type="VBoxContainer" parent="StationUI/AmmoPanel"]
+[node name="VBox" type="VBoxContainer" parent="StationUI/AmmoShop"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="StationUI/AmmoPanel/VBox"]
+[node name="Title" type="Label" parent="StationUI/AmmoShop/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "AMMO LOADOUT"
+text = "AMMO SHOP"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="StationUI/AmmoPanel/VBox"]
-custom_minimum_size = Vector2(0, 20)
+[node name="CreditsLabel" type="Label" parent="StationUI/AmmoShop/VBox"]
 layout_mode = 2
-
-[node name="AmmoLabel" type="Label" parent="StationUI/AmmoPanel/VBox"]
-layout_mode = 2
-text = "Standard ammo: 0 / 0"
+theme_override_font_sizes/font_size = 16
+text = "Credits: $0"
 horizontal_alignment = 1
 
-[node name="AmmoSlider" type="HSlider" parent="StationUI/AmmoPanel/VBox"]
+[node name="HSeparator" type="HSeparator" parent="StationUI/AmmoShop/VBox"]
 layout_mode = 2
 
-[node name="Spacer2" type="Control" parent="StationUI/AmmoPanel/VBox"]
-custom_minimum_size = Vector2(0, 10)
+[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/AmmoShop/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ItemList" type="VBoxContainer" parent="StationUI/AmmoShop/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="CloseButton" type="Button" parent="StationUI/AmmoShop/VBox"]
+layout_mode = 2
+text = "Close"
+
+[node name="LoadoutPanel" type="PanelContainer" parent="StationUI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_loadout")
+
+[node name="VBox" type="VBoxContainer" parent="StationUI/LoadoutPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="StationUI/LoadoutPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "SELECT LOADOUT"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="StationUI/LoadoutPanel/VBox"]
 layout_mode = 2
 
-[node name="ConfirmButton" type="Button" parent="StationUI/AmmoPanel/VBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/LoadoutPanel/VBox"]
 layout_mode = 2
-text = "Confirm"
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="CancelButton" type="Button" parent="StationUI/AmmoPanel/VBox"]
+[node name="ItemList" type="VBoxContainer" parent="StationUI/LoadoutPanel/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="DeployButton" type="Button" parent="StationUI/LoadoutPanel/VBox"]
+layout_mode = 2
+text = "DEPLOY"
+
+[node name="CancelButton" type="Button" parent="StationUI/LoadoutPanel/VBox"]
 layout_mode = 2
 text = "Cancel"
 
@@ -226,6 +277,3 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [connection signal="pressed" from="StationUI/DeployPanel/VBox/CancelButton" to="." method="_close_active_panel"]
-[connection signal="value_changed" from="StationUI/AmmoPanel/VBox/AmmoSlider" to="." method="_on_ammo_slider_changed"]
-[connection signal="pressed" from="StationUI/AmmoPanel/VBox/ConfirmButton" to="." method="_on_ammo_confirm"]
-[connection signal="pressed" from="StationUI/AmmoPanel/VBox/CancelButton" to="." method="_close_active_panel"]

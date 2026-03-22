@@ -13,16 +13,12 @@ var LEVEL_LIST: Array[String] = [
 
 ## UI panels
 @onready var deploy_panel: Control = $StationUI/DeployPanel
-@onready var ammo_panel: Control = $StationUI/AmmoPanel
+@onready var ammo_shop: Control = $StationUI/AmmoShop
+@onready var loadout_panel: Control = $StationUI/LoadoutPanel
 @onready var save_feedback: Label = $StationUI/SaveFeedback
 
 ## Deploy UI
 @onready var mission_list: VBoxContainer = $StationUI/DeployPanel/VBox/MissionList
-
-## Ammo UI elements
-@onready var ammo_slider: HSlider = $StationUI/AmmoPanel/VBox/AmmoSlider
-@onready var ammo_label: Label = $StationUI/AmmoPanel/VBox/AmmoLabel
-@onready var ammo_confirm_btn: Button = $StationUI/AmmoPanel/VBox/ConfirmButton
 
 ## Credits display
 @onready var credits_label: Label = $StationUI/CreditsLabel
@@ -33,17 +29,24 @@ var _level_data_cache: Array[LevelData] = []
 
 
 func _ready() -> void:
-	# Just set state — we're already in the hub scene, no need to change_scene
 	RunManager._set_game_state(RunManager.GameState.HUB)
 	RunManager.is_dead = false
 
 	deploy_board.deploy_requested.connect(_on_deploy_requested)
-	ammo_crate.loadout_requested.connect(_on_loadout_requested)
+	ammo_crate.loadout_requested.connect(_on_ammo_crate_requested)
 	save_terminal.save_completed.connect(_on_save_completed)
+
+	# Loadout panel signals
+	loadout_panel.deploy_confirmed.connect(_on_loadout_confirmed)
+	loadout_panel.loadout_cancelled.connect(_on_loadout_cancelled)
+
+	# Ammo shop signals
+	ammo_shop.shop_closed.connect(_on_shop_closed)
 
 	# Close all panels
 	deploy_panel.visible = false
-	ammo_panel.visible = false
+	ammo_shop.visible = false
+	loadout_panel.visible = false
 	save_feedback.visible = false
 
 	_load_level_list()
@@ -52,6 +55,13 @@ func _ready() -> void:
 	# Ensure a save exists
 	if SaveManager.current_slot < 0:
 		SaveManager.new_game(0)
+
+	# Give starter ammo if inventory is completely empty (first run)
+	var inv: Dictionary = SaveManager.data.get("ammo_inventory", {})
+	if inv.is_empty():
+		inv["standard"] = 25
+		SaveManager.data["ammo_inventory"] = inv
+		SaveManager.save()
 
 
 func _input(event: InputEvent) -> void:
@@ -72,6 +82,7 @@ func _close_active_panel() -> void:
 		active_panel.visible = false
 		active_panel = null
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	_update_credits_display()
 
 
 ## ── Level List ───────────────────────────────────────────────────────────────
@@ -85,7 +96,6 @@ func _load_level_list() -> void:
 
 
 func _populate_mission_buttons() -> void:
-	# Clear existing buttons
 	for child in mission_list.get_children():
 		child.queue_free()
 
@@ -105,42 +115,35 @@ func _on_deploy_requested() -> void:
 
 func _on_level_selected(level_path: String) -> void:
 	selected_level_path = level_path
+	# Close mission panel, open loadout selection
+	deploy_panel.visible = false
+	loadout_panel.open()
+	active_panel = loadout_panel
+
+
+## ── Loadout Panel ───────────────────────────────────────────────────────────
+
+func _on_loadout_confirmed(loadout: Dictionary) -> void:
 	_close_active_panel()
-	# Gather ammo loadout from save inventory
-	var loadout: Dictionary = {}
-	var inv: Dictionary = SaveManager.data.get("ammo_inventory", {})
-	# For now, take all standard ammo
-	if inv.get("standard", 0) > 0:
-		loadout["standard"] = inv["standard"]
-		inv["standard"] = 0
-	else:
-		# Give starter ammo if inventory is empty
-		loadout["standard"] = 25
-	SaveManager.save()
 	RunManager.deploy(selected_level_path, loadout)
 
 
-## ── Ammo Crate ───────────────────────────────────────────────────────────────
-
-func _on_loadout_requested() -> void:
-	_open_panel(ammo_panel)
-	var inv: Dictionary = SaveManager.data.get("ammo_inventory", {})
-	var available: int = inv.get("standard", 0)
-	ammo_slider.max_value = available
-	ammo_slider.value = available
-	_update_ammo_label()
+func _on_loadout_cancelled() -> void:
+	# Go back to mission select
+	loadout_panel.visible = false
+	_populate_mission_buttons()
+	active_panel = deploy_panel
+	deploy_panel.visible = true
 
 
-func _on_ammo_slider_changed(value: float) -> void:
-	_update_ammo_label()
+## ── Ammo Crate ──────────────────────────────────────────────────────────────
+
+func _on_ammo_crate_requested() -> void:
+	ammo_shop.open()
+	_open_panel(ammo_shop)
 
 
-func _update_ammo_label() -> void:
-	ammo_label.text = "Standard ammo: %d / %d" % [int(ammo_slider.value), int(ammo_slider.max_value)]
-
-
-func _on_ammo_confirm() -> void:
-	# This just pre-selects how much to take — deploy() reads it
+func _on_shop_closed() -> void:
 	_close_active_panel()
 
 
@@ -156,4 +159,4 @@ func _on_save_completed() -> void:
 ## ── Credits ──────────────────────────────────────────────────────────────────
 
 func _update_credits_display() -> void:
-	credits_label.text = "Credits: %d | XP: %d" % [SaveManager.get_credits(), SaveManager.get_xp()]
+	credits_label.text = "Credits: $%d | XP: %d" % [SaveManager.get_credits(), SaveManager.get_xp()]

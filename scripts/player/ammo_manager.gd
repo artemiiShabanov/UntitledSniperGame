@@ -1,7 +1,7 @@
 class_name AmmoManager
 extends RefCounted
 ## Manages ammo types, reserves, magazine state, and type switching.
-## Owned by Weapon. Will integrate with RunManager.carried_ammo in Phase 2.
+## Owned by Weapon. Reserves are loaded from RunManager.carried_ammo at run start.
 
 ## ── Signals ──────────────────────────────────────────────────────────────────
 
@@ -11,8 +11,8 @@ signal ammo_type_changed(ammo_type: AmmoType)
 
 var available_types: Array[AmmoType] = []
 var current_index: int = 0
-var magazine: int = 5       ## Rounds currently in magazine
-var reserve: int = 20       ## Reserve rounds for the active ammo type
+var magazine: int = 0       ## Rounds currently in magazine
+var reserve: int = 0        ## Reserve rounds for the active ammo type
 var reserves: Dictionary = {}  ## { "standard": 20, "armor_piercing": 5, ... }
 var magazine_size: int = 5  ## Max magazine capacity (set by weapon)
 
@@ -35,16 +35,19 @@ func load_types(mag_size: int) -> void:
 			if res is AmmoType:
 				available_types.append(res)
 
-	## TEST: remove when ammo economy is implemented
-	# Initialize reserves — give some of each for testing
-	# (In production, this comes from RunManager.carried_ammo)
-	if reserves.is_empty():
-		for ammo in available_types:
-			reserves[ammo.ammo_id] = 20
+	# Load reserves from RunManager.carried_ammo (set by hub loadout)
+	reserves = RunManager.carried_ammo.duplicate()
 
-	# Set initial magazine ammo to current type
+	# Find the first ammo type that has reserves, default to index 0
+	current_index = 0
+	for i in available_types.size():
+		if reserves.get(available_types[i].ammo_id, 0) > 0:
+			current_index = i
+			break
+
+	# Set initial reserve for current type
+	magazine = 0
 	if available_types.size() > 0:
-		current_index = 0
 		reserve = reserves.get(get_current_type().ammo_id, 0)
 
 
@@ -64,11 +67,28 @@ func has_ammo() -> bool:
 	return magazine > 0
 
 
+func get_total_ammo() -> int:
+	## Returns total rounds across all types (for checking if player has any ammo at all).
+	var total := magazine
+	for ammo_id in reserves:
+		total += reserves[ammo_id]
+	# Add reserve for current type (it's tracked separately from reserves dict during play)
+	# Actually reserve IS the current type's count, and reserves dict may be stale during play.
+	# Return magazine + reserve + all other types from reserves dict.
+	total = magazine + reserve
+	for ammo in available_types:
+		if ammo != get_current_type():
+			total += reserves.get(ammo.ammo_id, 0)
+	return total
+
+
 ## ── Magazine operations ─────────────────────────────────────────────────────
 
 func consume_round() -> void:
 	## Call when a shot is fired. Decrements magazine.
 	magazine -= 1
+	# Sync back to RunManager so extraction returns correct amounts
+	_sync_carried_ammo()
 
 
 func do_reload() -> void:
@@ -81,6 +101,7 @@ func do_reload() -> void:
 	var current_type := get_current_type()
 	if current_type:
 		reserves[current_type.ammo_id] = reserve
+	_sync_carried_ammo()
 
 
 ## ── Type switching ──────────────────────────────────────────────────────────
@@ -118,6 +139,7 @@ func _switch_to_index(new_index: int) -> void:
 	var new_type := get_current_type()
 	reserve = reserves.get(new_type.ammo_id, 0)
 
+	_sync_carried_ammo()
 	ammo_type_changed.emit(new_type)
 
 
@@ -139,3 +161,21 @@ func configure_bullet(bullet: Bullet, base_muzzle_velocity: float, base_gravity:
 	else:
 		bullet.muzzle_velocity = base_muzzle_velocity
 		bullet.bullet_gravity = base_gravity
+
+
+## ── Internal ────────────────────────────────────────────────────────────────
+
+func _sync_carried_ammo() -> void:
+	## Keep RunManager.carried_ammo in sync so extraction returns correct amounts.
+	## This rebuilds the dict from current reserves + active magazine/reserve.
+	var carried: Dictionary = {}
+	var current_type := get_current_type()
+	for ammo in available_types:
+		var count: int
+		if current_type and ammo.ammo_id == current_type.ammo_id:
+			count = reserve + magazine
+		else:
+			count = reserves.get(ammo.ammo_id, 0)
+		if count > 0:
+			carried[ammo.ammo_id] = count
+	RunManager.carried_ammo = carried
