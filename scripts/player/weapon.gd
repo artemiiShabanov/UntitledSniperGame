@@ -94,6 +94,10 @@ func _ready() -> void:
 		ammo_type_changed.emit(t)
 		state_changed.emit(state)  # Update HUD
 	)
+	# Auto-load first magazine so player starts with ammo ready
+	ammo.do_reload()
+	# Emit initial state so HUD displays correctly from frame 1
+	state_changed.emit(state)
 
 
 func _process(delta: float) -> void:
