@@ -14,6 +14,8 @@ signal life_lost(lives_remaining: int)
 signal run_failed
 signal run_started
 signal extraction_started
+signal extraction_cancelled
+signal extraction_progress_updated(progress: float)  ## 0.0 to 1.0
 signal run_completed(success: bool)
 signal run_timer_updated(time_left: float)
 signal run_timer_expired
@@ -172,14 +174,25 @@ func begin_extraction() -> void:
 
 
 func cancel_extraction() -> void:
-	## Called if player leaves the extraction zone.
+	## Called if player leaves the extraction zone or releases E.
 	if game_state != GameState.EXTRACTING:
 		return
+	extraction_timer = 0.0
+	extraction_progress_updated.emit(0.0)
+	extraction_cancelled.emit()
 	_set_game_state(GameState.IN_RUN)
+
+
+func get_extraction_progress() -> float:
+	## Returns 0.0 to 1.0 extraction completion.
+	if extraction_time <= 0.0:
+		return 1.0
+	return 1.0 - (extraction_timer / extraction_time)
 
 
 func _tick_extraction(delta: float) -> void:
 	extraction_timer -= delta
+	extraction_progress_updated.emit(get_extraction_progress())
 	if extraction_timer <= 0.0:
 		_end_run_success()
 
@@ -229,10 +242,17 @@ func _end_run_failure() -> void:
 ## ── Hits ─────────────────────────────────────────────────────────────────────
 
 func take_hit() -> void:
-	if game_state != GameState.IN_RUN or is_dead:
+	if is_dead:
+		return
+	# Allow hits during extraction too (cancels it)
+	if game_state != GameState.IN_RUN and game_state != GameState.EXTRACTING:
 		return
 	if hit_cooldown > 0.0:
 		return
+
+	# Damage cancels extraction
+	if game_state == GameState.EXTRACTING:
+		cancel_extraction()
 
 	lives -= 1
 	hit_cooldown = HIT_COOLDOWN_TIME

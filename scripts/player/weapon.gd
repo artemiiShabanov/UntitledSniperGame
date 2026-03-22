@@ -45,6 +45,9 @@ enum State { IDLE, AIMING, BOLT_CYCLING, RELOADING, INSPECTING }
 @export var muzzle_velocity: float = 300.0
 @export var bullet_gravity: float = 9.8
 
+## Ammo types — loaded from res://data/ammo/
+@export var available_ammo_types: Array[AmmoType] = []
+
 ## ── State ────────────────────────────────────────────────────────────────────
 
 var state: State = State.IDLE
@@ -54,6 +57,8 @@ var state_timer: float = 0.0
 ## Ammo
 var ammo_in_magazine: int = 5
 var ammo_reserve: int = 20
+var current_ammo_index: int = 0  ## Index into available_ammo_types
+var ammo_reserves: Dictionary = {}  ## { "standard": 20, "armor_piercing": 5, ... }
 
 ## Sway & breath
 var sway_time: float = 0.0
@@ -68,6 +73,7 @@ signal shot_fired
 signal reload_complete
 signal bolt_cycled
 signal state_changed(new_state: State)
+signal ammo_type_changed(ammo_type: AmmoType)
 
 ## ── Node references ──────────────────────────────────────────────────────────
 
@@ -78,6 +84,34 @@ signal state_changed(new_state: State)
 func _ready() -> void:
 	assert(camera != null, "Weapon must be a child of Camera3D")
 	breath_remaining = breath_max
+	_load_ammo_types()
+
+
+func _load_ammo_types() -> void:
+	# Auto-load all ammo type resources if none assigned in editor
+	if available_ammo_types.is_empty():
+		var ammo_paths := [
+			"res://data/ammo/standard.tres",
+			"res://data/ammo/armor_piercing.tres",
+			"res://data/ammo/high_damage.tres",
+			"res://data/ammo/shock.tres",
+			"res://data/ammo/golden.tres",
+		]
+		for path in ammo_paths:
+			var res := load(path)
+			if res is AmmoType:
+				available_ammo_types.append(res)
+
+	# Initialize reserves — give some of each for testing
+	# (In production, this comes from RunManager.carried_ammo)
+	if ammo_reserves.is_empty():
+		for ammo in available_ammo_types:
+			ammo_reserves[ammo.ammo_id] = 20
+
+	# Set initial magazine ammo to current type
+	if available_ammo_types.size() > 0:
+		current_ammo_index = 0
+		ammo_reserve = ammo_reserves.get(get_current_ammo_type().ammo_id, 0)
 
 
 func _process(delta: float) -> void:
@@ -104,7 +138,12 @@ func _process_state_timer(delta: float) -> void:
 		match state:
 			State.BOLT_CYCLING:
 				bolt_cycled.emit()
-				_set_state(State.AIMING if is_scoped else State.IDLE)
+				# Auto-reload if magazine is empty
+				if ammo_in_magazine <= 0 and ammo_reserve > 0:
+					state_timer = reload_time
+					_set_state(State.RELOADING)
+				else:
+					_set_state(State.AIMING if is_scoped else State.IDLE)
 			State.RELOADING:
 				_finish_reload()
 			State.INSPECTING:
@@ -132,7 +171,9 @@ func _cancel_inspect() -> void:
 ## ── Scope ────────────────────────────────────────────────────────────────────
 
 func _process_scope(delta: float) -> void:
-	var wants_scope := Input.is_action_pressed("zoom") and not is_busy()
+	# Allow staying scoped during bolt cycling — only block scope during reload/inspect
+	var scope_blocked := state in [State.RELOADING, State.INSPECTING]
+	var wants_scope := Input.is_action_pressed("zoom") and not scope_blocked
 
 	if wants_scope and not is_scoped:
 		is_scoped = true
@@ -155,6 +196,51 @@ func get_sensitivity_multiplier() -> float:
 	return 1.0
 
 
+## ── Ammo Type ───────────────────────────────────────────────────────────────
+
+func get_current_ammo_type() -> AmmoType:
+	if available_ammo_types.is_empty():
+		return null
+	return available_ammo_types[current_ammo_index]
+
+
+func cycle_ammo_type(direction: int = 1) -> void:
+	## Cycle to next/previous ammo type. Only works when not busy.
+	if is_busy() or available_ammo_types.size() <= 1:
+		return
+	var new_index := (current_ammo_index + direction) % available_ammo_types.size()
+	if new_index < 0:
+		new_index += available_ammo_types.size()
+	_switch_to_ammo_index(new_index)
+
+
+func select_ammo_type(index: int) -> void:
+	## Switch directly to ammo type by index (0-4 for keys 1-5).
+	if is_busy() or index < 0 or index >= available_ammo_types.size():
+		return
+	if index == current_ammo_index:
+		return
+	_switch_to_ammo_index(index)
+
+
+func _switch_to_ammo_index(new_index: int) -> void:
+	# Return magazine rounds to old ammo reserve
+	var current := get_current_ammo_type()
+	if current:
+		ammo_reserves[current.ammo_id] = ammo_reserve + ammo_in_magazine
+
+	# Switch
+	current_ammo_index = new_index
+	ammo_in_magazine = 0  # Must reload with new ammo type
+
+	# Load new reserve
+	var new_type := get_current_ammo_type()
+	ammo_reserve = ammo_reserves.get(new_type.ammo_id, 0)
+
+	ammo_type_changed.emit(new_type)
+	state_changed.emit(state)  # Update HUD
+
+
 ## ── Input ────────────────────────────────────────────────────────────────────
 
 func _process_input() -> void:
@@ -175,6 +261,24 @@ func _process_input() -> void:
 	# Inspect
 	if Input.is_action_just_pressed("inspect") and state == State.IDLE:
 		_start_inspect()
+
+	# Cycle ammo type — mouse wheel
+	if Input.is_action_just_pressed("ammo_next"):
+		cycle_ammo_type(1)
+	elif Input.is_action_just_pressed("ammo_prev"):
+		cycle_ammo_type(-1)
+
+	# Direct ammo selection — number keys 1-5
+	if Input.is_action_just_pressed("ammo_1"):
+		select_ammo_type(0)
+	elif Input.is_action_just_pressed("ammo_2"):
+		select_ammo_type(1)
+	elif Input.is_action_just_pressed("ammo_3"):
+		select_ammo_type(2)
+	elif Input.is_action_just_pressed("ammo_4"):
+		select_ammo_type(3)
+	elif Input.is_action_just_pressed("ammo_5"):
+		select_ammo_type(4)
 
 
 ## ── Sway ─────────────────────────────────────────────────────────────────────
@@ -253,23 +357,40 @@ func try_shoot() -> void:
 
 
 func _spawn_bullet() -> void:
-	var bullet: CharacterBody3D = bullet_scene.instantiate()
-	# Spawn at camera position, pointing forward
-	bullet.global_position = camera.global_position
-	bullet.direction = -camera.global_basis.z
+	var bullet: Bullet = bullet_scene.instantiate()
+
+	# Capture camera transform before adding bullet to tree
+	var spawn_pos := camera.global_position
+	var spawn_dir := -camera.global_basis.z
+
+	bullet.direction = spawn_dir
 
 	# Hipfire spread when not scoped
 	if not is_scoped:
 		bullet.spread_angle = deg_to_rad(hipfire_spread_deg)
 
-	bullet.muzzle_velocity = muzzle_velocity
-	bullet.bullet_gravity = bullet_gravity
+	# Apply ammo type properties
+	var ammo := get_current_ammo_type()
+	if ammo:
+		bullet.damage = ammo.damage
+		bullet.muzzle_velocity = muzzle_velocity * ammo.velocity_multiplier
+		bullet.bullet_gravity = bullet_gravity * ammo.gravity_multiplier
+		bullet.penetration = ammo.penetration
+		bullet.is_shock = ammo.is_shock
+		bullet.stun_duration = ammo.stun_duration
+		bullet.tracer_color = ammo.tracer_color
+		bullet.tracer_emission = ammo.tracer_emission
+		bullet.ammo_type = ammo
+	else:
+		bullet.muzzle_velocity = muzzle_velocity
+		bullet.bullet_gravity = bullet_gravity
 
-	# Add to scene tree (not as child of player so it persists independently)
+	# Add to scene tree first, then set global_position
 	get_tree().root.add_child(bullet)
+	bullet.global_position = spawn_pos
 
 	# Sound propagation — alert nearby enemies to the gunshot
-	_propagate_gunshot_sound(camera.global_position)
+	_propagate_gunshot_sound(spawn_pos)
 
 
 func try_reload() -> void:

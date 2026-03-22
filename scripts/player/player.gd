@@ -65,6 +65,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	weapon.state_changed.connect(_on_weapon_state_changed)
 	weapon.shot_fired.connect(_on_shot_fired)
+	weapon.ammo_type_changed.connect(_on_ammo_type_changed)
 	RunManager.life_lost.connect(_on_life_lost)
 	RunManager.run_failed.connect(_on_run_failed)
 	RunManager.run_started.connect(_on_run_started)
@@ -106,6 +107,12 @@ func _physics_process(delta: float) -> void:
 
 	if RunManager.is_dead:
 		velocity = Vector3.ZERO
+		return
+
+	# Freeze movement during extraction — player can still look around
+	if RunManager.game_state == RunManager.GameState.EXTRACTING:
+		velocity = Vector3.ZERO
+		_process_interaction()
 		return
 
 	if is_on_zipline:
@@ -250,6 +257,9 @@ func _process_interaction() -> void:
 	if current_interactable:
 		interact_prompt.text = current_interactable.get_interact_prompt()
 		interact_prompt.visible = true
+	elif _is_in_extraction_zone():
+		interact_prompt.text = "Hold E to Extract"
+		interact_prompt.visible = true
 	else:
 		interact_prompt.visible = false
 
@@ -311,14 +321,37 @@ func _on_shot_fired() -> void:
 	_update_weapon_display()
 
 
+func _on_ammo_type_changed(_ammo_type: AmmoType) -> void:
+	_update_weapon_display()
+
+
 func _update_weapon_display() -> void:
 	const STATE_NAMES := ["IDLE", "AIMING", "BOLT_CYCLING", "RELOADING", "INSPECTING"]
-	weapon_state_label.text = "%s | %d/%d | $%d" % [
+	var ammo := weapon.get_current_ammo_type()
+	var ammo_name := ammo.ammo_name if ammo else "???"
+	weapon_state_label.text = "%s | %s %d/%d | $%d" % [
 		STATE_NAMES[weapon.state],
+		ammo_name,
 		weapon.ammo_in_magazine,
 		weapon.ammo_reserve,
 		RunManager.get_run_credits(),
 	]
+	# Color the label to match ammo type
+	if ammo:
+		weapon_state_label.add_theme_color_override("font_color", ammo.tracer_color)
+	else:
+		weapon_state_label.remove_theme_color_override("font_color")
+
+
+## ── Extraction ──────────────────────────────────────────────────────────────
+
+func _is_in_extraction_zone() -> bool:
+	## Check if any active extraction zone has the player inside it.
+	var zones := get_tree().get_nodes_in_group("extraction_zone")
+	for zone in zones:
+		if zone is ExtractionZone and zone.player_inside:
+			return true
+	return false
 
 
 ## ── Damage ───────────────────────────────────────────────────────────────────

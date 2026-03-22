@@ -40,7 +40,7 @@ func _process(delta: float) -> void:
 		return
 
 	# Clean up dead/freed enemies from tracking
-	_spawned_enemies = _spawned_enemies.filter(func(e: Node) -> bool:
+	_spawned_enemies = _spawned_enemies.filter(func(e) -> bool:
 		return is_instance_valid(e) and not e.is_queued_for_deletion()
 	)
 
@@ -96,13 +96,12 @@ func _try_spawn_enemy() -> void:
 		return
 
 	var enemy := scene.instantiate()
+	_level.add_child(enemy)
 	enemy.global_position = spawn.global_position
 	enemy.rotation.y = deg_to_rad(spawn.facing_direction)
 
 	if spawn.behavior_tag != "default" and "initial_behavior" in enemy:
 		enemy.initial_behavior = spawn.behavior_tag
-
-	_level.add_child(enemy)
 	_spawned_enemies.append(enemy)
 
 	# Track for max_per_run

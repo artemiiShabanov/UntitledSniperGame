@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://clsw50y4t4k45"]
+[gd_scene load_steps=6 format=3 uid="uid://clsw50y4t4k45"]
 
 [ext_resource type="Script" uid="uid://pgmlxsj4tuhw" path="res://scripts/ui/crosshair.gd" id="1_crosshair"]
 [ext_resource type="Script" uid="uid://oy7dkie7naqf" path="res://scripts/ui/scope_overlay.gd" id="2_scope"]
 [ext_resource type="Script" uid="uid://dcy5gpnuujirf" path="res://scripts/ui/breath_meter.gd" id="3_breath"]
 [ext_resource type="Script" uid="uid://n30r48mn88pv" path="res://scripts/ui/kill_feed.gd" id="4_killfeed"]
+[ext_resource type="Script" uid="uid://cxm88sjqy52fe" path="res://scripts/ui/extraction_bar.gd" id="5_extraction"]
 
 [node name="HUD" type="CanvasLayer"]
 layer = 10
@@ -127,6 +128,43 @@ offset_right = -10.0
 offset_bottom = 250.0
 grow_horizontal = 0
 script = ExtResource("4_killfeed")
+
+[node name="ExtractionBar" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -120.0
+offset_right = 150.0
+offset_bottom = -80.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("5_extraction")
+
+[node name="Label" type="Label" parent="ExtractionBar"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 20.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 16
+text = "EXTRACTING..."
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="ExtractionBar"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+show_percentage = false
 
 [node name="InteractPrompt" type="Label" parent="."]
 anchors_preset = 7

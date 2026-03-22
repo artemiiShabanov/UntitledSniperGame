@@ -8,10 +8,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 | Area                | Progress | Next Action                              |
 |---------------------|----------|------------------------------------------|
-| FPS Mechanics       | ████░ 90% | Ammo types                              |
+| FPS Mechanics       | █████ 100%| Complete                                 |
 | Run Lifecycle       | ███░░ 70% | Extraction polish (hold E, progress bar) |
 | Level Platform      | ███░░ 60% | Level loader, per-run variation          |
-| Enemies             | ██░░░ 40% | More enemy types                         |
+| Enemies             | ██░░░ 40% | Detection + Lookout done; types deferred |
 | Danger & Reward     | ███░░ 70% | Higher-value targets in later phases     |
 | Objectives          | ░░░░░  0% | Contracts, optional objectives           |
 | Global Progression  | ░░░░░  5% | Currency flow, upgrades, skills          |
@@ -47,7 +47,7 @@ Make it look, sound, and feel great. Ship it.
 
 ## Phase 1 — Complete the Core Loop
 
-### F1. FPS Mechanics ████░ 90%
+### F1. FPS Mechanics █████ 100%
 
 #### F1.1 Movement [x]
 - [x] WASD + mouse look
@@ -62,13 +62,15 @@ Make it look, sound, and feel great. Ship it.
 - [x] Sniper rifle (bolt-action, scope zoom)
 - [x] Weapon inspect animation (dedicated key, shows rifle + equipped skin)
 
-#### F1.3 Shooting [~]
+#### F1.3 Shooting [x]
 - [x] Projectile-based bullets
 - [x] Bullet lifetime and collision
 - [x] Bullet drop & travel time
 - [x] Scope sway / hold breath to steady
 - [x] Reload mechanic
-- [ ] Ammo types (standard, armor-piercing, high-damage — different damage and penetration)
+- [x] Ammo types (Standard, AP, High-Damage, Shock, Golden — colored tracers, armor, stun)
+- [x] Auto-reload when magazine empty
+- [x] Stay scoped through bolt cycle
 
 #### F1.4 Player Lives [x]
 - [x] Lives system (limited lives per run, any enemy hit costs one life)
@@ -109,20 +111,19 @@ Make it look, sound, and feel great. Ship it.
 
 ---
 
-### F3. Enemies ██░░░ 40%
+### F3. Enemies (Core) ██░░░ 40%
 
 #### F3.1 Detection System [x]
 - [x] Line of sight + sound reaction (gunshots, impacts, ally eliminations)
 - [x] Alert states (Unaware → Suspicious → Alert → Searching)
 - [x] Scope glint / laser sight on enemies (visible warning to player)
 
-#### F3.2 Enemy Types [~]
+#### F3.2 Enemy Types (Core) [x]
 - [x] EnemyBase class (state machine, LOS, combat, sound, debug visuals)
 - [x] Lookout (basic sniper, stationary, low awareness, slow reaction)
-- [ ] Marksman (repositions between nests, medium awareness, decent accuracy)
-- [ ] Countersniper (scope glint visible, actively scans for player, accurate and fast)
-- [ ] Heavy Sniper (armored, requires AP ammo or headshot, high damage)
-- [ ] Elite Sniper (flanks to different nests, uses smoke/repositioning)
+- [x] Armor system (is_armored flag, AP penetration)
+- [x] Stun system (shock ammo, blue tint visual)
+> Remaining enemy types moved to Phase 4 — Lookout is sufficient for core loop
 
 ---
 
@@ -135,13 +136,12 @@ Make it look, sound, and feel great. Ship it.
 - [x] Run variation infrastructure (slot system, extraction randomization, event runner)
 - [ ] Level loader (pick level based on progression)
 
-#### F4.2 Per-Run Variation [ ]
+#### F4.2 Per-Run Variation [~]
 - [x] Randomized enemy spawn subset
 - [x] Randomized extraction zone selection
 - [ ] Time of day selection (morning, day, evening, night)
 - [ ] Weather selection (clear, fog, rain, overcast)
-- [ ] Color palette variation per run
-- [ ] Variable sniper positions (some nests blocked/revealed per run)
+> Color palette variation and variable sniper positions moved to Phase 4
 
 ---
 
@@ -356,7 +356,15 @@ Make it look, sound, and feel great. Ship it.
 Items moved here from other phases — not blocking progress, but tracked for
 later. Pull items back into active phases when/if they become relevant.
 
-*(empty — move items here as needed)*
+### Additional Enemy Types (from F3.2)
+- [ ] Marksman (repositions between nests, medium awareness, decent accuracy)
+- [ ] Countersniper (scope glint visible, actively scans for player, accurate and fast)
+- [ ] Heavy Sniper (armored, requires AP ammo or headshot, high damage)
+- [ ] Elite Sniper (flanks to different nests, uses smoke/repositioning)
+
+### Per-Run Variation Extras (from F4.2)
+- [ ] Color palette variation per run
+- [ ] Variable sniper positions (some nests blocked/revealed per run)
 
 ---
 

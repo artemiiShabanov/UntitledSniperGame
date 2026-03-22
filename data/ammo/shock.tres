@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="AmmoType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/ammo_type.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+ammo_name = "Shock"
+ammo_id = "shock"
+damage = 0.0
+velocity_multiplier = 0.9
+gravity_multiplier = 1.1
+penetration = false
+is_shock = true
+stun_duration = 4.0
+tracer_color = Color(1.0, 1.0, 0.2, 1)
+tracer_emission = 4.0
+cost_per_round = 10
+unlock_level = 0

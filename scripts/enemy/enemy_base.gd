@@ -41,6 +41,8 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 @export var bullet_scene: PackedScene = preload("res://scenes/projectile/bullet.tscn")
 @export var shot_damage: float = 1.0
 @export var headshot_multiplier: float = 2.0
+@export var is_armored: bool = false    ## Reduces non-AP damage by 75%
+@export var armor_reduction: float = 0.25  ## Damage multiplier when armored and hit by non-AP
 
 ## ── Exports: Scope Glint ───────────────────────────────────────────────────
 
@@ -77,6 +79,8 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 var alert_state: AlertState = AlertState.UNAWARE
 var suspicion: float = 0.0
 var is_dead: bool = false
+var is_stunned: bool = false
+var stun_timer: float = 0.0
 var player: Node3D = null
 
 ## Detection
@@ -141,6 +145,17 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if is_dead or RunManager.game_state != RunManager.GameState.IN_RUN:
+		return
+
+	# Stun handling — frozen, skip all behavior
+	if is_stunned:
+		stun_timer -= delta
+		if stun_timer <= 0.0:
+			is_stunned = false
+			_update_stun_visual(false)
+		if show_debug:
+			_update_debug_visuals()
+		_update_laser()
 		return
 
 	if not player:
@@ -363,7 +378,6 @@ func _fire_at_player() -> void:
 
 	# Spawn projectile bullet
 	var bullet: Bullet = bullet_scene.instantiate()
-	bullet.global_position = eye_pos
 	bullet.direction = aim_dir
 	bullet.muzzle_velocity = enemy_bullet_speed
 	bullet.is_enemy_bullet = true
@@ -374,6 +388,7 @@ func _fire_at_player() -> void:
 	bullet.spread_angle = spread
 
 	get_tree().root.add_child(bullet)
+	bullet.global_position = eye_pos
 
 
 func _face_player() -> void:
@@ -435,9 +450,19 @@ func on_bullet_hit(bullet: Bullet, collision: KinematicCollision3D) -> void:
 	if is_dead:
 		return
 
+	# Shock ammo — stun instead of damage
+	if bullet.is_shock:
+		stun(bullet.stun_duration)
+		return
+
 	var hit_point := collision.get_position()
 	var is_headshot := _check_headshot(hit_point)
 	var dmg := bullet.damage
+
+	# Armor reduces damage unless AP or headshot
+	if is_armored and not bullet.penetration and not is_headshot:
+		dmg *= armor_reduction
+
 	if is_headshot:
 		dmg *= headshot_multiplier
 
@@ -458,6 +483,49 @@ func _check_headshot(hit_point: Vector3) -> bool:
 		return false
 	# Headshot if hit point is within 0.3m of head marker
 	return hit_point.distance_to(head_marker.global_position) < 0.3
+
+
+## ── Stun ────────────────────────────────────────────────────────────────────
+
+func stun(duration: float) -> void:
+	## Freeze the enemy for the given duration. Called by shock ammo.
+	if is_dead:
+		return
+	is_stunned = true
+	stun_timer = duration
+	velocity = Vector3.ZERO
+	_update_stun_visual(true)
+
+	# Stunned enemy becomes alert after recovering
+	if alert_state == AlertState.UNAWARE or alert_state == AlertState.SUSPICIOUS:
+		suspicion = alert_threshold
+		var players := get_tree().get_nodes_in_group("player")
+		if players.size() > 0:
+			last_known_player_pos = players[0].global_position
+
+
+func _update_stun_visual(stunned: bool) -> void:
+	## Tint mesh blue/electric when stunned, restore on recovery.
+	if not mesh:
+		return
+	if stunned:
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.3, 0.6, 1.0)
+		mat.emission_enabled = true
+		mat.emission = Color(0.3, 0.6, 1.0)
+		mat.emission_energy_multiplier = 1.5
+		for child in mesh.get_children():
+			if child is MeshInstance3D:
+				child.material_override = mat
+			elif child is CSGShape3D:
+				child.material = mat
+	else:
+		# Remove override to restore original materials
+		for child in mesh.get_children():
+			if child is MeshInstance3D:
+				child.material_override = null
+			elif child is CSGShape3D:
+				child.material = null
 
 
 func _die(headshot: bool) -> void:

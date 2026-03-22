@@ -89,13 +89,12 @@ func _spawn_enemies() -> void:
 			continue
 
 		var enemy := scene.instantiate()
+		add_child(enemy)
 		enemy.global_position = spawn.global_position
 		enemy.rotation.y = deg_to_rad(spawn.facing_direction)
 
 		if spawn.behavior_tag != "default" and "initial_behavior" in enemy:
 			enemy.initial_behavior = spawn.behavior_tag
-
-		add_child(enemy)
 
 		# Track used counts for max_per_run
 		var path := scene.resource_path
