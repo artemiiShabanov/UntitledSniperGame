@@ -60,7 +60,16 @@ var carried_ammo: Dictionary = {}  ## { "standard": 20, "armor_piercing": 5 }
 var current_level_path: String = ""
 
 ## Run stats (for result screen)
-var run_stats: Dictionary = {}
+var run_stats: Dictionary = {
+	"kills": 0,
+	"headshots": 0,
+	"shots_fired": 0,
+	"shots_hit": 0,
+	"credits_earned": 0,
+	"xp_earned": 0,
+	"time_survived": 0.0,
+	"longest_kill_distance": 0.0,
+}
 
 ## Hit cooldown to prevent multiple hits in one frame
 var hit_cooldown: float = 0.0
