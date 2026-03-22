@@ -45,118 +45,150 @@ Make it look, sound, and feel great. Ship it.
 
 ---
 
-## Phase 1 — Complete the Core Loop
+## Phase 1 — Complete the Core Loop ✅
 
-### F1. FPS Mechanics █████ 100%
+All features complete. Bug-audited and refactored.
 
-#### F1.1 Movement [x]
-- [x] WASD + mouse look
-- [x] Gravity + floor detection
-- [x] Sprint
-- [x] Jump
-- [x] Crouch
-- [x] Slide (sprint + crouch)
-- [x] Ziplines (approach + E to attach/detach)
+<details>
+<summary>F1. FPS Mechanics — Movement, weapon, shooting, lives, interactions</summary>
 
-#### F1.2 Weapon — Sniper Rifle [x]
-- [x] Sniper rifle (bolt-action, scope zoom)
-- [x] Weapon inspect animation (dedicated key, shows rifle + equipped skin)
+- Movement: WASD, sprint, jump, crouch, slide, ziplines
+- Weapon: bolt-action sniper, scope zoom, inspect animation
+- Shooting: projectile bullets, drop, sway, hold breath, reload, auto-reload
+- 5 ammo types: Standard, AP, High-Damage, Shock (stun), Golden — colored tracers
+- Lives system: limited per run, any hit costs one life, death = lose credits
+- Interactions: look + E, zipline attach/detach
 
-#### F1.3 Shooting [x]
-- [x] Projectile-based bullets
-- [x] Bullet lifetime and collision
-- [x] Bullet drop & travel time
-- [x] Scope sway / hold breath to steady
-- [x] Reload mechanic
-- [x] Ammo types (Standard, AP, High-Damage, Shock, Golden — colored tracers, armor, stun)
-- [x] Auto-reload when magazine empty
-- [x] Stay scoped through bolt cycle
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/player/player.gd` | Player controller: movement, crouch/slide, zipline, interaction, HUD updates |
+| `scripts/player/weapon.gd` | Weapon state machine: scope, bolt cycle, reload, ammo types, sway, breath |
+| `scripts/projectile/bullet.gd` | Projectile physics: velocity, gravity, collision, tracer visuals, sound propagation |
+| `scripts/data/ammo_type.gd` | AmmoType resource: damage, velocity, penetration, shock, color, cost |
+| `scripts/systems/interactable.gd` | Base class for interactive objects |
+| `data/ammo/*.tres` | 5 ammo type definitions |
+| `scenes/player/player.tscn` | Player scene (CharacterBody3D, head, camera, weapon, HUD) |
+| `scenes/projectile/bullet.tscn` | Bullet scene (CharacterBody3D, mesh) |
 
-#### F1.4 Player Lives [x]
-- [x] Lives system (limited lives per run, any enemy hit costs one life)
-- [x] Death state (all lives lost = run failure, credits + ammo lost, XP kept)
+</details>
 
-#### F1.5 Interactions [x]
-- [x] Interaction system (look at object, press E)
-- [x] Zipline attach/detach
+<details>
+<summary>F2. Run Lifecycle — State machine, timer, extraction, result screen</summary>
 
----
+- State machine: HUB → DEPLOYING → IN_RUN → EXTRACTING → RESULT
+- Run timer with countdown, forced death at zero
+- Threat clock: EARLY → MID → LATE phases with configurable durations
+- Enemy spawner: dynamic spawns per threat phase
+- Extraction: hold E + progress bar, frozen movement, damage cancels
+- Result screen: stats (kills, accuracy, time, longest kill), credits/XP, press E to continue
+- Death screen: same layout, red title, credits lost
 
-### F2. Run Lifecycle █████ 100%
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/systems/run_manager.gd` | Autoload singleton: game state, lives, timer, threat phases, credits/XP, extraction, kill bonuses |
+| `scripts/world/extraction_zone.gd` | Area3D trigger: hold E to extract, cancel on leave/damage |
+| `scripts/world/enemy_spawner.gd` | Dynamic enemy spawning per threat phase, hidden spawn selection |
+| `scripts/ui/extraction_bar.gd` | HUD extraction progress bar |
+| `scripts/ui/run_result_screen.gd` | Full-screen result overlay with stats |
+| `scripts/ui/kill_feed.gd` | Kill notification with distance/headshot bonuses |
+| `scenes/world/extraction_zone.tscn` | Extraction zone scene (Area3D, mesh, label) |
 
-#### F2.1 Run State Machine [x]
-- [x] Run state machine (HUB → DEPLOYING → IN_RUN → EXTRACTING → RESULT)
-- [x] Hub → level transition with loading screen
-- [x] Run timer (countdown, forced death at zero)
-- [x] Death handling (lives ≤ 0, lose all credits + ammo)
+</details>
 
-#### F2.2 Escalating Danger [x]
-- [x] Threat clock (elapsed time → phase signals: early/mid/late)
-- [x] Enemy spawner (listens to threat phase)
-- [x] Phase config (spawn rates, enemy types per phase)
+<details>
+<summary>F3. Enemies (Core) — Detection, AI, Lookout type</summary>
 
-#### F2.3 Risk / Reward Curve [x]
-- [x] Credit accumulation system (enemy kills + distance/headshot bonuses)
-- [x] Credits lost on death, kept on extraction
-> Higher-value targets gated behind later phases moved to Phase 4
+- LOS detection: FOV cone + range + raycast occlusion
+- Alert states: UNAWARE → SUSPICIOUS → ALERT → SEARCHING with scan behavior
+- Sound reaction: gunshots and bullet impacts alert nearby enemies
+- Combat: projectile shooting with accuracy spread, reaction delay
+- Scope glint: bright billboard sprite visible at range when ALERT
+- Laser sight: short fading beam showing aim direction
+- Armor: reduces non-AP damage by 75%, AP penetrates
+- Stun: shock ammo freezes enemy with blue tint, recovers after duration
+- Debug: FOV cone + state indicator (toggled via show_debug export)
 
-#### F2.4 Extraction [x]
-- [x] Single extraction point per level (fixed location)
-- [x] Extraction channel (hold E, progress bar, interrupted by damage)
-- [x] Player frozen during extraction (can look, can't move)
-- [x] Extraction success (transfer credits + unused ammo to global save, show result screen)
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/enemy/enemy_base.gd` | EnemyBase class: AI state machine, LOS, combat, glint, laser, stun, armor, death |
+| `scripts/enemy/enemy_lookout.gd` | Lookout type: stationary, weak stats, overrides EnemyBase exports |
+| `scenes/enemy/enemy_lookout.tscn` | Lookout scene (CharacterBody3D, mesh, head marker, sight ray) |
 
-#### F2.5 Run Result [x]
-- [x] Run result screen (enemies eliminated, accuracy, time survived, longest kill, credits earned/lost, XP earned)
-- [x] Death screen (same layout, red title, credits lost)
-- [x] Press E to return to hub
+</details>
 
----
+<details>
+<summary>F4. Level Platform — Framework, spawning, variation, environment</summary>
 
-### F3. Enemies (Core) █████ 100%
+- BaseLevel: auto-finds player, spawns enemies, picks extraction zone, applies environment
+- LevelData resource: name, scene path, enemy pool, phase config, time/weather options
+- SpawnPoint markers with type (PLAYER, ENEMY, EXTRACTION) and facing direction
+- Run variation: random enemy subset, random extraction zone, level slots, events
+- Time of day: morning, day, evening, night (sun color/angle/energy, sky colors)
+- Weather: clear, snow, rain, overcast (fog density, visibility multiplier)
+- Visibility affects enemy sight range (fog halves it, night reduces by 40%)
 
-#### F3.1 Detection System [x]
-- [x] Line of sight + sound reaction (gunshots, impacts, ally eliminations)
-- [x] Alert states (Unaware → Suspicious → Alert → Searching)
-- [x] Scope glint / laser sight on enemies (visible warning to player)
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/world/base_level.gd` | Level orchestrator: player placement, spawn variation, environment setup |
+| `scripts/world/level_data.gd` | LevelData resource: metadata, enemy pool, phase config, environment options |
+| `scripts/world/spawn_point.gd` | Marker3D with type enum and facing direction |
+| `scripts/world/environment_config.gd` | Static presets for time of day and weather |
+| `scripts/world/enemy_pool.gd` | Weighted random enemy selection with max-per-run caps |
+| `scripts/world/enemy_pool_entry.gd` | Pool entry: scene, weight, max_per_run |
+| `scripts/world/level_event_data.gd` | Event data: probability, timing, script |
+| `scripts/world/level_event_runner.gd` | Runs timed events during a run |
+| `scripts/world/level_slot.gd` | Slot for swappable level chunks |
+| `scripts/world/level_slot_data.gd` | Slot data: variant scenes array |
+| `scripts/world/industrial_yard_builder.gd` | Procedural greybox builder for Industrial Yard |
+| `scripts/world/industrial_yard_level.gd` | Industrial Yard level script |
+| `data/levels/*.tres` | Level data and enemy pool resources |
+| `scenes/levels/industrial_yard.tscn` | Industrial Yard level scene |
+| `scenes/dev/dev_test.tscn` | Dev test level scene |
 
-#### F3.2 Enemy Types (Core) [x]
-- [x] EnemyBase class (state machine, LOS, combat, sound, debug visuals)
-- [x] Lookout (basic sniper, stationary, low awareness, slow reaction)
-- [x] Armor system (is_armored flag, AP penetration)
-- [x] Stun system (shock ammo, blue tint visual)
-> Remaining enemy types moved to Phase 4 — Lookout is sufficient for core loop
+</details>
 
----
+<details>
+<summary>F5. Danger & Reward — Threat phases, distance/headshot bonuses</summary>
 
-### F4. Level Platform █████ 100%
+- Threat clock: EARLY → MID → LATE based on elapsed time
+- Dynamic spawning ramps up with phase (configurable intervals and max counts)
+- Distance bonus: 1.5x at 100m, 2.0x at 150m, 3.0x at 200m+
+- Headshot bonus: 2x, stacks with distance (headshot at 200m = 6x)
+- Kill feed: shows enemy type, distance, multipliers, total credits
+- Threat phase indicator on HUD
 
-#### F4.1 Level Framework [x]
-- [x] Base level scene (terrain, spawn points, extraction zone, lighting)
-- [x] Level data (name, difficulty, available phases)
-- [x] Enemy spawner and pool system
-- [x] Run variation infrastructure (slot system, extraction randomization, event runner)
-> Level loader (progression-gated) moved to Phase 2 under F6.6
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/systems/run_manager.gd` | Threat phase updates, distance/headshot multiplier calculation |
+| `scripts/world/enemy_spawner.gd` | Phase-aware spawn intervals and limits |
+| `scripts/ui/kill_feed.gd` | Kill notification display |
 
-#### F4.2 Per-Run Variation [x]
-- [x] Randomized enemy spawn subset
-- [x] Randomized extraction zone selection
-- [x] Time of day selection (morning, day, evening, night)
-- [x] Weather selection (clear, snow, rain, overcast)
-- [x] Visibility affects enemy sight range
-> Color palette variation and variable sniper positions moved to Phase 4
+</details>
 
----
+**HUD files (shared across features):**
+| File | Purpose |
+|------|---------|
+| `scenes/ui/hud.tscn` | HUD scene: crosshair, scope overlay, weapon state, lives, timer, threat, kill feed, extraction bar, result screen |
+| `scripts/ui/crosshair.gd` | Dynamic crosshair |
+| `scripts/ui/scope_overlay.gd` | Scope zoom black mask |
+| `scripts/ui/breath_meter.gd` | Hold-breath meter |
 
-### F5. Danger & Reward █████ 100%
+**Hub files:**
+| File | Purpose |
+|------|---------|
+| `scripts/hub/hub.gd` | Hub controller: deploy board, ammo crate, save terminal |
+| `scripts/hub/deploy_board.gd` | Level selection UI |
+| `scenes/hub/hub.tscn` | Hub scene |
 
-- [x] Threat clock with phase transitions (EARLY → MID → LATE)
-- [x] Dynamic enemy spawning per phase
-- [x] Distance-based credit multiplier (1.5x at 100m, 2x at 150m, 3x at 200m+)
-- [x] Headshot bonus (2x, stacks with distance)
-- [x] Kill feed HUD with distance, bonuses, credits
-- [x] Threat phase indicator on HUD
-> Phase-gated targets and enemy pools moved to Phase 4
+**Save system:**
+| File | Purpose |
+|------|---------|
+| `scripts/systems/save_manager.gd` | Autoload: save/load, credits, XP, stats, multiple slots |
 
 ---
 
