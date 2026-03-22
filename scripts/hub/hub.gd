@@ -25,6 +25,7 @@ var LEVEL_LIST: Array[String] = [
 
 var active_panel: Control = null
 var selected_level_path: String = ""
+var selected_level_data: LevelData = null
 var _level_data_cache: Array[LevelData] = []
 
 
@@ -99,10 +100,17 @@ func _populate_mission_buttons() -> void:
 	for child in mission_list.get_children():
 		child.queue_free()
 
+	var credits: int = SaveManager.get_credits()
 	for data in _level_data_cache:
 		var btn := Button.new()
-		btn.text = "DEPLOY — %s" % data.level_name
-		btn.pressed.connect(_on_level_selected.bind(data.scene_path))
+		if data.entry_fee > 0:
+			btn.text = "%s — $%d entry" % [data.level_name, data.entry_fee]
+			if credits < data.entry_fee:
+				btn.text += " (can't afford)"
+				btn.disabled = true
+		else:
+			btn.text = "%s — FREE" % data.level_name
+		btn.pressed.connect(_on_level_selected.bind(data))
 		mission_list.add_child(btn)
 
 
@@ -113,8 +121,9 @@ func _on_deploy_requested() -> void:
 	_open_panel(deploy_panel)
 
 
-func _on_level_selected(level_path: String) -> void:
-	selected_level_path = level_path
+func _on_level_selected(data: LevelData) -> void:
+	selected_level_path = data.scene_path
+	selected_level_data = data
 	# Close mission panel, open loadout selection
 	deploy_panel.visible = false
 	loadout_panel.open()
@@ -124,6 +133,10 @@ func _on_level_selected(level_path: String) -> void:
 ## ── Loadout Panel ───────────────────────────────────────────────────────────
 
 func _on_loadout_confirmed(loadout: Dictionary) -> void:
+	# Charge entry fee
+	if selected_level_data and selected_level_data.entry_fee > 0:
+		SaveManager.add_credits(-selected_level_data.entry_fee)
+		SaveManager.save()
 	_close_active_panel()
 	RunManager.deploy(selected_level_path, loadout)
 

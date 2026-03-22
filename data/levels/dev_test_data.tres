@@ -9,6 +9,7 @@ script = ExtResource("1_script")
 level_name = "Dev Test"
 scene_path = "res://scenes/dev/dev_test.tscn"
 run_time_override = -1.0
+entry_fee = 0
 enemy_pool = ExtResource("2_pool")
 enemy_count_range = Vector2i(3, 6)
 extraction_count = 1

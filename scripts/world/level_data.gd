@@ -5,6 +5,7 @@ extends Resource
 @export var level_name: String = "Unnamed"
 @export var scene_path: String = ""
 @export var run_time_override: float = -1.0  ## Negative = use RunManager default
+@export var entry_fee: int = 0  ## Credits deducted on deploy (0 = free)
 
 @export_group("Spawn Variation")
 @export var enemy_pool: EnemyPool
