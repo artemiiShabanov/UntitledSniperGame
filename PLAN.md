@@ -219,11 +219,13 @@ screens that display it all. Each sub-feature is self-contained and testable.
 
 ### Step 2 — Core Menus (independent, unblocks testing)
 
-#### F8.2 Menus [ ]
-- [ ] Main menu (new game, continue, settings, quit)
-- [ ] Save slot selection screen (create, load, delete slots)
-- [ ] Pause menu (resume, settings, abandon run)
-- [ ] Settings (controls, audio, video, sensitivity)
+#### F8.2 Menus [x]
+- [x] Main menu (new game, continue, settings, quit)
+- [x] Save slot selection screen (create, load, delete slots)
+- [x] Pause menu (resume, settings, abandon run)
+- [x] Settings (controls, audio, video, sensitivity)
+- [x] SettingsManager autoload (persists to user://settings.cfg)
+- [x] Player uses SettingsManager.mouse_sensitivity (no more per-export)
 
 ### Step 3 — Weapon Upgrades (primary credit sink)
 

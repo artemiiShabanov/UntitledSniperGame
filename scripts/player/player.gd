@@ -1,7 +1,6 @@
 extends CharacterBody3D
 
 ## Movement tuning
-@export var mouse_sensitivity: float = 0.002
 @export var move_speed: float = 5.0
 @export var sprint_speed: float = 8.0
 @export var jump_velocity: float = 6.0
@@ -66,9 +65,6 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_handle_mouse_look(event)
 
-	if event.is_action_pressed("ui_cancel"):
-		_toggle_mouse_capture()
-
 	# Debug: T to simulate taking a hit
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and event.keycode == KEY_T:
 		RunManager.take_hit()
@@ -111,17 +107,10 @@ func _physics_process(delta: float) -> void:
 ## ── Input ────────────────────────────────────────────────────────────────────
 
 func _handle_mouse_look(event: InputEventMouseMotion) -> void:
-	var sens := mouse_sensitivity * weapon.get_sensitivity_multiplier()
+	var sens := SettingsManager.mouse_sensitivity * weapon.get_sensitivity_multiplier()
 	rotate_y(-event.relative.x * sens)
 	head.rotate_x(-event.relative.y * sens)
 	head.rotation.x = clampf(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
-
-
-func _toggle_mouse_capture() -> void:
-	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	else:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 ## ── Gravity ──────────────────────────────────────────────────────────────────

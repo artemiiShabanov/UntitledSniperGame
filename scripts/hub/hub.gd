@@ -32,6 +32,7 @@ var _level_data_cache: Array[LevelData] = []
 func _ready() -> void:
 	RunManager._set_game_state(RunManager.GameState.HUB)
 	RunManager.is_dead = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 	deploy_board.deploy_requested.connect(_on_deploy_requested)
 	ammo_crate.loadout_requested.connect(_on_ammo_crate_requested)
@@ -68,6 +69,7 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and active_panel:
 		_close_active_panel()
+		get_viewport().set_input_as_handled()
 
 
 func _open_panel(panel: Control) -> void:

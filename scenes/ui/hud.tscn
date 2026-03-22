@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://n30r48mn88pv" path="res://scripts/ui/kill_feed.gd" id="4_killfeed"]
 [ext_resource type="Script" uid="uid://cxm88sjqy52fe" path="res://scripts/ui/extraction_bar.gd" id="5_extraction"]
 [ext_resource type="Script" uid="uid://cnb6t3r1v8kgy" path="res://scripts/ui/run_result_screen.gd" id="6_result"]
-[ext_resource type="Script" path="res://scripts/ui/player_hud.gd" id="7_player_hud"]
+[ext_resource type="Script" uid="uid://bx8nqwwim43n4" path="res://scripts/ui/player_hud.gd" id="7_player_hud"]
 
 [node name="HUD" type="CanvasLayer"]
 layer = 10

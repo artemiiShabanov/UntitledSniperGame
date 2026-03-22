@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://blodvmd77hwum" path="res://scripts/world/level_data.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://d4mwdl1gbu6p" path="res://scripts/world/level_event_data.gd" id="2_hkjl5"]
-[ext_resource type="Resource" path="res://data/levels/dev_test_pool.tres" id="2_pool"]
+[ext_resource type="Resource" uid="uid://cxxyg2bn7jdvy" path="res://data/levels/dev_test_pool.tres" id="2_pool"]
 
 [resource]
 script = ExtResource("1_script")
