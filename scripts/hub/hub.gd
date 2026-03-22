@@ -1,7 +1,11 @@
 extends Node3D
 ## Hub scene — player walks around, interacts with stations.
 
-const DEV_TEST_LEVEL := "res://scenes/dev/dev_test.tscn"
+## All available levels — add new LevelData resources here
+var LEVEL_LIST: Array[String] = [
+	"res://data/levels/dev_test_data.tres",
+	"res://data/levels/industrial_yard_data.tres",
+]
 
 @onready var deploy_board: Interactable = $DeployBoard
 @onready var ammo_crate: Interactable = $AmmoCrate
@@ -12,6 +16,9 @@ const DEV_TEST_LEVEL := "res://scenes/dev/dev_test.tscn"
 @onready var ammo_panel: Control = $StationUI/AmmoPanel
 @onready var save_feedback: Label = $StationUI/SaveFeedback
 
+## Deploy UI
+@onready var mission_list: VBoxContainer = $StationUI/DeployPanel/VBox/MissionList
+
 ## Ammo UI elements
 @onready var ammo_slider: HSlider = $StationUI/AmmoPanel/VBox/AmmoSlider
 @onready var ammo_label: Label = $StationUI/AmmoPanel/VBox/AmmoLabel
@@ -21,6 +28,8 @@ const DEV_TEST_LEVEL := "res://scenes/dev/dev_test.tscn"
 @onready var credits_label: Label = $StationUI/CreditsLabel
 
 var active_panel: Control = null
+var selected_level_path: String = ""
+var _level_data_cache: Array[LevelData] = []
 
 
 func _ready() -> void:
@@ -37,6 +46,7 @@ func _ready() -> void:
 	ammo_panel.visible = false
 	save_feedback.visible = false
 
+	_load_level_list()
 	_update_credits_display()
 
 	# Ensure a save exists
@@ -64,13 +74,37 @@ func _close_active_panel() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
+## ── Level List ───────────────────────────────────────────────────────────────
+
+func _load_level_list() -> void:
+	_level_data_cache.clear()
+	for path in LEVEL_LIST:
+		var data := load(path) as LevelData
+		if data:
+			_level_data_cache.append(data)
+
+
+func _populate_mission_buttons() -> void:
+	# Clear existing buttons
+	for child in mission_list.get_children():
+		child.queue_free()
+
+	for data in _level_data_cache:
+		var btn := Button.new()
+		btn.text = "DEPLOY — %s" % data.level_name
+		btn.pressed.connect(_on_level_selected.bind(data.scene_path))
+		mission_list.add_child(btn)
+
+
 ## ── Deploy Board ─────────────────────────────────────────────────────────────
 
 func _on_deploy_requested() -> void:
+	_populate_mission_buttons()
 	_open_panel(deploy_panel)
 
 
-func _on_deploy_button_pressed() -> void:
+func _on_level_selected(level_path: String) -> void:
+	selected_level_path = level_path
 	_close_active_panel()
 	# Gather ammo loadout from save inventory
 	var loadout: Dictionary = {}
@@ -83,7 +117,7 @@ func _on_deploy_button_pressed() -> void:
 		# Give starter ammo if inventory is empty
 		loadout["standard"] = 25
 	SaveManager.save()
-	RunManager.deploy(DEV_TEST_LEVEL, loadout)
+	RunManager.deploy(selected_level_path, loadout)
 
 
 ## ── Ammo Crate ───────────────────────────────────────────────────────────────

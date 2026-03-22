@@ -6,7 +6,7 @@ extends EnemyBase
 func _ready() -> void:
 	# Override base defaults for a weak, stationary lookout
 	fov_degrees = 60.0
-	max_sight_range = 60.0
+	max_sight_range = 150.0  ## Can spot player at long range (but slow to react)
 	suspicion_rate = 0.3
 	suspicion_decay = 0.15
 	alert_threshold = 1.0
@@ -15,6 +15,7 @@ func _ready() -> void:
 	reaction_time = 2.0
 	fire_interval = 3.0
 	accuracy = 0.4
+	inaccuracy_deg = 6.0  ## Poor accuracy at range
 	health = 100.0
 
 	credit_reward = 50

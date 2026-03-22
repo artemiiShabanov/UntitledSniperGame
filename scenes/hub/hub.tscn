@@ -149,9 +149,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 
-[node name="DeployButton" type="Button" parent="StationUI/DeployPanel/VBox"]
+[node name="MissionList" type="VBoxContainer" parent="StationUI/DeployPanel/VBox"]
 layout_mode = 2
-text = "DEPLOY — Test Range"
 
 [node name="Spacer2" type="Control" parent="StationUI/DeployPanel/VBox"]
 custom_minimum_size = Vector2(0, 10)
@@ -226,7 +225,6 @@ text = "GAME SAVED"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[connection signal="pressed" from="StationUI/DeployPanel/VBox/DeployButton" to="." method="_on_deploy_button_pressed"]
 [connection signal="pressed" from="StationUI/DeployPanel/VBox/CancelButton" to="." method="_close_active_panel"]
 [connection signal="value_changed" from="StationUI/AmmoPanel/VBox/AmmoSlider" to="." method="_on_ammo_slider_changed"]
 [connection signal="pressed" from="StationUI/AmmoPanel/VBox/ConfirmButton" to="." method="_on_ammo_confirm"]

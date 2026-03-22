@@ -1,12 +1,16 @@
-[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="LevelData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/level_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://data/levels/dev_test_pool.tres" id="2_pool"]
 
 [resource]
 script = ExtResource("1_script")
 level_name = "Dev Test"
 scene_path = "res://scenes/dev/dev_test.tscn"
-difficulty = 1
 run_time_override = -1.0
+enemy_pool = ExtResource("2_pool")
+enemy_count_range = Vector2i(3, 6)
+extraction_count = 1
+max_events_per_run = 1
 available_times_of_day = PackedStringArray("day")
 available_weather = PackedStringArray("clear")

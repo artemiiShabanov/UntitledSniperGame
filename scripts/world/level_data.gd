@@ -4,9 +4,17 @@ extends Resource
 
 @export var level_name: String = "Unnamed"
 @export var scene_path: String = ""
-@export var difficulty: int = 1  ## 1-5 scale
 @export var run_time_override: float = -1.0  ## Negative = use RunManager default
 
-## Future hooks for Layer 10 — Per-Run Variation
+@export_group("Spawn Variation")
+@export var enemy_pool: EnemyPool
+@export var enemy_count_range: Vector2i = Vector2i(3, 6)  ## Min/max enemies per run
+@export var extraction_count: int = 1  ## How many extraction zones stay active
+
+@export_group("Events")
+@export var level_events_pool: Array[LevelEventData] = []
+@export var max_events_per_run: int = 1
+
+@export_group("Environment")
 @export var available_times_of_day: PackedStringArray = ["day"]
 @export var available_weather: PackedStringArray = ["clear"]

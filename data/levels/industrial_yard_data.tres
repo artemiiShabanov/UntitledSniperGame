@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/level_data.gd" id="1_script"]
+[ext_resource type="Resource" path="res://data/levels/industrial_yard_pool.tres" id="2_pool"]
+
+[resource]
+script = ExtResource("1_script")
+level_name = "Industrial Yard"
+scene_path = "res://scenes/levels/industrial_yard.tscn"
+run_time_override = 360.0
+enemy_pool = ExtResource("2_pool")
+enemy_count_range = Vector2i(5, 10)
+extraction_count = 1
+max_events_per_run = 2
+available_times_of_day = PackedStringArray("day", "evening")
+available_weather = PackedStringArray("clear", "overcast")

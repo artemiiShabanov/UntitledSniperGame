@@ -56,6 +56,16 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 @export var laser_length: float = 3.0  ## Meters before full fade
 @export var laser_width: float = 0.02  ## Beam thickness
 
+## ── Exports: Behavior ───────────────────────────────────────────────────────
+
+@export_group("Behavior")
+@export var initial_behavior: String = "default"  ## "default", "idle", "scanning", "patrol"
+@export var patrol_points: Array[Vector3] = []  ## World-space waypoints for patrol behavior
+@export var patrol_speed: float = 1.5  ## Walk speed between patrol points
+@export var patrol_wait_time: float = 3.0  ## Pause at each patrol point
+@export var scan_speed: float = 0.3  ## Slower than search scan for idle scanning
+@export var scan_angle: float = 60.0  ## Degrees to scan each side
+
 ## ── Exports: Rewards ─────────────────────────────────────────────────────────
 
 @export_group("Rewards")
@@ -82,6 +92,14 @@ var search_timer: float = 0.0
 var _search_base_yaw: float = 0.0  ## Y rotation toward last known position
 var _search_scan_progress: float = 0.0  ## Oscillates -1 to 1
 var _search_scan_dir: float = 1.0  ## Current scan direction
+
+## Behavior (UNAWARE state)
+var _behavior_base_yaw: float = 0.0  ## Starting facing direction
+var _behavior_scan_progress: float = 0.0
+var _behavior_scan_dir: float = 1.0
+var _patrol_index: int = 0  ## Current waypoint index
+var _patrol_waiting: bool = false
+var _patrol_wait_timer: float = 0.0
 
 ## ── Node references ──────────────────────────────────────────────────────────
 
@@ -112,6 +130,7 @@ var _laser_material: StandardMaterial3D
 func _ready() -> void:
 	add_to_group("enemy")
 	_find_player()
+	_behavior_base_yaw = rotation.y
 	if show_debug:
 		_setup_debug_visuals()
 	if glint_enabled:
@@ -131,6 +150,7 @@ func _physics_process(delta: float) -> void:
 
 	_update_line_of_sight()
 	_update_alert_state(delta)
+	_update_behavior(delta)
 	_update_combat(delta)
 	_update_glint(delta)
 	_update_laser()
@@ -224,17 +244,94 @@ func _set_alert_state(new_state: AlertState) -> void:
 	alert_state_changed.emit(new_state)
 
 	match new_state:
+		AlertState.UNAWARE:
+			velocity = Vector3.ZERO
+			if initial_behavior == "patrol" and not patrol_points.is_empty():
+				_patrol_index = _find_closest_patrol_point()
+				_patrol_waiting = false
 		AlertState.ALERT:
 			reaction_timer = reaction_time
 			fire_timer = 0.0
+			velocity = Vector3.ZERO
 			_face_player()
 		AlertState.SEARCHING:
 			search_timer = search_duration
-			# Face last known position, then begin scanning
+			velocity = Vector3.ZERO
 			_face_position(last_known_player_pos)
 			_search_base_yaw = rotation.y
 			_search_scan_progress = 0.0
 			_search_scan_dir = 1.0
+
+
+## ── Behavior (UNAWARE idle actions) ──────────────────────────────────────────
+
+func _update_behavior(delta: float) -> void:
+	if alert_state != AlertState.UNAWARE:
+		return
+
+	match initial_behavior:
+		"scanning":
+			_update_behavior_scan(delta)
+		"patrol":
+			_update_behavior_patrol(delta)
+		# "default", "idle": do nothing — stand still
+
+
+func _update_behavior_scan(delta: float) -> void:
+	_behavior_scan_progress += _behavior_scan_dir * scan_speed * delta
+	var max_progress := deg_to_rad(scan_angle)
+	if _behavior_scan_progress > max_progress:
+		_behavior_scan_progress = max_progress
+		_behavior_scan_dir = -1.0
+	elif _behavior_scan_progress < -max_progress:
+		_behavior_scan_progress = -max_progress
+		_behavior_scan_dir = 1.0
+	rotation.y = _behavior_base_yaw + _behavior_scan_progress
+
+
+func _update_behavior_patrol(delta: float) -> void:
+	if patrol_points.is_empty():
+		return
+
+	if _patrol_waiting:
+		_patrol_wait_timer -= delta
+		if _patrol_wait_timer <= 0.0:
+			_patrol_waiting = false
+			_patrol_index = (_patrol_index + 1) % patrol_points.size()
+		return
+
+	var target := patrol_points[_patrol_index]
+	var to_target := target - global_position
+	to_target.y = 0.0  ## Stay on same height plane
+	var dist := to_target.length()
+
+	if dist < 0.5:
+		# Arrived at waypoint
+		_patrol_waiting = true
+		_patrol_wait_timer = patrol_wait_time
+		return
+
+	# Face target and walk toward it
+	var dir := to_target.normalized()
+	_face_direction(dir)
+	velocity = dir * patrol_speed
+	move_and_slide()
+
+
+func _face_direction(dir: Vector3) -> void:
+	if dir.length_squared() > 0.001:
+		rotation.y = atan2(-dir.x, -dir.z)
+
+
+func _find_closest_patrol_point() -> int:
+	var closest := 0
+	var closest_dist := INF
+	for i in patrol_points.size():
+		var d := global_position.distance_squared_to(patrol_points[i])
+		if d < closest_dist:
+			closest_dist = d
+			closest = i
+	return closest
 
 
 ## ── Combat ───────────────────────────────────────────────────────────────────

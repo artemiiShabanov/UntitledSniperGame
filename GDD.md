@@ -24,6 +24,7 @@ Players who enjoy tactical shooters, extraction games, and roguelike progression
 
 ### 1.7 Key Pillars
 - **Precision over speed** — rewarding careful aim and patience, not run-and-gun
+- **Long-range mastery** — the game rewards shots at 100-200m+; levels, mechanics, and scoring are built around this
 - **Risk vs. reward** — every second in a run is a choice between greed and survival
 - **Satisfying progression** — always moving forward, whether through credits or experience
 - **Replayability** — randomized elements ensure no two runs feel identical
@@ -97,6 +98,8 @@ Shooting is the core skill expression of the game. It should feel weighty and re
 ### 3.6 Earning Credits (per run)
 Credits accumulate during a run but are only kept on successful extraction:
 - **Enemy kills** — each enemy type has a bounty value (higher for tougher snipers)
+- **Distance bonus** — kills at 100m+ earn a multiplier (e.g. 1.5x at 100m, 2x at 150m, 3x at 200m+), rewarding the intended long-range playstyle
+- **Headshot bonus** — headshots earn additional credits on top of the base bounty
 - **Destroying non-NPC targets** — vehicles, equipment, supply caches scattered across the map
 - **Contract completion** — bonus reward for fulfilling the chosen contract
 
@@ -209,14 +212,24 @@ New levels unlock through progression gates:
 ## 6. Level Design
 
 ### 6.1 Design Philosophy
-Levels are large, detailed, and vertical. The player should feel like a sniper operating in a complex environment — not running through corridors.
+Levels are large, detailed, and vertical. The player should feel like a sniper operating in a complex environment — not running through corridors. **The game is designed around 100-200m+ engagements.** Level geometry, enemy placement, and scoring must consistently support and reward long-range shooting.
 
 Every level should provide:
 - **Sniper nests / towers** — elevated positions with good sightlines as the primary gameplay location
-- **Long-range sightlines** — open areas where the sniper rifle shines
+- **Long-range sightlines (100-200m+)** — the dominant engagement range; most enemies should be placed at distances where bullet drop and travel time matter
+- **Open kill zones** — large courtyards, plazas, valleys, or industrial yards that force engagements at range
 - **Repositioning routes** — ziplines, catwalks, rooftops for moving between positions
-- **Tight spaces** — interior areas for sneaking and repositioning
-- **Verticality** — multiple elevation levels creating interesting shooting angles
+- **Limited close-range paths** — interior areas exist for sneaking and repositioning, but enemies should rarely be encountered at close range
+- **Verticality** — multiple elevation levels creating interesting long-range shooting angles and bullet drop compensation
+- **Distance-based reward scaling** — longer shots earn more credits/XP to incentivize the intended playstyle
+
+### 6.1.1 Long-Range Design Rules
+- **Minimum engagement distance:** Most enemy spawn points should be 80m+ from player vantage points. Close spawns (under 50m) should be rare exceptions.
+- **Level scale:** Maps should be at least 200m x 200m to support proper sightlines.
+- **Elevation matters:** Player nests should overlook large areas at 10-30m elevation advantage. This creates natural long-range angles.
+- **Sight blockers, not walls:** Use terrain, foliage, scaffolding, and breakable cover to create partial occlusion at range — not solid walls that force CQB.
+- **Wind corridors:** Open lanes 150m+ long where the player can see deep into the map. Every level needs at least 2-3 of these.
+- **Scope-mandatory zones:** Some targets/enemies should be visible only through scope zoom, reinforcing the sniper identity.
 
 ### 6.2 Environment Types
 - Industrial warehouses and compounds

@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://6gd4xuinew4i" path="res://scripts/world/base_level.gd" id="3_base_level"]
 [ext_resource type="Script" uid="uid://bt0op02i13jd1" path="res://scripts/world/spawn_point.gd" id="4_spawn_point"]
 [ext_resource type="PackedScene" path="res://scenes/world/extraction_zone.tscn" id="5_extraction"]
-[ext_resource type="PackedScene" path="res://scenes/enemy/enemy_lookout.tscn" id="6_lookout"]
+[ext_resource type="Resource" path="res://data/levels/dev_test_data.tres" id="6_level_data"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -87,6 +87,7 @@ size = Vector3(6, 0.5, 6)
 
 [node name="DevTest" type="Node3D"]
 script = ExtResource("3_base_level")
+level_data = ExtResource("6_level_data")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 20, 0)
@@ -186,6 +187,31 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -10)
 script = ExtResource("4_spawn_point")
 spawn_type = 1
 
+[node name="EnemySpawn4" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -20)
+script = ExtResource("4_spawn_point")
+spawn_type = 1
+
+[node name="EnemySpawn5" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -8)
+script = ExtResource("4_spawn_point")
+spawn_type = 1
+
+[node name="EnemySpawn6" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -18)
+script = ExtResource("4_spawn_point")
+spawn_type = 1
+
+[node name="EnemySpawn7" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -18)
+script = ExtResource("4_spawn_point")
+spawn_type = 1
+
+[node name="EnemySpawn8" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -5)
+script = ExtResource("4_spawn_point")
+spawn_type = 1
+
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
@@ -193,14 +219,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 point_a = Vector3(-8, 3.5, -11.6)
 point_b = Vector3(15, 8.75, -15)
 
-[node name="ExtractionZone" parent="." instance=ExtResource("5_extraction")]
+[node name="ExtractionZone1" parent="." instance=ExtResource("5_extraction")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, 10)
 
-[node name="Lookout1" parent="." instance=ExtResource("6_lookout")]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, -20)
-
-[node name="Lookout2" parent="." instance=ExtResource("6_lookout")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 8.5, -15)
-
-[node name="Lookout3" parent="." instance=ExtResource("6_lookout")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -8, 3.25, -12)
+[node name="ExtractionZone2" parent="." instance=ExtResource("5_extraction")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 15)
