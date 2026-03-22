@@ -45,20 +45,7 @@ var current_interactable: Interactable = null
 @onready var ceiling_ray: RayCast3D = $CeilingRay
 @onready var interaction_ray: RayCast3D = $Head/Camera3D/InteractionRay
 @onready var weapon: Weapon = $Head/Camera3D/Weapon
-@onready var interact_prompt: Label = $HUD/InteractPrompt
-@onready var crosshair: Control = $HUD/Crosshair
-@onready var scope_overlay: Control = $HUD/ScopeOverlay
-@onready var weapon_state_label: Label = $HUD/WeaponState
-@onready var lives_label: Label = $HUD/LivesLabel
-@onready var hit_flash: ColorRect = $HUD/HitFlash
-@onready var result_screen: Control = $HUD/RunResultScreen
-@onready var breath_meter: Control = $HUD/BreathMeter
-@onready var run_timer_label: Label = $HUD/RunTimer
-@onready var threat_phase_label: Label = $HUD/ThreatPhase
-
-## Hit flash
-var hit_flash_alpha: float = 0.0
-const HIT_FLASH_FADE_SPEED: float = 3.0
+@onready var hud = $HUD  ## PlayerHUD script on the HUD CanvasLayer
 
 
 func _ready() -> void:
@@ -66,15 +53,7 @@ func _ready() -> void:
 	weapon.state_changed.connect(_on_weapon_state_changed)
 	weapon.shot_fired.connect(_on_shot_fired)
 	weapon.ammo_type_changed.connect(_on_ammo_type_changed)
-	RunManager.life_lost.connect(_on_life_lost)
-	RunManager.run_failed.connect(_on_run_failed)
-	RunManager.run_started.connect(_on_run_started)
 	RunManager.run_completed.connect(_on_run_completed)
-	RunManager.run_timer_updated.connect(_on_run_timer_updated)
-	RunManager.threat_phase_changed.connect(_on_threat_phase_changed)
-	_update_lives_display()
-	run_timer_label.visible = false
-	threat_phase_label.visible = false
 
 
 func _input(event: InputEvent) -> void:
@@ -93,13 +72,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	# Fade hit flash
-	if hit_flash_alpha > 0.0:
-		hit_flash_alpha = maxf(hit_flash_alpha - HIT_FLASH_FADE_SPEED * delta, 0.0)
-		hit_flash.color.a = hit_flash_alpha
-
 	# Update breath meter
-	breath_meter.update_breath(
+	hud.update_breath(
 		weapon.get_breath_ratio(),
 		weapon.breath_exhausted_timer > 0.0,
 		weapon.is_scoped
@@ -255,13 +229,11 @@ func _process_interaction() -> void:
 	# Update prompt
 	current_interactable = new_interactable
 	if current_interactable:
-		interact_prompt.text = current_interactable.get_interact_prompt()
-		interact_prompt.visible = true
+		hud.update_interact_prompt(current_interactable.get_interact_prompt())
 	elif _is_in_extraction_zone():
-		interact_prompt.text = "Hold E to Extract"
-		interact_prompt.visible = true
+		hud.update_interact_prompt("Hold E to Extract")
 	else:
-		interact_prompt.visible = false
+		hud.hide_interact_prompt()
 
 	# Fire interaction
 	if current_interactable and Input.is_action_just_pressed("interact"):
@@ -308,39 +280,16 @@ func _detach_from_zipline() -> void:
 ## ── Weapon callbacks ─────────────────────────────────────────────────────────
 
 func _on_weapon_state_changed(_new_state: int) -> void:
-	# Toggle crosshair / scope overlay
-	var scoped := weapon.is_scoped
-	crosshair.visible = not scoped
-	scope_overlay.visible = scoped
-	if scoped:
-		scope_overlay.queue_redraw()
-	_update_weapon_display()
+	hud.update_scope_visuals(weapon.is_scoped)
+	hud.update_weapon_display(weapon)
 
 
 func _on_shot_fired() -> void:
-	_update_weapon_display()
+	hud.update_weapon_display(weapon)
 
 
 func _on_ammo_type_changed(_ammo_type: AmmoType) -> void:
-	_update_weapon_display()
-
-
-func _update_weapon_display() -> void:
-	const STATE_NAMES := ["IDLE", "AIMING", "BOLT_CYCLING", "RELOADING", "INSPECTING"]
-	var ammo := weapon.get_current_ammo_type()
-	var ammo_name := ammo.ammo_name if ammo else "???"
-	weapon_state_label.text = "%s | %s %d/%d | $%d" % [
-		STATE_NAMES[weapon.state],
-		ammo_name,
-		weapon.ammo_in_magazine,
-		weapon.ammo_reserve,
-		RunManager.get_run_credits(),
-	]
-	# Color the label to match ammo type
-	if ammo:
-		weapon_state_label.add_theme_color_override("font_color", ammo.tracer_color)
-	else:
-		weapon_state_label.remove_theme_color_override("font_color")
+	hud.update_weapon_display(weapon)
 
 
 ## ── Extraction ──────────────────────────────────────────────────────────────
@@ -361,69 +310,8 @@ func on_bullet_hit(_bullet: Node, _collision: KinematicCollision3D) -> void:
 	RunManager.take_hit()
 
 
-## ── Lives callbacks ──────────────────────────────────────────────────────────
-
-func _on_life_lost(_lives_remaining: int) -> void:
-	_update_lives_display()
-	# Red flash
-	hit_flash_alpha = 0.4
-	hit_flash.color = Color(1, 0, 0, hit_flash_alpha)
-
-
-func _on_run_started() -> void:
-	run_timer_label.visible = true
-	threat_phase_label.visible = true
-	_update_lives_display()
-	_update_threat_display()
-
-
-func _on_run_failed() -> void:
-	_update_lives_display()
-
+## ── Run callbacks ───────────────────────────────────────────────────────────
 
 func _on_run_completed(_success: bool) -> void:
-	run_timer_label.visible = false
-	threat_phase_label.visible = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	# Result screen handles display and return to hub
-
-
-## ── Run timer ────────────────────────────────────────────────────────────────
-
-func _on_run_timer_updated(time_left: float) -> void:
-	run_timer_label.visible = RunManager.game_state == RunManager.GameState.IN_RUN or \
-		RunManager.game_state == RunManager.GameState.EXTRACTING
-	var minutes := int(time_left) / 60
-	var seconds := int(time_left) % 60
-	run_timer_label.text = "%d:%02d" % [minutes, seconds]
-	# Turn red when under 30 seconds
-	if time_left <= 30.0:
-		run_timer_label.add_theme_color_override("font_color", Color(1, 0.2, 0.2))
-	else:
-		run_timer_label.remove_theme_color_override("font_color")
-
-
-func _on_threat_phase_changed(_phase: RunManager.ThreatPhase) -> void:
-	_update_threat_display()
-
-
-func _update_threat_display() -> void:
-	var phase_name := RunManager.get_threat_phase_name()
-	threat_phase_label.text = "THREAT: %s" % phase_name
-	match RunManager.threat_phase:
-		RunManager.ThreatPhase.EARLY:
-			threat_phase_label.add_theme_color_override("font_color", Color(0.4, 0.8, 0.4))
-		RunManager.ThreatPhase.MID:
-			threat_phase_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.2))
-		RunManager.ThreatPhase.LATE:
-			threat_phase_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
-
-
-func _update_lives_display() -> void:
-	var hearts := ""
-	for i in range(RunManager.max_lives):
-		if i < RunManager.lives:
-			hearts += "♥ "
-		else:
-			hearts += "♡ "
-	lives_label.text = hearts.strip_edges()

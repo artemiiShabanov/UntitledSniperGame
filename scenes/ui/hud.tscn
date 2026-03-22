@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://clsw50y4t4k45"]
+[gd_scene load_steps=8 format=3 uid="uid://clsw50y4t4k45"]
 
 [ext_resource type="Script" uid="uid://pgmlxsj4tuhw" path="res://scripts/ui/crosshair.gd" id="1_crosshair"]
 [ext_resource type="Script" uid="uid://oy7dkie7naqf" path="res://scripts/ui/scope_overlay.gd" id="2_scope"]
@@ -6,9 +6,11 @@
 [ext_resource type="Script" uid="uid://n30r48mn88pv" path="res://scripts/ui/kill_feed.gd" id="4_killfeed"]
 [ext_resource type="Script" uid="uid://cxm88sjqy52fe" path="res://scripts/ui/extraction_bar.gd" id="5_extraction"]
 [ext_resource type="Script" uid="uid://cnb6t3r1v8kgy" path="res://scripts/ui/run_result_screen.gd" id="6_result"]
+[ext_resource type="Script" path="res://scripts/ui/player_hud.gd" id="7_player_hud"]
 
 [node name="HUD" type="CanvasLayer"]
 layer = 10
+script = ExtResource("7_player_hud")
 
 [node name="Crosshair" type="Control" parent="."]
 layout_mode = 3
