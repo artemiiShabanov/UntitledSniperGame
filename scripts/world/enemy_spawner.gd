@@ -121,31 +121,32 @@ func _pick_hidden_spawn() -> SpawnPoint:
 	if not camera:
 		return _available_spawns[_rng.randi() % _available_spawns.size()]
 
-	# Shuffle spawns
-	var shuffled := _available_spawns.duplicate()
-	for i in range(shuffled.size() - 1, 0, -1):
-		var j := _rng.randi_range(0, i)
-		var tmp: SpawnPoint = shuffled[j]
-		shuffled[j] = shuffled[i]
-		shuffled[i] = tmp
+	var vp_size := camera.get_viewport().get_visible_rect().size
 
-	# Prefer spawns not on screen (check if point is behind camera or outside frustum)
-	for spawn in shuffled:
-		if not camera.is_position_behind(spawn.global_position):
-			var screen_pos := camera.unproject_position(spawn.global_position)
-			var vp_size := camera.get_viewport().get_visible_rect().size
-			if screen_pos.x < 0 or screen_pos.x > vp_size.x or screen_pos.y < 0 or screen_pos.y > vp_size.y:
-				return spawn
-		else:
-			# Behind camera = not visible, good spawn
-			return spawn
-
-	# Fallback: pick the farthest spawn from the player
-	var best: SpawnPoint = shuffled[0]
+	# Generate a random starting index and iterate through all spawns
+	# (avoids duplicating + shuffling the array every call)
+	var count := _available_spawns.size()
+	var start := _rng.randi() % count
+	var best: SpawnPoint = _available_spawns[start]
 	var best_dist := 0.0
-	for spawn in shuffled:
-		var d := player.global_position.distance_squared_to(spawn.global_position)
+
+	for offset in count:
+		var idx := (start + offset) % count
+		var spawn: SpawnPoint = _available_spawns[idx]
+		var pos := spawn.global_position
+
+		# Track farthest for fallback
+		var d := player.global_position.distance_squared_to(pos)
 		if d > best_dist:
 			best_dist = d
 			best = spawn
+
+		# Prefer spawns not on screen
+		if camera.is_position_behind(pos):
+			return spawn  # Behind camera = not visible
+		var screen_pos := camera.unproject_position(pos)
+		if screen_pos.x < 0 or screen_pos.x > vp_size.x or screen_pos.y < 0 or screen_pos.y > vp_size.y:
+			return spawn
+
+	# Fallback: farthest spawn from the player
 	return best

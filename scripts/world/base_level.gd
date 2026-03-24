@@ -98,6 +98,8 @@ func _fill_level_slots() -> void:
 
 func _spawn_enemies() -> void:
 	if not level_data or not level_data.enemy_pool:
+		if level_data:
+			push_warning("BaseLevel: level_data has no enemy_pool assigned")
 		return
 
 	var spawns := get_enemy_spawns()

@@ -59,13 +59,8 @@ func has_ammo() -> bool:
 
 func get_total_ammo() -> int:
 	## Returns total rounds across all types (for checking if player has any ammo at all).
-	var total := magazine
-	for ammo_id in reserves:
-		total += reserves[ammo_id]
-	# Add reserve for current type (it's tracked separately from reserves dict during play)
-	# Actually reserve IS the current type's count, and reserves dict may be stale during play.
-	# Return magazine + reserve + all other types from reserves dict.
-	total = magazine + reserve
+	## During play, `reserve` tracks the current type's count (reserves dict may be stale).
+	var total := magazine + reserve
 	for ammo in available_types:
 		if ammo != get_current_type():
 			total += reserves.get(ammo.ammo_id, 0)

@@ -200,19 +200,26 @@ func _process_interaction() -> void:
 
 	if interaction_ray.is_colliding():
 		var collider := interaction_ray.get_collider()
-		# Walk up the tree to find an Interactable parent
+		# Walk up the tree to find an Interactable parent (max 5 levels)
 		var node := collider as Node
-		while node:
+		var depth := 0
+		while node and depth < 5:
 			if node is Interactable:
 				new_interactable = node
 				break
 			node = node.get_parent()
+			depth += 1
 
 	# Also check ziplines by proximity (they use line math, not collision shapes)
 	if not new_interactable:
 		var ziplines := get_tree().get_nodes_in_group("zipline")
 		for zl in ziplines:
 			if zl is Interactable:
+				# Cheap broadphase: skip if too far from zipline origin
+				var rough_dist_sq := global_position.distance_squared_to(zl.global_position)
+				var max_range: float = zl.line_length + zl.attach_radius
+				if rough_dist_sq > max_range * max_range:
+					continue
 				var result: Dictionary = zl.get_closest_point(global_position)
 				if result.distance <= zl.attach_radius:
 					new_interactable = zl
@@ -249,7 +256,9 @@ func _attach_to_zipline(zl: Node3D, start_progress: float) -> void:
 
 
 func _process_zipline(delta: float) -> void:
-	var speed_normalized: float = zipline_ref.speed / zipline_ref.line_length
+	var zipline_speed_mult: float = SaveManager.get_skill_stat_bonus("zipline_speed_mult")
+	var effective_speed: float = zipline_ref.speed * (zipline_speed_mult if zipline_speed_mult > 0.0 else 1.0)
+	var speed_normalized: float = effective_speed / zipline_ref.line_length
 	zipline_progress += zipline_direction * speed_normalized * delta
 	zipline_progress = clampf(zipline_progress, 0.0, 1.0)
 

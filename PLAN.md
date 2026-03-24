@@ -16,7 +16,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | HUD                 | █████ 100%| Complete (trackers added with F7)        |
 | Save System (core)  | █████ 100%| Complete (stats tracking in Step 6)      |
 | Objectives          | ████░ 80% | Contracts done, in-run objectives deferred |
-| Global Progression  | █████ 100%| Complete (cosmetics deferred)             |
+| Global Progression  | ████░ 95% | Complete (cosmetics system deferred to P4)|
 | World Population    | ░░░░░  0% | Neutral NPCs, destructible targets       |
 | UI & Menus          | ████░ 90% | All screens done except cosmetics         |
 | Content             | ░░░░░ 10% | Levels, models, props                    |
@@ -196,7 +196,12 @@ All features complete. Bug-audited and refactored.
 
 ## Phase 2 — Progression & Depth ✅
 
-All features complete. Bug-audited and refactored.
+Core features complete. Bug-audited and refactored.
+
+**Incomplete items moved to Phase 4:**
+- Cosmetics system (F6.5): save data placeholder exists, no backend/shop/UI
+- KILL_TARGET / DESTROY_TARGET contracts: enum + fields exist, `check_completed()` returns false
+- Hub cosmetics screen: listed but not implemented (no cosmetics backend)
 
 <details>
 <summary>F6.1 Currency & Resources — Credits flow, XP flow, hub display</summary>
@@ -278,6 +283,8 @@ All features complete. Bug-audited and refactored.
 - Uses total_xp_earned (not spendable XP) for unlock gates
 - Deploy panel shows locked levels with requirements
 - Industrial Yard gated behind 2 extractions
+- Entry fees: LevelData.entry_fee deducted on deploy (0 = free), not refunded on death
+- Deploy panel shows fee amount and can't-afford state
 
 **Core files:**
 | File | Purpose |
@@ -291,6 +298,8 @@ All features complete. Bug-audited and refactored.
 
 - Contract data model + ContractRegistry (7 contracts)
 - Types: kill count, headshot count, accuracy, no hits, speed extract
+- Contract cost: credits deducted on accept (higher cost = higher reward)
+- Contract level restriction: limit contracts to specific levels (level_restriction field)
 - Contract selection in deploy flow (Mission → Contract → Loadout → Deploy)
 - Evaluation at extraction with bonus credits/XP
 - Random 3 offered per deploy, skip option
@@ -386,8 +395,9 @@ All features complete. Bug-audited and refactored.
 
 - Lifetime: runs, kills, headshots, extractions, deaths, shots fired/hit, accuracy, total XP earned
 - Best records: survival time, credits, kills, longest kill distance
-- Per-level: runs, extractions, deaths, kills, best time, best credits
+- Per-level: runs, extractions, deaths, kills, best time, best credits (stored in per_level_stats)
 - commit_run_stats() aggregates per-run data into lifetime totals
+- Stats terminal in hub displays lifetime, records, and per-level breakdown
 
 **Core files:**
 | File | Purpose |

@@ -196,7 +196,7 @@ Purchased with experience at the hub. Permanent passive abilities:
 - Ammo is purchased with credits at the hub and stored in the player's inventory
 - Before each run, the player chooses how much and which types to bring (not forced to take everything)
 - Standard ammo is cheap; specialized ammo (armor-piercing, high-damage) costs more
-- Advanced ammo types are unlocked through progression
+- All 5 ammo types are available from the start — cost is the gating mechanism
 - **On death:** all ammo brought into the run is lost
 - **On extraction:** unused ammo returns to the hub inventory
 - Creates multiple tensions: upgrades vs. ammo spending, bring more ammo (risk losing it) vs. bring less (risk running out)
@@ -204,8 +204,19 @@ Purchased with experience at the hub. Permanent passive abilities:
 ### 5.6 Level Unlocks
 New levels unlock through progression gates:
 - Successful extraction count thresholds
-- Currency or XP thresholds
+- Total XP earned thresholds (not spendable XP)
 - Displayed in the hub level select with requirements visible
+
+### 5.7 Level Entry Fees
+- Each level may have a credits entry fee deducted on deploy (0 = free)
+- Entry fees are not refunded on death — part of the run's risk
+- Harder/later levels have higher entry fees, creating an additional credit sink
+- Hub level select shows fee amount and whether the player can afford it
+
+### 5.8 Per-Level Stats
+- The game tracks detailed stats per level: runs, extractions, deaths, total kills, best time, best credits
+- Viewable from the Stats terminal in the hub
+- Provides insight into which levels the player is most effective on
 
 ---
 
@@ -295,9 +306,17 @@ All enemies are ranged threats — no melee rushers.
 
 ### 8.1 Contracts
 Before deploying, the player picks one contract from the board in the hub:
+- **Kill count** — eliminate at least N enemies
+- **Headshot count** — get at least N headshots
+- **Accuracy challenge** — finish with accuracy at or above N%
+- **No hits** — extract without taking any damage
+- **Speed extract** — extract within N seconds
+- Contracts may have a credit cost to accept (higher cost = higher reward)
+- Contracts can be restricted to specific levels (level_restriction field)
+
+Future contract types (deferred):
 - **Eliminate high-value target** — a specific marked enemy in the level
 - **Destroy target** — locate and destroy a specific vehicle, equipment, or supply cache
-- **Accuracy challenge** — hit a certain number of targets without missing
 
 Contracts provide bonus currency and XP on completion, incentivizing specific playstyles and adding structure to runs.
 
@@ -343,11 +362,18 @@ The hub is the player's base of operations between runs. It serves as the centra
 ### 10.1 In-Run HUD
 Minimal and clean — should not obstruct the sniper's view:
 - Crosshair (center)
-- Ammo counter (type + remaining)
-- Lives indicator
-- Run timer / threat meter
+- Scope overlay (when zoomed)
+- Weapon state + ammo counter (type + magazine/reserve + credits)
+- Lives indicator (hearts)
+- Run timer (turns red under 30s)
+- Threat phase indicator (EARLY/MID/LATE with color)
+- Hold-breath meter
+- Kill feed (enemy type, distance, multipliers, credits)
 - Extraction progress bar (when extracting)
-- Objective tracker
+- Interaction prompt (contextual)
+
+Future (deferred to Phase 4):
+- Objective tracker (for in-run optional objectives)
 - Active contract tracker
 
 ### 10.2 Menus

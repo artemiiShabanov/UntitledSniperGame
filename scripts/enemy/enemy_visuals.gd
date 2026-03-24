@@ -99,7 +99,7 @@ func on_death() -> void:
 ## ── Scope Glint ─────────────────────────────────────────────────────────────
 
 func _setup_glint() -> void:
-	var glint_pos := Vector3(0, 1.5, -0.2)
+	var glint_pos := Vector3(0, EnemyBase.EYE_HEIGHT, -0.2)
 
 	# Billboard sprite
 	_glint_sprite = Sprite3D.new()
@@ -211,7 +211,7 @@ func _update_laser() -> void:
 		_laser_immediate_mesh.clear_surfaces()
 		return
 
-	var eye := Vector3(0, 1.5, -0.2)
+	var eye := Vector3(0, EnemyBase.EYE_HEIGHT, -0.2)
 	var forward := -enemy.global_basis.z
 	var end := eye + forward * laser_length
 	var hw := laser_width * 0.5
@@ -294,7 +294,7 @@ func _update_debug_visuals() -> void:
 	_debug_immediate_mesh.clear_surfaces()
 	_debug_immediate_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _debug_material)
 
-	var eye_offset := Vector3(0, 1.5, 0)
+	var eye_offset := Vector3(0, EnemyBase.EYE_HEIGHT, 0)
 	var cone_length: float = minf(enemy.max_sight_range, 20.0)
 	var half_angle := deg_to_rad(enemy.fov_degrees)
 	var segments := 16

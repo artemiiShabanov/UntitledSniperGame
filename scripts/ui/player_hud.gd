@@ -56,8 +56,9 @@ func update_weapon_display(weapon: Weapon) -> void:
 	const STATE_NAMES := ["IDLE", "AIMING", "BOLT_CYCLING", "RELOADING", "INSPECTING"]
 	var ammo := weapon.get_current_ammo_type()
 	var ammo_name := ammo.ammo_name if ammo else "???"
+	var state_idx := clampi(weapon.state, 0, STATE_NAMES.size() - 1)
 	weapon_state_label.text = "%s | %s %d/%d | $%d" % [
-		STATE_NAMES[weapon.state],
+		STATE_NAMES[state_idx],
 		ammo_name,
 		weapon.ammo_in_magazine,
 		weapon.ammo_reserve,

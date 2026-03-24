@@ -75,6 +75,12 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 @export var credit_reward: int = 50
 @export var xp_reward: int = 25
 
+## ── Constants ────────────────────────────────────────────────────────────────
+
+const EYE_HEIGHT: float = 1.5
+const HEADSHOT_RADIUS: float = 0.3
+const PLAYER_HEAD_FALLBACK_HEIGHT: float = 1.6
+
 ## ── State ────────────────────────────────────────────────────────────────────
 
 var alert_state: AlertState = AlertState.UNAWARE
@@ -179,7 +185,7 @@ func _update_line_of_sight() -> void:
 	if not player:
 		return
 
-	var eye_pos := global_position + Vector3.UP * 1.5
+	var eye_pos := global_position + Vector3.UP * EYE_HEIGHT
 	var to_player := _get_player_head_pos() - eye_pos
 	var distance := to_player.length()
 
@@ -361,7 +367,7 @@ func _fire_at_player() -> void:
 	if not can_see_player or not player:
 		return
 
-	var eye_pos := global_position + Vector3.UP * 1.5
+	var eye_pos := global_position + Vector3.UP * EYE_HEIGHT
 	var target := _get_player_head_pos()
 	var aim_dir := (target - eye_pos).normalized()
 
@@ -466,7 +472,7 @@ func on_bullet_hit(bullet: Bullet, collision: KinematicCollision3D) -> void:
 func _check_headshot(hit_point: Vector3) -> bool:
 	if not head_marker:
 		return false
-	return hit_point.distance_to(head_marker.global_position) < 0.3
+	return hit_point.distance_to(head_marker.global_position) < HEADSHOT_RADIUS
 
 
 ## ── Stun ────────────────────────────────────────────────────────────────────
@@ -564,4 +570,4 @@ func _get_player_head_pos() -> Vector3:
 		return Vector3.ZERO
 	if player.has_node("Head"):
 		return player.get_node("Head").global_position
-	return player.global_position + Vector3.UP * 1.6
+	return player.global_position + Vector3.UP * PLAYER_HEAD_FALLBACK_HEIGHT

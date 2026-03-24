@@ -12,6 +12,7 @@ var direction: Vector3 = Vector3.FORWARD
 var spread_angle: float = 0.0  ## Radians, applied on spawn
 var time_alive: float = 0.0
 var is_enemy_bullet: bool = false  ## Set by enemy to change collision mask + color
+var _already_hit: Array[Node] = []  ## Track penetrated targets to avoid double-hit
 
 ## Ammo type properties (set by weapon before adding to scene)
 var ammo_type: AmmoType = null
@@ -54,16 +55,23 @@ func _physics_process(delta: float) -> void:
 	var collision := move_and_collide(velocity * delta)
 	if collision:
 		var collider := collision.get_collider()
-		if collider and collider.has_method("on_bullet_hit"):
-			collider.on_bullet_hit(self, collision)
-		elif collider and is_shock and collider.has_method("stun"):
-			# Fallback for objects that have stun() but not on_bullet_hit()
-			collider.stun(stun_duration)
+		var hit_enemy := false
+		if collider and collider not in _already_hit:
+			if collider.has_method("on_bullet_hit"):
+				collider.on_bullet_hit(self, collision)
+				hit_enemy = collider.is_in_group("enemy")
+			elif is_shock and collider.has_method("stun"):
+				collider.stun(stun_duration)
+				hit_enemy = collider.is_in_group("enemy")
 		# Only player bullets alert enemies to impact sounds
 		if not is_enemy_bullet:
 			_propagate_impact_sound(collision.get_position())
-		## TODO: penetration - continue through enemies instead of queue_free
-		queue_free()
+		# Penetrating rounds pass through enemies (not world geometry)
+		if penetration and hit_enemy:
+			_already_hit.append(collider)
+			damage *= 0.5  # Halve damage per penetration
+		else:
+			queue_free()
 
 
 const IMPACT_LOUDNESS: float = 20.0
