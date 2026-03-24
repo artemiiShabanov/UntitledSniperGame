@@ -259,12 +259,15 @@ screens that display it all. Each sub-feature is self-contained and testable.
 
 ### Step 5 — Contracts & Objectives (give runs purpose)
 
-#### F7.1 Contracts [ ]
-- [ ] Contract board in hub (pick one contract before deploying)
-- [ ] Contract types: eliminate high-value target, destroy target, accuracy challenge
-- [ ] Bonus currency/XP reward on completion
+#### F7.1 Contracts [x]
+- [x] Contract data model + ContractRegistry autoload (7 contracts)
+- [x] Contract types: kill count, headshot count, accuracy, no hits, speed extract
+- [x] Contract selection in deploy flow (Mission → Contract → Loadout → Deploy)
+- [x] Contract evaluation at extraction with bonus credits/XP
+- [x] Random selection of 3 contracts offered per deploy
+- [x] Skip option (deploy without contract)
 
-#### F7.2 In-Run Objectives [ ]
+#### F7.2 In-Run Objectives [ ] (deferred — needs HUD integration)
 - [ ] Optional objectives (all headshots, no alerts, extract before mid-phase, no missed shots, no civilian casualties)
 - [ ] Bonus rewards for completing optional objectives
 

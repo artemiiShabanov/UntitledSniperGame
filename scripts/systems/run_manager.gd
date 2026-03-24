@@ -59,6 +59,10 @@ var carried_ammo: Dictionary = {}  ## { "standard": 20, "armor_piercing": 5 }
 ## Current level
 var current_level_path: String = ""
 
+## Active contract (null if none selected)
+var active_contract: Contract = null
+var contract_completed: bool = false
+
 ## Run stats (for result screen)
 var run_stats: Dictionary = {
 	"kills": 0,
@@ -125,6 +129,7 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 	run_timer = default_run_time
 	run_start_time = default_run_time
 	threat_phase = ThreatPhase.EARLY
+	contract_completed = false
 	run_stats = {
 		"kills": 0,
 		"headshots": 0,
@@ -134,6 +139,8 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 		"xp_earned": 0,
 		"time_survived": 0.0,
 		"longest_kill_distance": 0.0,
+		"contract_bonus_credits": 0,
+		"contract_bonus_xp": 0,
 	}
 
 	# Load the level
@@ -212,6 +219,15 @@ func _tick_extraction(delta: float) -> void:
 
 func _end_run_success() -> void:
 	_set_game_state(GameState.RESULT)
+
+	# Check contract completion
+	if active_contract:
+		contract_completed = active_contract.check_completed(run_stats, lives, max_lives)
+		if contract_completed:
+			run_credits += active_contract.bonus_credits
+			run_xp += active_contract.bonus_xp
+			run_stats.contract_bonus_credits = active_contract.bonus_credits
+			run_stats.contract_bonus_xp = active_contract.bonus_xp
 
 	# Commit earnings to save
 	run_stats.credits_earned = run_credits

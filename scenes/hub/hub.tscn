@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bwh5bc43q01ws"]
+[gd_scene load_steps=16 format=3 uid="uid://bwh5bc43q01ws"]
 
 [ext_resource type="Script" uid="uid://s52rkyeu1kxe" path="res://scripts/hub/hub.gd" id="1_hub"]
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="2_player"]
@@ -9,8 +9,9 @@
 [ext_resource type="Script" uid="uid://bny6a12nat13f" path="res://scripts/hub/loadout_panel.gd" id="7_loadout"]
 [ext_resource type="Script" uid="uid://caf273t4815bh" path="res://scripts/hub/mod_shop.gd" id="8_mod_shop"]
 [ext_resource type="Script" uid="uid://iye08sxbqpay" path="res://scripts/hub/mod_bench.gd" id="9_mod_bench"]
-[ext_resource type="Script" path="res://scripts/hub/skill_shop.gd" id="10_skill_shop"]
-[ext_resource type="Script" path="res://scripts/hub/skill_board.gd" id="11_skill_board"]
+[ext_resource type="Script" uid="uid://d1g16ea7iyde7" path="res://scripts/hub/skill_shop.gd" id="10_skill_shop"]
+[ext_resource type="Script" uid="uid://cgtgbthc7ps50" path="res://scripts/hub/skill_board.gd" id="11_skill_board"]
+[ext_resource type="Script" path="res://scripts/hub/contract_panel.gd" id="12_contract"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station1"]
 size = Vector3(1.5, 2, 0.3)
@@ -407,5 +408,52 @@ theme_override_constants/separation = 6
 [node name="CloseButton" type="Button" parent="StationUI/SkillShop/VBox"]
 layout_mode = 2
 text = "Close"
+
+[node name="ContractPanel" type="PanelContainer" parent="StationUI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -220.0
+offset_right = 280.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("12_contract")
+
+[node name="VBox" type="VBoxContainer" parent="StationUI/ContractPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="StationUI/ContractPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "SELECT CONTRACT"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="StationUI/ContractPanel/VBox"]
+layout_mode = 2
+text = "Complete for bonus rewards. Optional."
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="StationUI/ContractPanel/VBox"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/ContractPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ItemList" type="VBoxContainer" parent="StationUI/ContractPanel/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="SkipButton" type="Button" parent="StationUI/ContractPanel/VBox"]
+layout_mode = 2
+text = "Skip (No Contract)"
 
 [connection signal="pressed" from="StationUI/DeployPanel/VBox/CancelButton" to="." method="_close_active_panel"]

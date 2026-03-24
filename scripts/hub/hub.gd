@@ -19,6 +19,7 @@ var LEVEL_LIST: Array[String] = [
 @onready var loadout_panel: Control = $StationUI/LoadoutPanel
 @onready var mod_shop: Control = $StationUI/ModShop
 @onready var skill_shop: Control = $StationUI/SkillShop
+@onready var contract_panel: Control = $StationUI/ContractPanel
 @onready var save_feedback: Label = $StationUI/SaveFeedback
 
 ## Deploy UI
@@ -45,6 +46,7 @@ func _ready() -> void:
 	mod_shop.shop_closed.connect(_on_mod_shop_closed)
 	skill_board.skill_requested.connect(_on_skill_requested)
 	skill_shop.shop_closed.connect(_on_skill_shop_closed)
+	contract_panel.contract_selected.connect(_on_contract_selected)
 
 	# Loadout panel signals
 	loadout_panel.deploy_confirmed.connect(_on_loadout_confirmed)
@@ -59,6 +61,7 @@ func _ready() -> void:
 	loadout_panel.visible = false
 	mod_shop.visible = false
 	skill_shop.visible = false
+	contract_panel.visible = false
 	save_feedback.visible = false
 
 	_load_level_list()
@@ -136,8 +139,18 @@ func _on_deploy_requested() -> void:
 func _on_level_selected(data: LevelData) -> void:
 	selected_level_path = data.scene_path
 	selected_level_data = data
-	# Close mission panel, open loadout selection
+	# Close mission panel, open contract selection
 	deploy_panel.visible = false
+	contract_panel.open()
+	active_panel = contract_panel
+
+
+## ── Contract Panel ──────────────────────────────────────────────────────────
+
+func _on_contract_selected(contract: Contract) -> void:
+	RunManager.active_contract = contract
+	# Close contract panel, open loadout
+	contract_panel.visible = false
 	loadout_panel.open()
 	active_panel = loadout_panel
 
@@ -154,11 +167,11 @@ func _on_loadout_confirmed(loadout: Dictionary) -> void:
 
 
 func _on_loadout_cancelled() -> void:
-	# Go back to mission select
+	# Go back to contract selection
 	loadout_panel.visible = false
-	_populate_mission_buttons()
-	active_panel = deploy_panel
-	deploy_panel.visible = true
+	RunManager.active_contract = null
+	contract_panel.open()
+	active_panel = contract_panel
 
 
 ## ── Ammo Crate ──────────────────────────────────────────────────────────────

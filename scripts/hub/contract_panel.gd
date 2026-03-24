@@ -1,0 +1,75 @@
+extends Control
+## Contract selection panel — pick one contract before deploying.
+## Shows a random selection of available contracts.
+
+signal contract_selected(contract: Contract)  ## null means "no contract"
+signal cancelled
+
+@onready var item_list: VBoxContainer = $VBox/ScrollContainer/ItemList
+@onready var close_btn: Button = $VBox/SkipButton
+
+var _offered: Array[Contract] = []
+
+
+func _ready() -> void:
+	close_btn.pressed.connect(func(): contract_selected.emit(null))
+
+
+func open() -> void:
+	visible = true
+	_rebuild()
+
+
+func _rebuild() -> void:
+	for child in item_list.get_children():
+		child.queue_free()
+
+	_offered = ContractRegistry.get_random_selection()
+
+	for contract in _offered:
+		var row := _build_contract_row(contract)
+		item_list.add_child(row)
+
+
+func _build_contract_row(contract: Contract) -> PanelContainer:
+	var panel := PanelContainer.new()
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 12)
+	panel.add_child(hbox)
+
+	# Info
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var name_label := Label.new()
+	name_label.text = contract.contract_name
+	name_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+	info.add_child(name_label)
+
+	var desc_label := Label.new()
+	desc_label.text = contract.description
+	desc_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	desc_label.add_theme_font_size_override("font_size", 12)
+	info.add_child(desc_label)
+
+	var reward_label := Label.new()
+	var parts: Array[String] = []
+	if contract.bonus_credits > 0:
+		parts.append("+$%d" % contract.bonus_credits)
+	if contract.bonus_xp > 0:
+		parts.append("+%d XP" % contract.bonus_xp)
+	reward_label.text = "Reward: " + " ".join(parts)
+	reward_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+	reward_label.add_theme_font_size_override("font_size", 12)
+	info.add_child(reward_label)
+
+	hbox.add_child(info)
+
+	# Accept button
+	var btn := Button.new()
+	btn.text = "Accept"
+	btn.custom_minimum_size = Vector2(80, 0)
+	btn.pressed.connect(func(): contract_selected.emit(contract))
+	hbox.add_child(btn)
+
+	return panel
