@@ -16,7 +16,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | HUD                 | █████ 100%| Complete (trackers added with F7)        |
 | Save System (core)  | █████ 100%| Complete (stats tracking in Step 6)      |
 | Objectives          | ████░ 80% | Contracts done, in-run objectives deferred |
-| Global Progression  | ████░ 95% | Complete (cosmetics system deferred to P4)|
+| Global Progression  | ████░ 95% | Complete (cosmetics deferred to P4)       |
 | World Population    | ░░░░░  0% | Neutral NPCs, destructible targets       |
 | UI & Menus          | ████░ 90% | All screens done except cosmetics         |
 | Content             | ░░░░░ 10% | Levels, models, props                    |
@@ -52,7 +52,7 @@ Make it look, sound, and feel great. Ship it.
 All features complete. Bug-audited and refactored.
 
 <details>
-<summary>F1. FPS Mechanics — Movement, weapon, shooting, lives, interactions</summary>
+<summary>FPS Mechanics — Movement, weapon, shooting, lives, interactions</summary>
 
 - Movement: WASD, sprint, jump, crouch, slide, ziplines
 - Weapon: bolt-action sniper, scope zoom, inspect animation
@@ -76,7 +76,7 @@ All features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F2. Run Lifecycle — State machine, timer, extraction, result screen</summary>
+<summary>Run Lifecycle — State machine, timer, extraction, result screen</summary>
 
 - State machine: HUB → DEPLOYING → IN_RUN → EXTRACTING → RESULT
 - Run timer with countdown, forced death at zero
@@ -100,7 +100,7 @@ All features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F3. Enemies (Core) — Detection, AI, Lookout type</summary>
+<summary>Enemies (Core) — Detection, AI, Lookout type</summary>
 
 - LOS detection: FOV cone + range + raycast occlusion
 - Alert states: UNAWARE → SUSPICIOUS → ALERT → SEARCHING with scan behavior
@@ -122,7 +122,7 @@ All features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F4. Level Platform — Framework, spawning, variation, environment</summary>
+<summary>Level Platform — Framework, spawning, variation, environment</summary>
 
 - BaseLevel: auto-finds player, spawns enemies, picks extraction zone, applies environment
 - LevelData resource: name, scene path, enemy pool, phase config, time/weather options
@@ -154,7 +154,7 @@ All features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F5. Danger & Reward — Threat phases, distance/headshot bonuses</summary>
+<summary>Danger & Reward — Threat phases, distance/headshot bonuses</summary>
 
 - Threat clock: EARLY → MID → LATE based on elapsed time
 - Dynamic spawning ramps up with phase (configurable intervals and max counts)
@@ -171,6 +171,9 @@ All features complete. Bug-audited and refactored.
 | `scripts/ui/kill_feed.gd` | Kill notification display |
 
 </details>
+
+<details>
+<summary>Shared files (HUD, Hub, Save)</summary>
 
 **HUD files (shared across features):**
 | File | Purpose |
@@ -192,6 +195,8 @@ All features complete. Bug-audited and refactored.
 |------|---------|
 | `scripts/systems/save_manager.gd` | Autoload: save/load, credits, XP, stats, multiple slots |
 
+</details>
+
 ---
 
 ## Phase 2 — Progression & Depth ✅
@@ -199,12 +204,12 @@ All features complete. Bug-audited and refactored.
 Core features complete. Bug-audited and refactored.
 
 **Incomplete items moved to Phase 4:**
-- Cosmetics system (F6.5): save data placeholder exists, no backend/shop/UI
+- Cosmetics system: save data placeholder exists, no backend/shop/UI
 - KILL_TARGET / DESTROY_TARGET contracts: enum + fields exist, `check_completed()` returns false
 - Hub cosmetics screen: listed but not implemented (no cosmetics backend)
 
 <details>
-<summary>F6.1 Currency & Resources — Credits flow, XP flow, hub display</summary>
+<summary>Currency & Resources — Credits flow, XP flow, hub display</summary>
 
 - Credits: earned in runs, saved on extraction, lost on death
 - XP: earned in runs, always kept (total_xp_earned tracked separately for unlock gates)
@@ -218,7 +223,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F6.2 Rifle Modifications — Mod data model, registry, shop, weapon integration</summary>
+<summary>Rifle Modifications — Mod data model, registry, shop, weapon integration</summary>
 
 - RifleMod resource with slot, cost, stat_overrides, special behavior key
 - ModRegistry autoload: central catalog of all mods
@@ -238,7 +243,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F6.3 Player Skill Unlocks — Skill data model, registry, 4 skills, shop</summary>
+<summary>Player Skill Unlocks — Skill data model, registry, 4 skills, shop</summary>
 
 - PlayerSkill resource + SkillRegistry autoload (4 skills)
 - Iron Lungs (+2s breath), Quick Hands (20% reload), Zipline Runner (40% zipline), Last Stand (+1 life)
@@ -256,7 +261,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F6.4 Ammo Economy — Shop, inventory, loadout selection, carry/return</summary>
+<summary>Ammo Economy — Shop, inventory, loadout selection, carry/return</summary>
 
 - Ammo shop (buy any type, +1/+5/+10 buttons)
 - Hub inventory stored between runs
@@ -277,7 +282,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F6.6 Level Unlocks — Extraction count and XP thresholds</summary>
+<summary>Level Unlocks — Extraction count and XP thresholds</summary>
 
 - LevelData: unlock_extractions + unlock_xp exports, is_unlocked() check
 - Uses total_xp_earned (not spendable XP) for unlock gates
@@ -294,7 +299,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F7.1 Contracts — Pre-run challenges with bonus rewards</summary>
+<summary>Contracts — Pre-run challenges with bonus rewards</summary>
 
 - Contract data model + ContractRegistry (7 contracts)
 - Types: kill count, headshot count, accuracy, no hits, speed extract
@@ -314,7 +319,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F8.1 HUD — In-run display (crosshair, scope, weapon, timer, kills)</summary>
+<summary>HUD — In-run display (crosshair, scope, weapon, timer, kills)</summary>
 
 - Crosshair, scope overlay, weapon state + credits display
 - Lives indicator (hearts), run timer, threat phase indicator
@@ -335,7 +340,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F8.2 Menus — Main menu, save slots, pause, settings</summary>
+<summary>Menus — Main menu, save slots, pause, settings</summary>
 
 - Main menu (new game, continue, settings, quit)
 - Save slot selection (create, load, delete)
@@ -354,7 +359,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F8.3 Hub UI — All progression screens</summary>
+<summary>Hub UI — All progression screens</summary>
 
 - Contract selection (in deploy flow)
 - Weapon modifications screen (ModShop)
@@ -376,7 +381,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F9.1 Local Save — Save structure, file I/O, auto-save, multiple slots</summary>
+<summary>Local Save — Save structure, file I/O, auto-save, multiple slots</summary>
 
 - Save data: credits, XP, ammo inventory, modifications, skills, stats, per-level stats
 - JSON file I/O to user data directory
@@ -391,7 +396,7 @@ Core features complete. Bug-audited and refactored.
 </details>
 
 <details>
-<summary>F9.2 Stats Tracking — Lifetime stats, best records, per-level breakdown</summary>
+<summary>Stats Tracking — Lifetime stats, best records, per-level breakdown</summary>
 
 - Lifetime: runs, kills, headshots, extractions, deaths, shots fired/hit, accuracy, total XP earned
 - Best records: survival time, credits, kills, longest kill distance
@@ -408,54 +413,58 @@ Core features complete. Bug-audited and refactored.
 
 </details>
 
-**Shared utilities (created during Phase 2 refactoring):**
+<details>
+<summary>Shared utilities</summary>
+
 | File | Purpose |
 |------|---------|
 | `scripts/util/format_utils.gd` | FormatUtils class: time formatting shared across UI |
+
+</details>
 
 ---
 
 ## Phase 3 — Content & Population
 
-### F10. World Population ░░░░░ 0%
+### World Population ░░░░░ 0%
 
-#### F10.1 Neutral NPCs [ ]
+#### Neutral NPCs [ ]
 - [ ] NPC spawning and patrol routes (workers, civilians)
 - [ ] Panic/flee reaction to gunfire
 - [ ] Currency penalty for killing neutral NPCs
 
-#### F10.2 Non-NPC Targets [ ]
+#### Non-NPC Targets [ ]
 - [ ] Destructible objects (vehicles, equipment, supply caches)
 - [ ] Static and moving targets
 - [ ] Credit reward on destruction
 
-#### F10.3 Events System [ ]
+#### Events System [ ]
 - [ ] Event types TBD — designed in detail when reached
 
 ---
 
-### F11. Content Production ░░░░░ 10%
+### Content Production ░░░░░ 10%
 
-#### F11.1 Levels [~]
+#### Levels [~]
 - [~] Industrial Yard (greybox done, needs art pass)
 - [ ] Level 2 — TBD theme (castle/fortress?)
 - [ ] Level 3 — TBD theme (urban rooftops?)
 - [ ] Level 4+ — as needed for progression gates
 > Each level needs: theme, 200m+ map, 2-3 wind corridors, sniper nests, repositioning routes, 15-20 enemy spawns, 2-3 extraction zones
 
-#### F11.2 Contracts [ ]
+#### Contracts [ ]
 - [ ] Contract templates per level (eliminate HVT, destroy target, accuracy challenge)
 - [ ] Contract reward balancing
 - [ ] Contract board variety (enough to feel fresh across runs)
 
-#### F11.3 Enemy Visuals [ ]
+#### Enemy Visuals [ ]
 - [ ] Lookout model (replace capsule placeholder)
 - [ ] Marksman model (distinct silhouette — backpack, mid-weight)
 - [ ] Countersniper model (scope glint visible at range, lean profile)
 - [ ] Heavy Sniper model (bulky, armored, reads as tough)
 - [ ] Elite Sniper model (tactical gear, smoke grenades visible)
 
-#### F11.4 Props & Environment Art [ ]
+#### Props & Environment Art [ ]
 - [ ] Reusable building kit (walls, roofs, floors, stairs, railings)
 - [ ] Industrial props (crates, barrels, containers, pallets, pipes)
 - [ ] Vehicles (trucks, cars — destructible targets)
@@ -463,7 +472,7 @@ Core features complete. Bug-audited and refactored.
 - [ ] Cover objects (sandbags, concrete barriers, scaffolding)
 - [ ] Vegetation (trees, bushes — sight blockers at range)
 
-#### F11.5 VFX [ ]
+#### VFX [ ]
 - [ ] Muzzle flash (player + enemy)
 - [ ] Bullet tracer trail
 - [ ] Hit impact — surface-dependent (metal spark, dirt puff, wood splinter)
@@ -474,7 +483,7 @@ Core features complete. Bug-audited and refactored.
 - [ ] Smoke grenade (for Elite Sniper)
 - [ ] Weather particles (rain, fog volume)
 
-#### F11.6 Audio Assets [ ]
+#### Audio Assets [ ]
 - [ ] Player — rifle shot, bolt cycle, reload, dry fire, scope zoom
 - [ ] Player — footsteps per surface (metal, concrete, wood, dirt)
 - [ ] Bullet — impact per surface (metal, ground, wood, flesh)
@@ -483,7 +492,7 @@ Core features complete. Bug-audited and refactored.
 - [ ] Music — tension tracks that build with threat phase
 - [ ] UI — menu clicks, extraction countdown, objective complete, deploy whoosh
 
-#### F11.7 UI Screens [ ]
+#### UI Screens [ ]
 - [ ] Main menu (new game, continue, settings, quit)
 - [ ] Save slot selection
 - [ ] Hub layout (navigate between boards/screens)
@@ -506,22 +515,22 @@ Core features complete. Bug-audited and refactored.
 Items moved here from other phases — not blocking progress, but tracked for
 later. Pull items back into active phases when/if they become relevant.
 
-### Additional Enemy Types (from F3.2)
+### Additional Enemy Types
 - [ ] Marksman (repositions between nests, medium awareness, decent accuracy)
 - [ ] Countersniper (scope glint visible, actively scans for player, accurate and fast)
 - [ ] Heavy Sniper (armored, requires AP ammo or headshot, high damage)
 - [ ] Elite Sniper (flanks to different nests, uses smoke/repositioning)
 
-### Per-Run Variation Extras (from F4.2)
+### Per-Run Variation Extras
 - [ ] Color palette variation per run
 - [ ] Variable sniper positions (some nests blocked/revealed per run)
 
-### Phase-Gated Rewards (from F2.3, F5)
+### Phase-Gated Rewards
 - [ ] Higher-value targets gated behind later phases
 - [ ] Phase-specific enemy type pools (tougher enemies in LATE)
 - [ ] Spawn multiplier for credit/XP based on threat phase
 
-### Rifle Modifications — Full Catalog (from F6.2)
+### Rifle Modifications — Full Catalog
 - [ ] Barrel: Light Barrel, Heavy Barrel
 - [ ] Stock: Padded, Breath, Competition
 - [ ] Bolt: Quick, Smooth Action, Match
@@ -529,19 +538,19 @@ later. Pull items back into active phases when/if they become relevant.
 - [ ] Scope: 4x, 8x, Variable (adjustable zoom + scope overlays)
 - [ ] Visual model per mod on rifle
 
-### Cosmetics System (from F6.5)
+### Cosmetics System
 - [ ] Rifle skins (visual overlays on top of upgrade parts)
 - [ ] Cosmetics UI in hub (preview, equip)
 - [ ] Cosmetics screen (needs cosmetics backend)
 
-### Expanded Contracts (from F7.1)
+### Expanded Contracts
 - [ ] Level-specific contracts (level_restriction field ready)
 - [ ] KILL_TARGET contracts — eliminate a named high-value target (target_id field ready)
 - [ ] DESTROY_TARGET contracts — destroy a specific object
 - [ ] Higher-risk/higher-reward contracts for harder levels
 - [ ] Contract difficulty scaling based on player progression
 
-### In-Run Objectives (from F7.2)
+### In-Run Objectives
 - [ ] Optional objectives (all headshots, no alerts, extract before mid-phase, no missed shots, no civilian casualties)
 - [ ] Bonus rewards for completing optional objectives
 
@@ -549,7 +558,7 @@ later. Pull items back into active phases when/if they become relevant.
 
 ## Phase 5 — Polish & Ship
 
-### F12. Art & Audio ░░░░░ 5%
+### Art & Audio ░░░░░ 5%
 - [ ] Low-poly stylized art pipeline (flat/minimal shading, clean geometry)
 - [ ] Color palette per level (accent colors for enemies, objectives, extraction)
 - [ ] Environment art (blocky architecture, contrasting floor levels, fog/haze)
@@ -561,7 +570,7 @@ later. Pull items back into active phases when/if they become relevant.
 - [ ] Weather effects (fog, rain, overcast)
 - [ ] All audio assets integrated and balanced
 
-### F13. Steam & Release ░░░░░ 0%
+### Steam & Release ░░░░░ 0%
 - [ ] GodotSteam plugin
 - [ ] Steam Cloud save sync
 - [ ] Achievements (first extraction, kill milestones, accuracy milestones, etc.)
