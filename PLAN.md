@@ -267,6 +267,13 @@ screens that display it all. Each sub-feature is self-contained and testable.
 - [x] Random selection of 3 contracts offered per deploy
 - [x] Skip option (deploy without contract)
 
+##### Deferred: Expanded contract list
+- [ ] Level-specific contracts (level_restriction field ready)
+- [ ] KILL_TARGET contracts — eliminate a named high-value target (target_id field ready)
+- [ ] DESTROY_TARGET contracts — destroy a specific object
+- [ ] Higher-risk/higher-reward contracts for harder levels
+- [ ] Contract difficulty scaling based on player progression
+
 #### F7.2 In-Run Objectives [ ] (deferred — needs HUD integration)
 - [ ] Optional objectives (all headshots, no alerts, extract before mid-phase, no missed shots, no civilian casualties)
 - [ ] Bonus rewards for completing optional objectives

@@ -22,13 +22,16 @@ func get_all_contracts() -> Array[Contract]:
 	return result
 
 
-func get_random_selection(count: int = CONTRACTS_OFFERED_PER_RUN) -> Array[Contract]:
-	## Returns a random subset of contracts for the player to choose from.
-	var all := get_all_contracts()
-	all.shuffle()
+func get_random_selection(level_path: String = "", count: int = CONTRACTS_OFFERED_PER_RUN) -> Array[Contract]:
+	## Returns a random subset of contracts available for the given level.
+	var available: Array[Contract] = []
+	for c: Contract in _contracts.values():
+		if c.is_available_for_level(level_path):
+			available.append(c)
+	available.shuffle()
 	var result: Array[Contract] = []
-	for i in range(mini(count, all.size())):
-		result.append(all[i])
+	for i in range(mini(count, available.size())):
+		result.append(available[i])
 	return result
 
 
@@ -38,37 +41,37 @@ func _register_all() -> void:
 	_add(Contract.create(
 		"kill_3", "Clean Sweep",
 		"Eliminate at least 3 enemies.",
-		Contract.Type.KILL_COUNT, 3.0, 75, 30
+		Contract.Type.KILL_COUNT, 3.0, 25, 75, 30
 	))
 	_add(Contract.create(
 		"kill_5", "Body Count",
 		"Eliminate at least 5 enemies.",
-		Contract.Type.KILL_COUNT, 5.0, 150, 50
+		Contract.Type.KILL_COUNT, 5.0, 50, 150, 50
 	))
 	_add(Contract.create(
 		"headshot_2", "Precision Work",
 		"Score at least 2 headshots.",
-		Contract.Type.HEADSHOT_COUNT, 2.0, 100, 40
+		Contract.Type.HEADSHOT_COUNT, 2.0, 25, 100, 40
 	))
 	_add(Contract.create(
 		"headshot_4", "Dead Eye",
 		"Score at least 4 headshots.",
-		Contract.Type.HEADSHOT_COUNT, 4.0, 200, 75
+		Contract.Type.HEADSHOT_COUNT, 4.0, 50, 200, 75
 	))
 	_add(Contract.create(
 		"accuracy_80", "Sharpshooter",
 		"Finish with at least 80% accuracy.",
-		Contract.Type.ACCURACY, 80.0, 150, 50
+		Contract.Type.ACCURACY, 80.0, 40, 150, 50
 	))
 	_add(Contract.create(
 		"no_hits", "Ghost",
 		"Extract without taking any damage.",
-		Contract.Type.NO_HITS, 0.0, 200, 80
+		Contract.Type.NO_HITS, 0.0, 75, 200, 80
 	))
 	_add(Contract.create(
 		"speed_60", "Quick Job",
 		"Extract within 60 seconds.",
-		Contract.Type.SPEED_EXTRACT, 60.0, 175, 60
+		Contract.Type.SPEED_EXTRACT, 60.0, 50, 175, 60
 	))
 
 

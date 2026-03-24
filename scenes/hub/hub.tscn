@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://iye08sxbqpay" path="res://scripts/hub/mod_bench.gd" id="9_mod_bench"]
 [ext_resource type="Script" uid="uid://d1g16ea7iyde7" path="res://scripts/hub/skill_shop.gd" id="10_skill_shop"]
 [ext_resource type="Script" uid="uid://cgtgbthc7ps50" path="res://scripts/hub/skill_board.gd" id="11_skill_board"]
-[ext_resource type="Script" path="res://scripts/hub/contract_panel.gd" id="12_contract"]
+[ext_resource type="Script" uid="uid://6gtch1tmr82" path="res://scripts/hub/contract_panel.gd" id="12_contract"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station1"]
 size = Vector3(1.5, 2, 0.3)

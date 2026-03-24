@@ -141,7 +141,7 @@ func _on_level_selected(data: LevelData) -> void:
 	selected_level_data = data
 	# Close mission panel, open contract selection
 	deploy_panel.visible = false
-	contract_panel.open()
+	contract_panel.open(selected_level_path)
 	active_panel = contract_panel
 
 
@@ -170,7 +170,7 @@ func _on_loadout_cancelled() -> void:
 	# Go back to contract selection
 	loadout_panel.visible = false
 	RunManager.active_contract = null
-	contract_panel.open()
+	contract_panel.open(selected_level_path)
 	active_panel = contract_panel
 
 

@@ -68,6 +68,23 @@ func _populate(success: bool) -> void:
 	if longest_kill > 0.0:
 		_add_stat_row("Longest Kill", "%.0fm" % longest_kill)
 
+	# Contract result
+	if RunManager.active_contract:
+		var contract: Contract = RunManager.active_contract
+		if success and RunManager.contract_completed:
+			_add_stat_row("Contract: " + contract.contract_name, "COMPLETED")
+			var bonus_parts: Array[String] = []
+			if stats.get("contract_bonus_credits", 0) > 0:
+				bonus_parts.append("+$%d" % stats.get("contract_bonus_credits", 0))
+			if stats.get("contract_bonus_xp", 0) > 0:
+				bonus_parts.append("+%d XP" % stats.get("contract_bonus_xp", 0))
+			if bonus_parts.size() > 0:
+				_add_stat_row("Contract Bonus", " ".join(bonus_parts))
+		elif success:
+			_add_stat_row("Contract: " + contract.contract_name, "FAILED")
+		else:
+			_add_stat_row("Contract: " + contract.contract_name, "LOST")
+
 	# Credits
 	var credits_earned: int = stats.get("credits_earned", 0)
 	if success:
