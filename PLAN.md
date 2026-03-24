@@ -286,9 +286,10 @@ screens that display it all. Each sub-feature is self-contained and testable.
 - [x] Best records (survival time, credits in one run, kills in one run, longest kill distance)
 - [x] Per-level stats (runs, extractions, deaths, kills, best time, best credits)
 
-#### F6.6 Level Unlocks [ ]
-- [ ] Progression gates (extraction count or currency/XP thresholds)
-- [ ] Hub level select (locked/unlocked, requirements shown)
+#### F6.6 Level Unlocks [x]
+- [x] LevelData: unlock_extractions + unlock_xp exports, is_unlocked() check
+- [x] Deploy panel shows locked levels with requirements, disabled buttons
+- [x] Industrial Yard gated behind 2 extractions
 
 ### Step 7 — Cosmetics (optional spend path, low priority)
 

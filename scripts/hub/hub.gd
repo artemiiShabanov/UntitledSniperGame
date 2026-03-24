@@ -118,13 +118,18 @@ func _populate_mission_buttons() -> void:
 	var credits: int = SaveManager.get_credits()
 	for data in _level_data_cache:
 		var btn := Button.new()
-		if data.entry_fee > 0:
+
+		if not data.is_unlocked():
+			btn.text = "LOCKED: %s — Requires: %s" % [data.level_name, data.get_unlock_requirements_text()]
+			btn.disabled = true
+		elif data.entry_fee > 0:
 			btn.text = "%s — $%d entry" % [data.level_name, data.entry_fee]
 			if credits < data.entry_fee:
 				btn.text += " (can't afford)"
 				btn.disabled = true
 		else:
 			btn.text = "%s — FREE" % data.level_name
+
 		btn.pressed.connect(_on_level_selected.bind(data))
 		mission_list.add_child(btn)
 

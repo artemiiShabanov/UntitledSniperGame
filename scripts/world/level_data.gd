@@ -6,6 +6,28 @@ extends Resource
 @export var scene_path: String = ""
 @export var run_time_override: float = -1.0  ## Negative = use RunManager default
 @export var entry_fee: int = 0  ## Credits deducted on deploy (0 = free)
+@export var unlock_extractions: int = 0  ## Total extractions needed to unlock (0 = always open)
+@export var unlock_xp: int = 0  ## Total XP earned needed to unlock (0 = no requirement)
+
+
+func is_unlocked() -> bool:
+	if unlock_extractions > 0:
+		if SaveManager.get_stat("total_extractions", 0) < unlock_extractions:
+			return false
+	if unlock_xp > 0:
+		if SaveManager.get_xp() < unlock_xp:
+			return false
+	return true
+
+
+func get_unlock_requirements_text() -> String:
+	var parts: Array[String] = []
+	if unlock_extractions > 0:
+		parts.append("%d extractions" % unlock_extractions)
+	if unlock_xp > 0:
+		parts.append("%d XP" % unlock_xp)
+	return " + ".join(parts)
+
 
 @export_group("Spawn Variation")
 @export var enemy_pool: EnemyPool

@@ -9,6 +9,7 @@ level_name = "Industrial Yard"
 scene_path = "res://scenes/levels/industrial_yard.tscn"
 run_time_override = 360.0
 entry_fee = 50
+unlock_extractions = 2
 enemy_pool = ExtResource("2_pool")
 enemy_count_range = Vector2i(5, 10)
 extraction_count = 1
