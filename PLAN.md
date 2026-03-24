@@ -248,13 +248,14 @@ screens that display it all. Each sub-feature is self-contained and testable.
 
 ### Step 4 — Player Skills (secondary XP sink)
 
-#### F6.3 Player Skill Unlocks [ ]
-- [ ] Skill tree (spend XP to unlock passive abilities)
-- [ ] Longer hold breath
-- [ ] Faster zipline traversal
-- [ ] Faster reload
-- [ ] Extra life
-- [ ] Skill UI in hub
+#### F6.3 Player Skill Unlocks [x]
+- [x] PlayerSkill data model + SkillRegistry autoload (4 skills)
+- [x] SaveManager: skill purchase/ownership with XP
+- [x] Iron Lungs — +2s hold breath (additive, stacks with stock mod)
+- [x] Quick Hands — 20% faster reload (multiplicative, stacks with bolt mod)
+- [x] Zipline Runner — 40% faster ziplines (stored, applied when ziplines exist)
+- [x] Last Stand — +1 extra life per run
+- [x] SkillShop hub panel + SkillBoard station
 
 ### Step 5 — Contracts & Objectives (give runs purpose)
 

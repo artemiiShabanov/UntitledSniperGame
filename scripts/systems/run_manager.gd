@@ -115,6 +115,8 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 
 	# Reset run state
 	max_lives = default_lives
+	var bonus_lives: int = int(SaveManager.get_skill_stat_bonus("bonus_lives"))
+	max_lives += bonus_lives
 	lives = max_lives
 	is_dead = false
 	run_credits = 0

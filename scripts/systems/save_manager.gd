@@ -176,6 +176,49 @@ func get_equipped_loadout() -> Dictionary:
 	return mods.get("equipped", {}).duplicate()
 
 
+## ── Skills ──────────────────────────────────────────────────────────────────
+
+func has_skill(id: String) -> bool:
+	var skills: Array = data.get("skills", [])
+	return id in skills
+
+
+func purchase_skill(id: String, xp_cost: int) -> bool:
+	if has_skill(id) or get_xp() < xp_cost:
+		return false
+	add_xp(-xp_cost)
+	var skills: Array = data.get("skills", [])
+	skills.append(id)
+	data["skills"] = skills
+	save()
+	return true
+
+
+func get_owned_skills() -> Array:
+	return data.get("skills", [])
+
+
+func has_skill_effect(effect_key: String) -> bool:
+	## Check if any owned skill provides the given effect.
+	for skill_id in get_owned_skills():
+		var skill: PlayerSkill = SkillRegistry.get_skill(skill_id)
+		if skill and skill.effect_key == effect_key:
+			return true
+	return false
+
+
+func get_skill_stat_bonus(stat_key: String, default: float = 0.0) -> float:
+	## Sum all skill bonuses for a given stat key.
+	var total := 0.0
+	for skill_id in get_owned_skills():
+		var skill: PlayerSkill = SkillRegistry.get_skill(skill_id)
+		if skill and skill.stat_bonus.has(stat_key):
+			total += skill.stat_bonus[stat_key]
+	if total == 0.0:
+		return default
+	return total
+
+
 ## ── Run stats aggregation ───────────────────────────────────────────────────
 
 func commit_run_stats(run_stats: Dictionary, level_path: String, success: bool) -> void:

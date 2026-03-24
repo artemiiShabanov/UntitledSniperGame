@@ -11,12 +11,14 @@ var LEVEL_LIST: Array[String] = [
 @onready var ammo_crate: Interactable = $AmmoCrate
 @onready var save_terminal: Interactable = $SaveTerminal
 @onready var mod_bench: Interactable = $ModBench
+@onready var skill_board: Interactable = $SkillBoard
 
 ## UI panels
 @onready var deploy_panel: Control = $StationUI/DeployPanel
 @onready var ammo_shop: Control = $StationUI/AmmoShop
 @onready var loadout_panel: Control = $StationUI/LoadoutPanel
 @onready var mod_shop: Control = $StationUI/ModShop
+@onready var skill_shop: Control = $StationUI/SkillShop
 @onready var save_feedback: Label = $StationUI/SaveFeedback
 
 ## Deploy UI
@@ -41,6 +43,8 @@ func _ready() -> void:
 	save_terminal.save_completed.connect(_on_save_completed)
 	mod_bench.mod_requested.connect(_on_mod_requested)
 	mod_shop.shop_closed.connect(_on_mod_shop_closed)
+	skill_board.skill_requested.connect(_on_skill_requested)
+	skill_shop.shop_closed.connect(_on_skill_shop_closed)
 
 	# Loadout panel signals
 	loadout_panel.deploy_confirmed.connect(_on_loadout_confirmed)
@@ -54,6 +58,7 @@ func _ready() -> void:
 	ammo_shop.visible = false
 	loadout_panel.visible = false
 	mod_shop.visible = false
+	skill_shop.visible = false
 	save_feedback.visible = false
 
 	_load_level_list()
@@ -175,6 +180,17 @@ func _on_mod_requested() -> void:
 
 
 func _on_mod_shop_closed() -> void:
+	_close_active_panel()
+
+
+## ── Skill Board ─────────────────────────────────────────────────────────
+
+func _on_skill_requested() -> void:
+	skill_shop.open()
+	_open_panel(skill_shop)
+
+
+func _on_skill_shop_closed() -> void:
 	_close_active_panel()
 
 

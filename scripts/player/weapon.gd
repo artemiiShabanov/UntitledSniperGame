@@ -104,6 +104,7 @@ func _ready() -> void:
 ## ── Modifications ────────────────────────────────────────────────────────────
 
 func apply_modifications() -> void:
+	# Apply equipped mods
 	var loadout: Dictionary = SaveManager.get_equipped_loadout()
 	for slot: String in loadout:
 		var mod: RifleMod = ModRegistry.get_mod(loadout[slot])
@@ -112,6 +113,15 @@ func apply_modifications() -> void:
 		for prop: String in mod.stat_overrides:
 			if prop in self:
 				set(prop, mod.stat_overrides[prop])
+
+	# Apply skill bonuses (after mods so they stack)
+	var breath_bonus: float = SaveManager.get_skill_stat_bonus("breath_max")
+	if breath_bonus > 0.0:
+		breath_max += breath_bonus
+
+	var reload_mult: float = SaveManager.get_skill_stat_bonus("reload_time_mult")
+	if reload_mult > 0.0:
+		reload_time *= reload_mult
 
 
 func _process(delta: float) -> void:

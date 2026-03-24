@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 SaveManager="*res://scripts/systems/save_manager.gd"
 RunManager="*res://scripts/systems/run_manager.gd"
 ModRegistry="*res://scripts/data/mod_registry.gd"
+SkillRegistry="*res://scripts/data/skill_registry.gd"
 SettingsManager="*res://scripts/ui/settings_manager.gd"
 PauseMenu="*res://scenes/ui/pause_menu.tscn"
 
