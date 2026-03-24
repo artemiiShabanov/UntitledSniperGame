@@ -3,7 +3,7 @@ extends Node
 ## Handles save/load, multiple slots, and data structure.
 
 const SAVE_DIR := "user://saves/"
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 const MAX_SLOTS := 3
 
 ## Currently loaded save data. Empty dict means no save loaded.
@@ -130,6 +130,52 @@ func update_stat_max(key: String, value: Variant) -> void:
 	data["stats"] = stats
 
 
+## ── Modifications ───────────────────────────────────────────────────────────
+
+func owns_mod(id: String) -> bool:
+	var mods: Dictionary = data.get("modifications", {})
+	var owned: Array = mods.get("owned", [])
+	return id in owned
+
+
+func purchase_mod(id: String, cost: int) -> bool:
+	if owns_mod(id) or get_credits() < cost:
+		return false
+	add_credits(-cost)
+	var mods: Dictionary = data.get("modifications", {})
+	var owned: Array = mods.get("owned", [])
+	owned.append(id)
+	mods["owned"] = owned
+	data["modifications"] = mods
+	save()
+	return true
+
+
+func equip_mod(id: String) -> void:
+	if not owns_mod(id):
+		return
+	var mod: RifleMod = ModRegistry.get_mod(id)
+	if not mod:
+		return
+	var mods: Dictionary = data.get("modifications", {})
+	var equipped: Dictionary = mods.get("equipped", {})
+	equipped[mod.slot] = id
+	mods["equipped"] = equipped
+	data["modifications"] = mods
+	save()
+
+
+func get_equipped_mod(slot: String) -> String:
+	var mods: Dictionary = data.get("modifications", {})
+	var equipped: Dictionary = mods.get("equipped", {})
+	return equipped.get(slot, slot + "_standard")
+
+
+func get_equipped_loadout() -> Dictionary:
+	var mods: Dictionary = data.get("modifications", {})
+	return mods.get("equipped", {}).duplicate()
+
+
 ## ── Run stats aggregation ───────────────────────────────────────────────────
 
 func commit_run_stats(run_stats: Dictionary, level_path: String, success: bool) -> void:
@@ -220,7 +266,19 @@ func _default_data(slot: int) -> Dictionary:
 		"credits": 0,
 		"xp": 0,
 		"ammo_inventory": {},
-		"upgrades": [],
+		"modifications": {
+			"owned": [
+				"barrel_standard", "stock_standard", "bolt_standard",
+				"magazine_standard", "scope_standard",
+			],
+			"equipped": {
+				"barrel": "barrel_standard",
+				"stock": "stock_standard",
+				"bolt": "bolt_standard",
+				"magazine": "magazine_standard",
+				"scope": "scope_standard",
+			},
+		},
 		"skills": [],
 		"cosmetics": [],
 		"stats": {
@@ -245,9 +303,23 @@ func _migrate(save_data: Dictionary) -> Dictionary:
 	## Add migration steps here as SAVE_VERSION increments.
 	var ver: int = save_data.get("version", 0)
 
-	if ver < 1:
-		# Future: migrate from v0 to v1
-		pass
+	if ver < 2:
+		# v1 → v2: replace "upgrades" array with "modifications" dict
+		save_data.erase("upgrades")
+		if not save_data.has("modifications"):
+			save_data["modifications"] = {
+				"owned": [
+					"barrel_standard", "stock_standard", "bolt_standard",
+					"magazine_standard", "scope_standard",
+				],
+				"equipped": {
+					"barrel": "barrel_standard",
+					"stock": "stock_standard",
+					"bolt": "bolt_standard",
+					"magazine": "magazine_standard",
+					"scope": "scope_standard",
+				},
+			}
 
 	save_data["version"] = SAVE_VERSION
 	return save_data

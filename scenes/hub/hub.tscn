@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bwh5bc43q01ws"]
+[gd_scene load_steps=13 format=3 uid="uid://bwh5bc43q01ws"]
 
 [ext_resource type="Script" uid="uid://s52rkyeu1kxe" path="res://scripts/hub/hub.gd" id="1_hub"]
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="2_player"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" uid="uid://d17fgkr7081ri" path="res://scripts/hub/save_terminal.gd" id="5_save"]
 [ext_resource type="Script" uid="uid://b16075m32j71r" path="res://scripts/hub/ammo_shop.gd" id="6_ammo_shop"]
 [ext_resource type="Script" uid="uid://bny6a12nat13f" path="res://scripts/hub/loadout_panel.gd" id="7_loadout"]
+[ext_resource type="Script" uid="uid://caf273t4815bh" path="res://scripts/hub/mod_shop.gd" id="8_mod_shop"]
+[ext_resource type="Script" uid="uid://iye08sxbqpay" path="res://scripts/hub/mod_bench.gd" id="9_mod_bench"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station1"]
 size = Vector3(1.5, 2, 0.3)
@@ -107,6 +109,21 @@ size = Vector3(0.8, 2, 0.3)
 [node name="Label3D" type="Label3D" parent="SaveTerminal"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
 text = "SAVE"
+font_size = 48
+
+[node name="ModBench" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.5, -3)
+script = ExtResource("9_mod_bench")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ModBench"]
+shape = SubResource("BoxShape3D_station1")
+
+[node name="MeshInstance3D" type="CSGBox3D" parent="ModBench"]
+size = Vector3(1.5, 2, 0.3)
+
+[node name="Label3D" type="Label3D" parent="ModBench"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
+text = "MOD BENCH"
 font_size = 48
 
 [node name="StationUI" type="CanvasLayer" parent="."]
@@ -273,5 +290,57 @@ theme_override_font_sizes/font_size = 32
 text = "GAME SAVED"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ModShop" type="PanelContainer" parent="StationUI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("8_mod_shop")
+
+[node name="VBox" type="VBoxContainer" parent="StationUI/ModShop"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="StationUI/ModShop/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "RIFLE MODIFICATIONS"
+horizontal_alignment = 1
+
+[node name="CreditsLabel" type="Label" parent="StationUI/ModShop/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Credits: $0"
+horizontal_alignment = 1
+
+[node name="TabBar" type="HBoxContainer" parent="StationUI/ModShop/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HSeparator" type="HSeparator" parent="StationUI/ModShop/VBox"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/ModShop/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ItemList" type="VBoxContainer" parent="StationUI/ModShop/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="CloseButton" type="Button" parent="StationUI/ModShop/VBox"]
+layout_mode = 2
+text = "Close"
 
 [connection signal="pressed" from="StationUI/DeployPanel/VBox/CancelButton" to="." method="_close_active_panel"]

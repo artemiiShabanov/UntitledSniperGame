@@ -227,16 +227,24 @@ screens that display it all. Each sub-feature is self-contained and testable.
 - [x] SettingsManager autoload (persists to user://settings.cfg)
 - [x] Player uses SettingsManager.mouse_sensitivity (no more per-export)
 
-### Step 3 — Weapon Upgrades (primary credit sink)
+### Step 3 — Rifle Modifications (primary credit sink)
 
-#### F6.2 Weapon Upgrades [ ]
-- [ ] Barrel (bullet velocity)
-- [ ] Stock (sway reduction)
-- [ ] Bolt (reload speed)
-- [ ] Magazine (capacity)
-- [ ] Scope (zoom levels, reticles, clarity)
-- [ ] Visual model per upgrade tier on rifle
-- [ ] Upgrade UI (spend credits, preview parts)
+#### F6.2 Rifle Modifications [x] (foundation)
+- [x] RifleMod data model (Resource with stat_overrides, special behavior key)
+- [x] ModRegistry autoload (central catalog of all mods)
+- [x] SaveManager: owned/equipped modifications, purchase/equip methods
+- [x] Weapon.apply_modifications() — reads equipped mods, applies stats at run start
+- [x] ModShop hub panel (browse slots, buy, equip)
+- [x] ModBench hub station (interactable)
+- [x] Test mods: Long Barrel (velocity), Extended Mag (capacity)
+
+##### Deferred: Full mod catalog
+- [ ] Barrel: Light Barrel, Heavy Barrel
+- [ ] Stock: Padded, Breath, Competition
+- [ ] Bolt: Quick, Smooth Action, Match
+- [ ] Magazine: Drum Mag
+- [ ] Scope: 4x, 8x, Variable (adjustable zoom + scope overlays)
+- [ ] Visual model per mod on rifle
 
 ### Step 4 — Player Skills (secondary XP sink)
 

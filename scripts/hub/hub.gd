@@ -10,11 +10,13 @@ var LEVEL_LIST: Array[String] = [
 @onready var deploy_board: Interactable = $DeployBoard
 @onready var ammo_crate: Interactable = $AmmoCrate
 @onready var save_terminal: Interactable = $SaveTerminal
+@onready var mod_bench: Interactable = $ModBench
 
 ## UI panels
 @onready var deploy_panel: Control = $StationUI/DeployPanel
 @onready var ammo_shop: Control = $StationUI/AmmoShop
 @onready var loadout_panel: Control = $StationUI/LoadoutPanel
+@onready var mod_shop: Control = $StationUI/ModShop
 @onready var save_feedback: Label = $StationUI/SaveFeedback
 
 ## Deploy UI
@@ -37,6 +39,8 @@ func _ready() -> void:
 	deploy_board.deploy_requested.connect(_on_deploy_requested)
 	ammo_crate.loadout_requested.connect(_on_ammo_crate_requested)
 	save_terminal.save_completed.connect(_on_save_completed)
+	mod_bench.mod_requested.connect(_on_mod_requested)
+	mod_shop.shop_closed.connect(_on_mod_shop_closed)
 
 	# Loadout panel signals
 	loadout_panel.deploy_confirmed.connect(_on_loadout_confirmed)
@@ -49,6 +53,7 @@ func _ready() -> void:
 	deploy_panel.visible = false
 	ammo_shop.visible = false
 	loadout_panel.visible = false
+	mod_shop.visible = false
 	save_feedback.visible = false
 
 	_load_level_list()
@@ -159,6 +164,17 @@ func _on_ammo_crate_requested() -> void:
 
 
 func _on_shop_closed() -> void:
+	_close_active_panel()
+
+
+## ── Mod Bench ───────────────────────────────────────────────────────────
+
+func _on_mod_requested() -> void:
+	mod_shop.open()
+	_open_panel(mod_shop)
+
+
+func _on_mod_shop_closed() -> void:
 	_close_active_panel()
 
 

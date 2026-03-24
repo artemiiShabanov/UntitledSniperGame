@@ -88,6 +88,7 @@ signal ammo_type_changed(ammo_type: AmmoType)
 
 func _ready() -> void:
 	assert(camera != null, "Weapon must be a child of Camera3D")
+	apply_modifications()
 	breath_remaining = breath_max
 	ammo.load_types(magazine_size)
 	ammo.ammo_type_changed.connect(func(t: AmmoType):
@@ -98,6 +99,19 @@ func _ready() -> void:
 	ammo.do_reload()
 	# Emit initial state so HUD displays correctly from frame 1
 	state_changed.emit(state)
+
+
+## ── Modifications ────────────────────────────────────────────────────────────
+
+func apply_modifications() -> void:
+	var loadout: Dictionary = SaveManager.get_equipped_loadout()
+	for slot: String in loadout:
+		var mod: RifleMod = ModRegistry.get_mod(loadout[slot])
+		if not mod:
+			continue
+		for prop: String in mod.stat_overrides:
+			if prop in self:
+				set(prop, mod.stat_overrides[prop])
 
 
 func _process(delta: float) -> void:
