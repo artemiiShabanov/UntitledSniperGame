@@ -68,6 +68,11 @@ func _populate(success: bool) -> void:
 	if longest_kill > 0.0:
 		_add_stat_row("Longest Kill", "%.0fm" % longest_kill)
 
+	# NPC kills (penalty)
+	var npc_kills: int = stats.get("npc_kills", 0)
+	if npc_kills > 0:
+		_add_stat_row("Civilians Killed", str(npc_kills))
+
 	# Contract result
 	if RunManager.active_contract:
 		var contract: Contract = RunManager.active_contract

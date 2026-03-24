@@ -285,10 +285,22 @@ All enemies are ranged threats — no melee rushers.
 - Appears in mid phase, more frequent and dangerous in late phase
 
 ### 7.5 Neutral NPCs
-- Workers, civilians — ambient life, walk routes, react to gunfire (panic/flee)
-- Create a feeling of a live environment
-- **Killing a neutral NPC = currency penalty** (deducted from run earnings)
-- Add stealth considerations — can't shoot freely without consequence
+Three NPC types, each with activity-based behavior cycles (not just patrol):
+
+| Type | Activity Cycle | Visual Color | Kill Penalty |
+|------|---------------|--------------|--------------|
+| **Laborer** | Work (station) → Carry (between points) → Rest (sit/smoke) | Orange/brown | -$150 |
+| **Technician** | Operate (panel/radio) → Inspect (walk stations) → Rest | Green | -$100 |
+| **Civilian** | Walk (paths) → Eat (bench) → Idle (phone/chat) | Blue | -$200 |
+
+- **Activity Points**: Marker3D nodes placed in levels define where NPCs perform each activity
+- NPCs cycle through their activities, traveling between matching ActivityPoints
+- **Panic/flee**: gunfire (gunshot or bullet impact) within range triggers flee behavior — NPC runs away from sound origin for several seconds, then resumes activities at nearest matching point
+- NPCs do NOT alert enemies when panicking
+- **Static spawning**: NPCs are placed at level start (configurable count range per level), no dynamic spawning
+- **Kill penalty**: flat credit deduction from run earnings (floored at 0), shown in kill feed as red text
+- Visually distinct from enemies (different mesh colors, different collision layer)
+- Creates moral/tactical tension — shooting near NPCs risks losing credits, shooting through NPC areas risks hitting civilians
 
 ### 7.6 Non-NPC Targets
 - Destructible objects: vehicles, equipment, supply caches

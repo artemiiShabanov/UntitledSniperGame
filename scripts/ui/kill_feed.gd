@@ -10,6 +10,7 @@ var _entries: Array[Dictionary] = []  ## [{label: Label, timer: float}]
 
 func _ready() -> void:
 	RunManager.enemy_killed_with_info.connect(_on_enemy_killed)
+	RunManager.npc_killed_with_info.connect(_on_npc_killed)
 
 
 func _process(delta: float) -> void:
@@ -62,5 +63,14 @@ func _on_enemy_killed(info: Dictionary) -> void:
 	else:
 		label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))  # White
 
+	add_child(label)
+	_entries.append({"label": label, "timer": DISPLAY_DURATION})
+
+
+func _on_npc_killed(info: Dictionary) -> void:
+	var label := Label.new()
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	label.text = "CIVILIAN KILLED | -$%d" % info.penalty
+	label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))  # Bright red
 	add_child(label)
 	_entries.append({"label": label, "timer": DISPLAY_DURATION})

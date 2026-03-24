@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="NpcType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/npc_type.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+npc_name = "Technician"
+npc_id = "technician"
+kind = 1
+activity_durations = {
+"operate": 15.0,
+"inspect": 6.0,
+"rest": 5.0
+}
+move_speed = 1.2
+panic_flee_speed = 3.5
+panic_duration = 6.0
+panic_threshold = 0.3
+kill_penalty = 100
+mesh_color = Color(0.3, 0.7, 0.4, 1)

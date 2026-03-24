@@ -81,6 +81,10 @@ func _propagate_impact_sound(impact_pos: Vector3) -> void:
 	for enemy in enemies:
 		if enemy.has_method("hear_sound"):
 			enemy.hear_sound(impact_pos, IMPACT_LOUDNESS)
+	var npcs := get_tree().get_nodes_in_group("npc")
+	for npc in npcs:
+		if npc.has_method("hear_sound"):
+			npc.hear_sound(impact_pos, IMPACT_LOUDNESS)
 
 
 func _apply_tracer_material(color: Color, emission: float, mesh_scale: Vector3) -> void:

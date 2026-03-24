@@ -55,6 +55,7 @@ func _setup_run_variation() -> void:
 	_pick_environment()
 	_fill_level_slots()
 	_spawn_enemies()
+	_spawn_npcs()
 	_pick_extraction_zone()
 	_roll_events()
 	_setup_enemy_spawner()
@@ -139,6 +140,69 @@ func _spawn_enemies() -> void:
 	# Store unused spawns for reinforcement events
 	for i in range(count, shuffled.size()):
 		_unused_enemy_spawns.append(shuffled[i])
+
+
+func _spawn_npcs() -> void:
+	if not level_data or not level_data.npc_pool:
+		return
+
+	var activity_points := get_activity_points()
+	if activity_points.is_empty():
+		push_warning("BaseLevel: level has npc_pool but no ActivityPoints placed")
+		return
+
+	var count := rng.randi_range(level_data.npc_count_range.x, level_data.npc_count_range.y)
+	var used_counts: Dictionary = {}
+
+	for i in count:
+		var scene := level_data.npc_pool.pick_random(rng, used_counts)
+		if scene == null:
+			continue
+
+		var npc: NpcBase = scene.instantiate()
+		add_child(npc)
+
+		# Give the NPC all activity points so it can navigate between them
+		npc.available_points = activity_points
+
+		# Place at a random activity point matching its first activity
+		var start_point := _pick_npc_start_point(npc, activity_points)
+		if start_point:
+			npc.global_position = start_point.global_position
+			npc.rotation.y = deg_to_rad(start_point.facing_direction)
+			npc.target_point = start_point
+		else:
+			# Fallback: place at any activity point
+			var fallback := activity_points[rng.randi() % activity_points.size()]
+			npc.global_position = fallback.global_position
+			npc.rotation.y = deg_to_rad(fallback.facing_direction)
+
+		var path := scene.resource_path
+		used_counts[path] = used_counts.get(path, 0) + 1
+
+
+func _pick_npc_start_point(npc: NpcBase, points: Array[ActivityPoint]) -> ActivityPoint:
+	## Finds a random activity point matching the NPC's first activity.
+	if npc.activity_list.is_empty():
+		return null
+
+	var first_activity: String = npc.activity_list[0]
+	var matching: Array[ActivityPoint] = []
+	for point in points:
+		if point.get_activity_name() == first_activity:
+			matching.append(point)
+
+	if matching.is_empty():
+		return null
+	return matching[rng.randi() % matching.size()]
+
+
+func get_activity_points() -> Array[ActivityPoint]:
+	var result: Array[ActivityPoint] = []
+	for child in _find_all_recursive(self):
+		if child is ActivityPoint:
+			result.append(child)
+	return result
 
 
 func _pick_extraction_zone() -> void:

@@ -376,3 +376,7 @@ func _propagate_gunshot_sound(origin: Vector3) -> void:
 	for enemy in enemies:
 		if enemy.has_method("hear_sound"):
 			enemy.hear_sound(origin, GUNSHOT_LOUDNESS)
+	var npcs := get_tree().get_nodes_in_group("npc")
+	for npc in npcs:
+		if npc.has_method("hear_sound"):
+			npc.hear_sound(origin, GUNSHOT_LOUDNESS)

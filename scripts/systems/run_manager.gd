@@ -21,6 +21,7 @@ signal run_timer_updated(time_left: float)
 signal run_timer_expired
 signal threat_phase_changed(phase: ThreatPhase)
 signal enemy_killed_with_info(info: Dictionary)  ## {enemy, headshot, distance, credits, xp}
+signal npc_killed_with_info(info: Dictionary)  ## {penalty, npc_kills}
 
 ## ── Exports ──────────────────────────────────────────────────────────────────
 
@@ -141,6 +142,7 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 		"longest_kill_distance": 0.0,
 		"contract_bonus_credits": 0,
 		"contract_bonus_xp": 0,
+		"npc_kills": 0,
 	}
 
 	# Load the level
@@ -341,6 +343,21 @@ func record_kill(headshot: bool = false) -> void:
 	run_stats.kills += 1
 	if headshot:
 		run_stats.headshots += 1
+
+
+## ── NPC Kill Penalty ────────────────────────────────────────────────────────
+
+func record_npc_kill(penalty: int) -> void:
+	## Deducts credits for killing a neutral NPC.
+	run_credits = maxi(run_credits - penalty, 0)
+	run_stats.credits_earned = run_credits
+	run_stats.npc_kills = run_stats.get("npc_kills", 0) + 1
+
+	var info := {
+		"penalty": penalty,
+		"npc_kills": run_stats.npc_kills,
+	}
+	npc_killed_with_info.emit(info)
 
 
 ## ── Threat Phase ────────────────────────────────────────────────────────────

@@ -42,6 +42,10 @@ func get_unlock_requirements_text() -> String:
 @export var mid_max_enemies: int = 6  ## Max concurrent dynamically-spawned enemies
 @export var late_max_enemies: int = 12
 
+@export_group("NPC Population")
+@export var npc_pool: NpcPool
+@export var npc_count_range: Vector2i = Vector2i(3, 6)  ## Min/max NPCs spawned at level start
+
 @export_group("Events")
 @export var level_events_pool: Array[LevelEventData] = []
 @export var max_events_per_run: int = 1

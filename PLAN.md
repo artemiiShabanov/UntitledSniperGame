@@ -17,7 +17,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Save System (core)  | █████ 100%| Complete (stats tracking in Step 6)      |
 | Objectives          | ████░ 80% | Contracts done, in-run objectives deferred |
 | Global Progression  | ████░ 95% | Complete (cosmetics deferred to P4)       |
-| World Population    | ░░░░░  0% | Neutral NPCs, destructible targets       |
+| World Population    | █░░░░ 33% | NPCs done, destructible targets next     |
 | UI & Menus          | ████░ 90% | All screens done except cosmetics         |
 | Content             | ░░░░░ 10% | Levels, models, props                    |
 | Art & Audio         | ░░░░░  5% | Art pipeline, sounds, music              |
@@ -426,12 +426,33 @@ Core features complete. Bug-audited and refactored.
 
 ## Phase 3 — Content & Population
 
-### World Population ░░░░░ 0%
+### World Population █░░░░ 33%
 
-#### Neutral NPCs [ ]
-- [ ] NPC spawning and patrol routes (workers, civilians)
-- [ ] Panic/flee reaction to gunfire
-- [ ] Currency penalty for killing neutral NPCs
+#### Neutral NPCs [x]
+- [x] NpcBase class with activity state machine (PERFORMING ↔ TRAVELING) and panic layer (CALM ↔ PANICKING)
+- [x] 3 NPC types: Laborer (work→carry→rest), Technician (operate→inspect→rest), Civilian (walk→eat→idle)
+- [x] ActivityPoint markers in levels define where NPCs perform each activity
+- [x] NpcPool + NpcPoolEntry for weighted random NPC selection per level
+- [x] Panic/flee reaction to gunfire (sound propagation from weapon + bullet impacts)
+- [x] Flat credit penalty for killing NPCs (shown in kill feed, tracked in run stats)
+- [x] Result screen shows civilian kills count
+- [x] NPC scenes with distinct mesh colors (orange laborer, green technician, blue civilian)
+- [x] NpcVisuals with debug state indicator (blue=calm, yellow=panicking)
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/data/npc_type.gd` | NpcType resource: kind, activity durations, speeds, penalty, color |
+| `scripts/world/activity_point.gd` | Marker3D for NPC activity locations |
+| `scripts/world/npc_pool.gd` | Weighted NPC selection pool |
+| `scripts/world/npc_pool_entry.gd` | Pool entry (scene, weight, max) |
+| `scripts/npc/npc_base.gd` | NPC state machine: activity cycling, panic/flee, death |
+| `scripts/npc/npc_visuals.gd` | Debug visualization for NPCs |
+| `scripts/npc/npc_laborer.gd` | Laborer type subclass |
+| `scripts/npc/npc_technician.gd` | Technician type subclass |
+| `scripts/npc/npc_civilian.gd` | Civilian type subclass |
+| `data/npcs/*.tres` | 3 NPC type definitions |
+| `scenes/npc/*.tscn` | 3 NPC scene files |
 
 #### Non-NPC Targets [ ]
 - [ ] Destructible objects (vehicles, equipment, supply caches)
