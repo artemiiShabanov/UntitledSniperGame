@@ -15,21 +15,7 @@ var _row_controls: Dictionary = {}  ## { ammo_id: { "owned": Label, "buy_btn": B
 
 func _ready() -> void:
 	close_btn.pressed.connect(func(): shop_closed.emit())
-	_load_ammo_types()
-
-
-func _load_ammo_types() -> void:
-	var paths := [
-		"res://data/ammo/standard.tres",
-		"res://data/ammo/armor_piercing.tres",
-		"res://data/ammo/high_damage.tres",
-		"res://data/ammo/shock.tres",
-		"res://data/ammo/golden.tres",
-	]
-	for path in paths:
-		var res := load(path)
-		if res is AmmoType:
-			_ammo_types.append(res)
+	_ammo_types = AmmoRegistry.get_all_types()
 
 
 func open() -> void:

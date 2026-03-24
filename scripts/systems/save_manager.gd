@@ -3,7 +3,7 @@ extends Node
 ## Handles save/load, multiple slots, and data structure.
 
 const SAVE_DIR := "user://saves/"
-const SAVE_VERSION := 2
+const SAVE_VERSION := 3
 const MAX_SLOTS := 3
 
 ## Currently loaded save data. Empty dict means no save loaded.
@@ -96,6 +96,8 @@ func add_credits(amount: int) -> void:
 
 func add_xp(amount: int) -> void:
 	data["xp"] = data.get("xp", 0) + amount
+	if amount > 0:
+		increment_stat("total_xp_earned", amount)
 
 
 func get_credits() -> int:
@@ -104,6 +106,10 @@ func get_credits() -> int:
 
 func get_xp() -> int:
 	return data.get("xp", 0)
+
+
+func get_total_xp_earned() -> int:
+	return get_stat("total_xp_earned", 0)
 
 
 func update_stat(key: String, value: Variant) -> void:
@@ -332,6 +338,7 @@ func _default_data(slot: int) -> Dictionary:
 			"total_deaths": 0,
 			"total_shots_fired": 0,
 			"total_shots_hit": 0,
+			"total_xp_earned": 0,
 			"best_survival_time": 0.0,
 			"best_credits_one_run": 0,
 			"best_kills_one_run": 0,
@@ -363,6 +370,19 @@ func _migrate(save_data: Dictionary) -> Dictionary:
 					"scope": "scope_standard",
 				},
 			}
+
+	if ver < 3:
+		# v2 → v3: add total_xp_earned stat (reconstruct from current XP + spent on skills)
+		var stats: Dictionary = save_data.get("stats", {})
+		if not stats.has("total_xp_earned"):
+			var current_xp: int = save_data.get("xp", 0)
+			var spent_xp: int = 0
+			for skill_id in save_data.get("skills", []):
+				var skill: PlayerSkill = SkillRegistry.get_skill(skill_id)
+				if skill:
+					spent_xp += skill.cost
+			stats["total_xp_earned"] = current_xp + spent_xp
+			save_data["stats"] = stats
 
 	save_data["version"] = SAVE_VERSION
 	return save_data

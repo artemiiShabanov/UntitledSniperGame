@@ -15,10 +15,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Danger & Reward     | █████ 100%| Complete (phase-gating deferred)         |
 | HUD                 | █████ 100%| Complete (trackers added with F7)        |
 | Save System (core)  | █████ 100%| Complete (stats tracking in Step 6)      |
-| Objectives          | ░░░░░  0% | Contracts, optional objectives           |
-| Global Progression  | ██░░░ 30% | Currency + ammo done, upgrades next      |
+| Objectives          | ████░ 80% | Contracts done, in-run objectives deferred |
+| Global Progression  | █████ 100%| Complete (cosmetics deferred)             |
 | World Population    | ░░░░░  0% | Neutral NPCs, destructible targets       |
-| UI & Menus          | ░░░░░ 10% | Main menu, pause, hub screens            |
+| UI & Menus          | ████░ 90% | All screens done except cosmetics         |
 | Content             | ░░░░░ 10% | Levels, models, props                    |
 | Art & Audio         | ░░░░░  5% | Art pipeline, sounds, music              |
 | Polish & Release    | ░░░░░  0% | Steam, controller, balancing             |
@@ -194,141 +194,214 @@ All features complete. Bug-audited and refactored.
 
 ---
 
-## Phase 2 — Progression & Depth
+## Phase 2 — Progression & Depth ✅
 
-Build order: foundation systems first (currency, ammo, menus), then spend
-systems (upgrades, skills), then goals (contracts, objectives), then UI
-screens that display it all. Each sub-feature is self-contained and testable.
+All features complete. Bug-audited and refactored.
 
-### Step 1 — Currency & Ammo Economy (foundation for all spending)
+<details>
+<summary>F6.1 Currency & Resources — Credits flow, XP flow, hub display</summary>
 
-#### F6.1 Currency & Resources [x]
-- [x] Credits flow: run → extraction → save
-- [x] Experience flow: run → always saved
-- [x] Currency storage in global save
-- [x] Currency display in hub (refreshes after runs and purchases)
+- Credits: earned in runs, saved on extraction, lost on death
+- XP: earned in runs, always kept (total_xp_earned tracked separately for unlock gates)
+- Currency storage in global save, hub display refreshes after runs/purchases
 
-#### F6.4 Ammo Economy [x]
-- [x] Ammo shop at hub (buy any type with credits, +1/+5/+10 buttons)
-- [x] Hub ammo inventory (stored between runs in save)
-- [x] Pre-run loadout selection (sliders per type, bring what you want)
-- [x] Weapon loads from RunManager.carried_ammo (no more hardcoded test ammo)
-- [x] Ammo lost on death, unused ammo returned on extraction
-- [x] Starter ammo (25 standard) given on first run
-> Unlock gating deferred — all types available for now (unlock_level = 0)
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/systems/save_manager.gd` | Credits/XP storage, add/get, total_xp_earned tracking |
 
-### Step 2 — Core Menus (independent, unblocks testing)
+</details>
 
-#### F8.2 Menus [x]
-- [x] Main menu (new game, continue, settings, quit)
-- [x] Save slot selection screen (create, load, delete slots)
-- [x] Pause menu (resume, settings, abandon run)
-- [x] Settings (controls, audio, video, sensitivity)
-- [x] SettingsManager autoload (persists to user://settings.cfg)
-- [x] Player uses SettingsManager.mouse_sensitivity (no more per-export)
+<details>
+<summary>F6.2 Rifle Modifications — Mod data model, registry, shop, weapon integration</summary>
 
-### Step 3 — Rifle Modifications (primary credit sink)
+- RifleMod resource with slot, cost, stat_overrides, special behavior key
+- ModRegistry autoload: central catalog of all mods
+- SaveManager: owned/equipped modifications, purchase/equip methods
+- Weapon.apply_modifications() at run start
+- ModShop hub panel + ModBench station
+- Foundation mods: Long Barrel (velocity), Extended Mag (capacity)
 
-#### F6.2 Rifle Modifications [x] (foundation)
-- [x] RifleMod data model (Resource with stat_overrides, special behavior key)
-- [x] ModRegistry autoload (central catalog of all mods)
-- [x] SaveManager: owned/equipped modifications, purchase/equip methods
-- [x] Weapon.apply_modifications() — reads equipped mods, applies stats at run start
-- [x] ModShop hub panel (browse slots, buy, equip)
-- [x] ModBench hub station (interactable)
-- [x] Test mods: Long Barrel (velocity), Extended Mag (capacity)
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/data/rifle_mod.gd` | RifleMod resource definition |
+| `scripts/data/mod_registry.gd` | Autoload mod catalog |
+| `scripts/hub/mod_shop.gd` | Browse, buy, equip mods UI |
+| `scripts/hub/mod_bench.gd` | Hub station interactable |
 
-##### Deferred: Full mod catalog
-- [ ] Barrel: Light Barrel, Heavy Barrel
-- [ ] Stock: Padded, Breath, Competition
-- [ ] Bolt: Quick, Smooth Action, Match
-- [ ] Magazine: Drum Mag
-- [ ] Scope: 4x, 8x, Variable (adjustable zoom + scope overlays)
-- [ ] Visual model per mod on rifle
+</details>
 
-### Step 4 — Player Skills (secondary XP sink)
+<details>
+<summary>F6.3 Player Skill Unlocks — Skill data model, registry, 4 skills, shop</summary>
 
-#### F6.3 Player Skill Unlocks [x]
-- [x] PlayerSkill data model + SkillRegistry autoload (4 skills)
-- [x] SaveManager: skill purchase/ownership with XP
-- [x] Iron Lungs — +2s hold breath (additive, stacks with stock mod)
-- [x] Quick Hands — 20% faster reload (multiplicative, stacks with bolt mod)
-- [x] Zipline Runner — 40% faster ziplines (stored, applied when ziplines exist)
-- [x] Last Stand — +1 extra life per run
-- [x] SkillShop hub panel + SkillBoard station
+- PlayerSkill resource + SkillRegistry autoload (4 skills)
+- Iron Lungs (+2s breath), Quick Hands (20% reload), Zipline Runner (40% zipline), Last Stand (+1 life)
+- SaveManager: skill purchase with XP
+- SkillShop hub panel + SkillBoard station
 
-### Step 5 — Contracts & Objectives (give runs purpose)
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/data/player_skill.gd` | PlayerSkill resource definition |
+| `scripts/data/skill_registry.gd` | Autoload skill catalog |
+| `scripts/hub/skill_shop.gd` | Skill purchase UI |
+| `scripts/hub/skill_board.gd` | Hub station interactable |
 
-#### F7.1 Contracts [x]
-- [x] Contract data model + ContractRegistry autoload (7 contracts)
-- [x] Contract types: kill count, headshot count, accuracy, no hits, speed extract
-- [x] Contract selection in deploy flow (Mission → Contract → Loadout → Deploy)
-- [x] Contract evaluation at extraction with bonus credits/XP
-- [x] Random selection of 3 contracts offered per deploy
-- [x] Skip option (deploy without contract)
+</details>
 
-##### Deferred: Expanded contract list
-- [ ] Level-specific contracts (level_restriction field ready)
-- [ ] KILL_TARGET contracts — eliminate a named high-value target (target_id field ready)
-- [ ] DESTROY_TARGET contracts — destroy a specific object
-- [ ] Higher-risk/higher-reward contracts for harder levels
-- [ ] Contract difficulty scaling based on player progression
+<details>
+<summary>F6.4 Ammo Economy — Shop, inventory, loadout selection, carry/return</summary>
 
-#### F7.2 In-Run Objectives [ ] (deferred — needs HUD integration)
-- [ ] Optional objectives (all headshots, no alerts, extract before mid-phase, no missed shots, no civilian casualties)
-- [ ] Bonus rewards for completing optional objectives
+- Ammo shop (buy any type, +1/+5/+10 buttons)
+- Hub inventory stored between runs
+- Pre-run loadout selection (sliders per type)
+- Weapon loads from carried ammo, unused returned on extraction, lost on death
+- Starter ammo (25 standard) on first run
+- AmmoRegistry autoload centralizes all ammo type definitions
 
-### Step 6 — Stats & Level Unlocks (progression gates)
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/data/ammo_registry.gd` | Autoload ammo type catalog (5 types) |
+| `scripts/hub/ammo_shop.gd` | Buy ammo with credits |
+| `scripts/hub/loadout_panel.gd` | Pre-run ammo selection sliders |
+| `scripts/player/ammo_manager.gd` | In-run ammo state, type switching, magazine ops |
+| `scripts/hub/ammo_crate.gd` | Hub station interactable |
 
-#### F9.2 Stats Tracking [x]
-- [x] Lifetime stats (total runs, kills, headshots, extractions, deaths, shots fired/hit)
-- [x] Accuracy stats (overall accuracy %, headshot %)
-- [x] Best records (survival time, credits in one run, kills in one run, longest kill distance)
-- [x] Per-level stats (runs, extractions, deaths, kills, best time, best credits)
+</details>
 
-#### F6.6 Level Unlocks [x]
-- [x] LevelData: unlock_extractions + unlock_xp exports, is_unlocked() check
-- [x] Deploy panel shows locked levels with requirements, disabled buttons
-- [x] Industrial Yard gated behind 2 extractions
+<details>
+<summary>F6.6 Level Unlocks — Extraction count and XP thresholds</summary>
 
-### Step 7 — Cosmetics (optional spend path, low priority)
+- LevelData: unlock_extractions + unlock_xp exports, is_unlocked() check
+- Uses total_xp_earned (not spendable XP) for unlock gates
+- Deploy panel shows locked levels with requirements
+- Industrial Yard gated behind 2 extractions
 
-#### F6.5 Cosmetics [ ]
-- [ ] Rifle skins (visual overlays on top of upgrade parts)
-- [ ] Cosmetics UI in hub (preview, equip)
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/world/level_data.gd` | Unlock logic: is_unlocked(), requirements text |
 
-### Step 8 — Hub UI (screens for all the above systems)
+</details>
 
-#### F8.3 Hub UI [ ]
-- [ ] Hub navigation
-- [ ] Contract board (browse, pick one)
-- [ ] Weapon upgrades screen (visible rifle parts, spend credits)
-- [ ] Skill tree screen (spend XP, unlock abilities)
-- [ ] Cosmetics screen (rifle skins, preview, equip)
-- [ ] Level select (locked/unlocked, requirements, best stats)
-- [ ] Loadout screen (ammo type + amount selection)
-- [ ] Stats screen (lifetime stats, records, per-level stats)
+<details>
+<summary>F7.1 Contracts — Pre-run challenges with bonus rewards</summary>
 
----
+- Contract data model + ContractRegistry (7 contracts)
+- Types: kill count, headshot count, accuracy, no hits, speed extract
+- Contract selection in deploy flow (Mission → Contract → Loadout → Deploy)
+- Evaluation at extraction with bonus credits/XP
+- Random 3 offered per deploy, skip option
 
-### Already Complete
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/data/contract.gd` | Contract resource definition |
+| `scripts/data/contract_registry.gd` | Autoload contract catalog |
+| `scripts/hub/contract_panel.gd` | Contract selection UI |
 
-#### F8.1 HUD [x]
-- [x] Crosshair
-- [x] Weapon state + credits display
-- [x] Lives indicator (hearts)
-- [x] Run timer
-- [x] Threat phase indicator
-- [x] Kill feed
-- [x] Breath meter
-- [x] Extraction progress bar
-> Contract tracker and objective tracker will be added when F7 is built.
+</details>
 
-#### F9.1 Local Save [x]
-- [x] Save data structure (credits, XP, ammo inventory, upgrades, skills, unlocks, stats)
-- [x] File I/O (read/write to user data directory)
-- [x] Auto-save (after each extraction and hub purchase)
-- [x] Multiple save slots
+<details>
+<summary>F8.1 HUD — In-run display (crosshair, scope, weapon, timer, kills)</summary>
+
+- Crosshair, scope overlay, weapon state + credits display
+- Lives indicator (hearts), run timer, threat phase indicator
+- Kill feed, breath meter, extraction progress bar
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/ui/player_hud.gd` | In-run HUD: weapon, lives, timer, threat, interaction |
+| `scripts/ui/crosshair.gd` | Dynamic crosshair |
+| `scripts/ui/scope_overlay.gd` | Scope zoom black mask |
+| `scripts/ui/breath_meter.gd` | Hold-breath meter |
+| `scripts/ui/kill_feed.gd` | Kill notification with distance/headshot bonuses |
+| `scripts/ui/extraction_bar.gd` | Extraction progress bar |
+| `scripts/ui/run_result_screen.gd` | End-of-run stats overlay |
+| `scenes/ui/hud.tscn` | HUD scene |
+
+</details>
+
+<details>
+<summary>F8.2 Menus — Main menu, save slots, pause, settings</summary>
+
+- Main menu (new game, continue, settings, quit)
+- Save slot selection (create, load, delete)
+- Pause menu (resume, settings, abandon run)
+- Settings (controls, audio, video, sensitivity)
+- SettingsManager autoload
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/ui/main_menu.gd` | Main menu + slot management |
+| `scripts/ui/pause_menu.gd` | Global pause overlay (autoload) |
+| `scripts/ui/settings_screen.gd` | Settings widget |
+| `scripts/ui/settings_manager.gd` | Settings persistence (autoload) |
+
+</details>
+
+<details>
+<summary>F8.3 Hub UI — All progression screens</summary>
+
+- Contract selection (in deploy flow)
+- Weapon modifications screen (ModShop)
+- Skill unlock screen (SkillShop)
+- Level select (locked/unlocked, requirements, entry fees)
+- Loadout screen (ammo selection)
+- Stats screen (lifetime stats, records, per-level breakdown)
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/hub/hub.gd` | Hub orchestrator: stations, panels, deploy flow |
+| `scripts/hub/stats_panel.gd` | Stats display (lifetime, records, per-level) |
+| `scripts/hub/stats_terminal.gd` | Hub station interactable |
+| `scripts/hub/deploy_board.gd` | Hub station interactable |
+| `scripts/hub/save_terminal.gd` | Hub station interactable |
+| `scenes/hub/hub.tscn` | Hub scene |
+
+</details>
+
+<details>
+<summary>F9.1 Local Save — Save structure, file I/O, auto-save, multiple slots</summary>
+
+- Save data: credits, XP, ammo inventory, modifications, skills, stats, per-level stats
+- JSON file I/O to user data directory
+- Auto-save after extraction and hub purchases
+- Multiple save slots (3 max), migration system (v3)
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/systems/save_manager.gd` | Save/load, data structure, migrations |
+
+</details>
+
+<details>
+<summary>F9.2 Stats Tracking — Lifetime stats, best records, per-level breakdown</summary>
+
+- Lifetime: runs, kills, headshots, extractions, deaths, shots fired/hit, accuracy, total XP earned
+- Best records: survival time, credits, kills, longest kill distance
+- Per-level: runs, extractions, deaths, kills, best time, best credits
+- commit_run_stats() aggregates per-run data into lifetime totals
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/systems/save_manager.gd` | Stats storage, aggregation, percentage calculations |
+| `scripts/systems/run_manager.gd` | Per-run stats collection, end-of-run commit |
+| `scripts/ui/run_result_screen.gd` | End-of-run stats display |
+
+</details>
+
+**Shared utilities (created during Phase 2 refactoring):**
+| File | Purpose |
+|------|---------|
+| `scripts/util/format_utils.gd` | FormatUtils class: time formatting shared across UI |
 
 ---
 
@@ -437,6 +510,30 @@ later. Pull items back into active phases when/if they become relevant.
 - [ ] Higher-value targets gated behind later phases
 - [ ] Phase-specific enemy type pools (tougher enemies in LATE)
 - [ ] Spawn multiplier for credit/XP based on threat phase
+
+### Rifle Modifications — Full Catalog (from F6.2)
+- [ ] Barrel: Light Barrel, Heavy Barrel
+- [ ] Stock: Padded, Breath, Competition
+- [ ] Bolt: Quick, Smooth Action, Match
+- [ ] Magazine: Drum Mag
+- [ ] Scope: 4x, 8x, Variable (adjustable zoom + scope overlays)
+- [ ] Visual model per mod on rifle
+
+### Cosmetics System (from F6.5)
+- [ ] Rifle skins (visual overlays on top of upgrade parts)
+- [ ] Cosmetics UI in hub (preview, equip)
+- [ ] Cosmetics screen (needs cosmetics backend)
+
+### Expanded Contracts (from F7.1)
+- [ ] Level-specific contracts (level_restriction field ready)
+- [ ] KILL_TARGET contracts — eliminate a named high-value target (target_id field ready)
+- [ ] DESTROY_TARGET contracts — destroy a specific object
+- [ ] Higher-risk/higher-reward contracts for harder levels
+- [ ] Contract difficulty scaling based on player progression
+
+### In-Run Objectives (from F7.2)
+- [ ] Optional objectives (all headshots, no alerts, extract before mid-phase, no missed shots, no civilian casualties)
+- [ ] Bonus rewards for completing optional objectives
 
 ---
 

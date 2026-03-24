@@ -23,17 +23,7 @@ func load_types(mag_size: int) -> void:
 	magazine_size = mag_size
 
 	if available_types.is_empty():
-		var ammo_paths := [
-			"res://data/ammo/standard.tres",
-			"res://data/ammo/armor_piercing.tres",
-			"res://data/ammo/high_damage.tres",
-			"res://data/ammo/shock.tres",
-			"res://data/ammo/golden.tres",
-		]
-		for path in ammo_paths:
-			var res := load(path)
-			if res is AmmoType:
-				available_types.append(res)
+		available_types = AmmoRegistry.get_all_types()
 
 	# Load reserves from RunManager.carried_ammo (set by hub loadout)
 	reserves = RunManager.carried_ammo.duplicate()

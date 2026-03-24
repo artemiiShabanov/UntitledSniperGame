@@ -29,8 +29,8 @@ signal enemy_killed_with_info(info: Dictionary)  ## {enemy, headshot, distance, 
 @export var extraction_time: float = 3.0  ## Seconds to extract
 
 ## Threat phase timing (seconds of elapsed time)
-@export var early_phase_duration: float = 15.0   ## TEST: First 15s = EARLY (60s for production)
-@export var mid_phase_duration: float = 30.0     ## TEST: Next 30s = MID, then LATE (120s for production)
+@export var early_phase_duration: float = 60.0   ## Seconds in EARLY phase before MID
+@export var mid_phase_duration: float = 120.0    ## Seconds in MID phase before LATE
 
 ## ── State ────────────────────────────────────────────────────────────────────
 

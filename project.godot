@@ -22,6 +22,7 @@ RunManager="*res://scripts/systems/run_manager.gd"
 ModRegistry="*res://scripts/data/mod_registry.gd"
 SkillRegistry="*res://scripts/data/skill_registry.gd"
 ContractRegistry="*res://scripts/data/contract_registry.gd"
+AmmoRegistry="*res://scripts/data/ammo_registry.gd"
 SettingsManager="*res://scripts/ui/settings_manager.gd"
 PauseMenu="*res://scenes/ui/pause_menu.tscn"
 

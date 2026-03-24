@@ -64,7 +64,7 @@ func _populate(success: bool) -> void:
 	_add_stat_row("Headshots", str(headshots))
 	_add_stat_row("Shots Fired", str(shots_fired))
 	_add_stat_row("Accuracy", "%.0f%%" % accuracy)
-	_add_stat_row("Time Survived", "%d:%02d" % [int(time_survived) / 60, int(time_survived) % 60])
+	_add_stat_row("Time Survived", FormatUtils.format_time(time_survived))
 	if longest_kill > 0.0:
 		_add_stat_row("Longest Kill", "%.0fm" % longest_kill)
 

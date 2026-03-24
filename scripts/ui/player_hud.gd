@@ -110,9 +110,7 @@ func _on_run_completed(_success: bool) -> void:
 func _on_run_timer_updated(time_left: float) -> void:
 	run_timer_label.visible = RunManager.game_state == RunManager.GameState.IN_RUN or \
 		RunManager.game_state == RunManager.GameState.EXTRACTING
-	var minutes := int(time_left) / 60
-	var seconds := int(time_left) % 60
-	run_timer_label.text = "%d:%02d" % [minutes, seconds]
+	run_timer_label.text = FormatUtils.format_time(time_left)
 	# Turn red when under 30 seconds
 	if time_left <= 30.0:
 		run_timer_label.add_theme_color_override("font_color", Color(1, 0.2, 0.2))

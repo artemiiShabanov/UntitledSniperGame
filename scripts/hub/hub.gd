@@ -12,6 +12,7 @@ var LEVEL_LIST: Array[String] = [
 @onready var save_terminal: Interactable = $SaveTerminal
 @onready var mod_bench: Interactable = $ModBench
 @onready var skill_board: Interactable = $SkillBoard
+@onready var stats_terminal: Interactable = $StatsTerminal
 
 ## UI panels
 @onready var deploy_panel: Control = $StationUI/DeployPanel
@@ -20,6 +21,7 @@ var LEVEL_LIST: Array[String] = [
 @onready var mod_shop: Control = $StationUI/ModShop
 @onready var skill_shop: Control = $StationUI/SkillShop
 @onready var contract_panel: Control = $StationUI/ContractPanel
+@onready var stats_panel: Control = $StationUI/StatsPanel
 @onready var save_feedback: Label = $StationUI/SaveFeedback
 
 ## Deploy UI
@@ -47,6 +49,8 @@ func _ready() -> void:
 	skill_board.skill_requested.connect(_on_skill_requested)
 	skill_shop.shop_closed.connect(_on_skill_shop_closed)
 	contract_panel.contract_selected.connect(_on_contract_selected)
+	stats_terminal.stats_requested.connect(_on_stats_requested)
+	stats_panel.closed.connect(_on_stats_closed)
 
 	# Loadout panel signals
 	loadout_panel.deploy_confirmed.connect(_on_loadout_confirmed)
@@ -62,6 +66,7 @@ func _ready() -> void:
 	mod_shop.visible = false
 	skill_shop.visible = false
 	contract_panel.visible = false
+	stats_panel.visible = false
 	save_feedback.visible = false
 
 	_load_level_list()
@@ -209,6 +214,17 @@ func _on_skill_requested() -> void:
 
 
 func _on_skill_shop_closed() -> void:
+	_close_active_panel()
+
+
+## ── Stats Terminal ───────────────────────────────────────────────────────
+
+func _on_stats_requested() -> void:
+	stats_panel.open(LEVEL_LIST)
+	_open_panel(stats_panel)
+
+
+func _on_stats_closed() -> void:
 	_close_active_panel()
 
 

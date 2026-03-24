@@ -3,7 +3,6 @@ extends Control
 ## Shows a random selection of available contracts for the selected level.
 
 signal contract_selected(contract: Contract)  ## null means "no contract"
-signal cancelled
 
 @onready var item_list: VBoxContainer = $VBox/ScrollContainer/ItemList
 @onready var close_btn: Button = $VBox/SkipButton

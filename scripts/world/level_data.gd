@@ -15,7 +15,7 @@ func is_unlocked() -> bool:
 		if SaveManager.get_stat("total_extractions", 0) < unlock_extractions:
 			return false
 	if unlock_xp > 0:
-		if SaveManager.get_xp() < unlock_xp:
+		if SaveManager.get_total_xp_earned() < unlock_xp:
 			return false
 	return true
 
