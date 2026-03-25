@@ -486,7 +486,16 @@ Core features complete. Bug-audited and refactored.
 - [x] Global shader uniforms — palette swap recolors entire scene instantly
 
 #### Character Models [ ]
-- [ ] Player weapon model (sniper rifle with visible upgrade parts)
+- [ ] **Rifle viewmodel** — low-poly first-person rifle (few boxes/cylinders, colored fg_dark)
+  - [ ] Base rifle geometry (stock, receiver, barrel, trigger guard)
+  - [ ] Mod attachments as swappable mesh parts:
+    - [ ] Barrel mods (standard, long — visible length change)
+    - [ ] Stock mods (standard — visible shape change)
+    - [ ] Magazine mods (standard, extended — visible size change)
+    - [ ] Scope mods (iron sights, standard scope — visible on top rail)
+    - [ ] Bolt mods (standard — subtle receiver detail)
+  - [ ] Viewmodel positioning (bottom-right of screen, sway follows weapon sway)
+  - [ ] Scope-in transition (rifle raises, screen enters scope view)
 - [ ] Lookout model (replace capsule placeholder)
 - [ ] Neutral NPC models (Laborer, Technician, Civilian — distinct from enemies)
 - [ ] Destructible target models (crates, supply caches)
