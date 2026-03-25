@@ -21,7 +21,8 @@ const PANEL_BORDER_WIDTH := 1
 const BUTTON_CORNER_RADIUS := 3
 
 
-func _ready() -> void:
+func _enter_tree() -> void:
+	## Build and apply theme as early as possible to avoid unstyled flash.
 	_load_fonts()
 	theme = Theme.new()
 	_build_theme()

@@ -33,6 +33,11 @@ FilmGrainOverlay="*res://scenes/ui/film_grain_overlay.tscn"
 
 window/size/mode=2
 
+[gui]
+
+theme/custom_font="res://assets/fonts/JetBrainsMono-Regular.ttf"
+theme/default_font_size=16
+
 [input]
 
 move_forward={
