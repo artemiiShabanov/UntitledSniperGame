@@ -22,6 +22,7 @@ signal run_timer_expired
 signal threat_phase_changed(phase: ThreatPhase)
 signal enemy_killed_with_info(info: Dictionary)  ## {enemy, headshot, distance, credits, xp}
 signal npc_killed_with_info(info: Dictionary)  ## {penalty, npc_kills}
+signal target_destroyed_with_info(info: Dictionary)  ## {credits, xp}
 
 ## ── Exports ──────────────────────────────────────────────────────────────────
 
@@ -143,6 +144,7 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 		"contract_bonus_credits": 0,
 		"contract_bonus_xp": 0,
 		"npc_kills": 0,
+		"targets_destroyed": 0,
 	}
 
 	# Load the level
@@ -358,6 +360,22 @@ func record_npc_kill(penalty: int) -> void:
 		"npc_kills": run_stats.npc_kills,
 	}
 	npc_killed_with_info.emit(info)
+
+
+## ── Target Destruction ──────────────────────────────────────────────────────
+
+func record_target_destroyed(credits: int, xp: int) -> void:
+	## Records a destructible target being destroyed. Awards credits and XP.
+	run_stats.targets_destroyed = run_stats.get("targets_destroyed", 0) + 1
+	add_run_credits(credits)
+	add_run_xp(xp)
+
+	var info := {
+		"credits": credits,
+		"xp": xp,
+		"targets_destroyed": run_stats.targets_destroyed,
+	}
+	target_destroyed_with_info.emit(info)
 
 
 ## ── Threat Phase ────────────────────────────────────────────────────────────

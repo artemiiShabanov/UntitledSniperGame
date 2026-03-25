@@ -68,6 +68,11 @@ func _populate(success: bool) -> void:
 	if longest_kill > 0.0:
 		_add_stat_row("Longest Kill", "%.0fm" % longest_kill)
 
+	# Targets destroyed
+	var targets_destroyed: int = stats.get("targets_destroyed", 0)
+	if targets_destroyed > 0:
+		_add_stat_row("Targets Destroyed", str(targets_destroyed))
+
 	# NPC kills (penalty)
 	var npc_kills: int = stats.get("npc_kills", 0)
 	if npc_kills > 0:

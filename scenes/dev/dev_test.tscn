@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://bt0op02i13jd1" path="res://scripts/world/spawn_point.gd" id="4_spawn_point"]
 [ext_resource type="PackedScene" path="res://scenes/world/extraction_zone.tscn" id="5_extraction"]
 [ext_resource type="Resource" uid="uid://damul4spf4c47" path="res://data/levels/dev_test_data.tres" id="6_level_data"]
+[ext_resource type="PackedScene" path="res://scenes/world/destructible_box.tscn" id="7_destructible"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -224,3 +225,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, 10)
 
 [node name="ExtractionZone2" parent="." instance=ExtResource("5_extraction")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 15)
+
+[node name="DBox1" parent="." instance=ExtResource("7_destructible")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -6)
+
+[node name="DBox2" parent="." instance=ExtResource("7_destructible")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -8)
+
+[node name="DBox3" parent="." instance=ExtResource("7_destructible")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -12)

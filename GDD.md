@@ -303,9 +303,12 @@ Three NPC types, each with activity-based behavior cycles (not just patrol):
 - Creates moral/tactical tension — shooting near NPCs risks losing credits, shooting through NPC areas risks hitting civilians
 
 ### 7.6 Non-NPC Targets
-- Destructible objects: vehicles, equipment, supply caches
-- Mix of static and moving targets
-- Destroying them earns credits and can fulfill contract objectives
+- **DestructibleTarget** (`StaticBody3D`): takes bullet damage, breaks when health reaches 0
+- Currently one type: destructible box (50 HP, +$25 / +10 XP on destruction)
+- High-value variants possible (e.g., far-distance boxes with +$50)
+- Visual feedback: darkens on destruction, removed after 5 seconds
+- Kill feed shows "TARGET DESTROYED | +$X" in warm yellow
+- Future expansion: vehicles, equipment, supply caches, moving targets, contract objectives
 
 ### 7.7 Scaling with Threat Phase
 - **Early:** neutral NPCs, static/moving non-NPC targets, no enemies

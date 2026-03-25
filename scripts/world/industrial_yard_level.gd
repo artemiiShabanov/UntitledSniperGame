@@ -19,6 +19,7 @@ func _build_level() -> void:
 	_create_extraction_zones()
 	_create_ziplines()
 	_create_activity_points()
+	_create_destructibles()
 
 
 ## ── Spawn Points ───────────────────────────────────────────────────────────
@@ -218,6 +219,44 @@ func _add_activity(point_name: String, activity: ActivityPoint.Activity,
 	ap.facing_direction = facing
 	ap.point_group = group
 	add_child(ap)
+
+
+## ── Destructible Targets ─────────────────────────────────────────────────
+
+func _create_destructibles() -> void:
+	var box_scene := preload("res://scenes/world/destructible_box.tscn")
+
+	# Near warehouse A dock — supply crates
+	_add_destructible(box_scene, "DBox_Dock1", Vector3(3, 0, -24))
+	_add_destructible(box_scene, "DBox_Dock2", Vector3(6, 0, -23))
+
+	# Near containers — loose cargo
+	_add_destructible(box_scene, "DBox_Containers1", Vector3(-10, 0, -18))
+	_add_destructible(box_scene, "DBox_Containers2", Vector3(14, 0, -16))
+
+	# Yard center — exposed targets
+	_add_destructible(box_scene, "DBox_YardCenter", Vector3(-3, 0, -8))
+
+	# Near warehouse B — supplies
+	_add_destructible(box_scene, "DBox_WarehouseB", Vector3(53, 0, -38))
+
+	# Near silos — equipment box
+	_add_destructible(box_scene, "DBox_Silos", Vector3(-70, 0, -50))
+
+	# Far north — high-value distant target
+	var far_box: DestructibleTarget = box_scene.instantiate()
+	far_box.name = "DBox_FarNorth"
+	far_box.position = Vector3(10, 0, -115)
+	far_box.credit_reward = 50  # Extra reward for distance
+	far_box.xp_reward = 20
+	add_child(far_box)
+
+
+func _add_destructible(scene: PackedScene, box_name: String, pos: Vector3) -> void:
+	var box: DestructibleTarget = scene.instantiate()
+	box.name = box_name
+	box.position = pos
+	add_child(box)
 
 
 ## ── Ziplines ───────────────────────────────────────────────────────────────

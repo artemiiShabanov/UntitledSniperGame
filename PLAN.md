@@ -17,7 +17,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Save System (core)  | █████ 100%| Complete (stats tracking in Step 6)      |
 | Objectives          | ████░ 80% | Contracts done, in-run objectives deferred |
 | Global Progression  | ████░ 95% | Complete (cosmetics deferred to P4)       |
-| World Population    | █░░░░ 33% | NPCs done, destructible targets next     |
+| World Population    | ██░░░ 66% | NPCs + destructibles done, events next   |
 | UI & Menus          | ████░ 90% | All screens done except cosmetics         |
 | Content             | ░░░░░ 10% | Levels, models, props                    |
 | Art & Audio         | ░░░░░  5% | Art pipeline, sounds, music              |
@@ -426,7 +426,7 @@ Core features complete. Bug-audited and refactored.
 
 ## Phase 3 — Content & Population
 
-### World Population █░░░░ 33%
+### World Population ██░░░ 66%
 
 #### Neutral NPCs [x]
 - [x] NpcBase class with activity state machine (PERFORMING ↔ TRAVELING) and panic layer (CALM ↔ PANICKING)
@@ -454,10 +454,20 @@ Core features complete. Bug-audited and refactored.
 | `data/npcs/*.tres` | 3 NPC type definitions |
 | `scenes/npc/*.tscn` | 3 NPC scene files |
 
-#### Non-NPC Targets [ ]
-- [ ] Destructible objects (vehicles, equipment, supply caches)
-- [ ] Static and moving targets
-- [ ] Credit reward on destruction
+#### Non-NPC Targets [x]
+- [x] DestructibleTarget class (StaticBody3D): health, bullet hit, credit/XP reward on destruction
+- [x] Destructible box scene with distinct visual (warm yellow)
+- [x] RunManager.record_target_destroyed() + target_destroyed_with_info signal
+- [x] Kill feed shows "TARGET DESTROYED | +$X" in warm yellow
+- [x] Result screen shows targets destroyed count
+- [x] 8 destructible boxes placed in Industrial Yard (1 far-north high-value)
+- [x] 3 destructible boxes placed in dev test level
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/world/destructible_target.gd` | DestructibleTarget: health, hit, reward, visual death |
+| `scenes/world/destructible_box.tscn` | Box scene (StaticBody3D, collision, mesh) |
 
 #### Events System [ ]
 - [ ] Event types TBD — designed in detail when reached
