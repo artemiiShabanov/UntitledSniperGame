@@ -476,11 +476,6 @@ Core features complete. Bug-audited and refactored.
 
 ### Content Production ░░░░░ 10%
 
-#### Contracts [ ]
-- [ ] Contract templates per level (eliminate HVT, destroy target, accuracy challenge)
-- [ ] Contract reward balancing
-- [ ] Contract board variety (enough to feel fresh across runs)
-
 #### Art Pipeline [ ]
 - [ ] Low-poly stylized art direction (flat/minimal shading, clean geometry)
 - [ ] Color palette per level (accent colors for enemies, objectives, extraction)
@@ -559,7 +554,10 @@ later. Pull items back into active phases when/if they become relevant.
 - [ ] Cosmetics UI in hub (preview, equip)
 - [ ] Cosmetics screen (needs cosmetics backend)
 
-### Expanded Contracts
+### Contracts — Content & Expansion
+- [ ] Contract templates per level (eliminate HVT, destroy target, accuracy challenge)
+- [ ] Contract reward balancing
+- [ ] Contract board variety (enough to feel fresh across runs)
 - [ ] Level-specific contracts (level_restriction field ready)
 - [ ] KILL_TARGET contracts — eliminate a named high-value target (target_id field ready)
 - [ ] DESTROY_TARGET contracts — destroy a specific object
