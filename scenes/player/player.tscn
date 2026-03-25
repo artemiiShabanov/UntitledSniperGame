@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://cu5r57bea486j"]
+[gd_scene load_steps=6 format=3 uid="uid://cu5r57bea486j"]
 
 [ext_resource type="Script" uid="uid://b81j16jmplds0" path="res://scripts/player/player.gd" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://clsw50y4t4k45" path="res://scenes/ui/hud.tscn" id="2_hud"]
 [ext_resource type="Script" uid="uid://c3b6w1ejt1oxw" path="res://scripts/player/weapon.gd" id="3_weapon"]
+[ext_resource type="Script" path="res://scripts/player/rifle_viewmodel.gd" id="4_viewmodel"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.3
@@ -30,5 +31,8 @@ target_position = Vector3(0, 0, -3)
 
 [node name="Weapon" type="Node3D" parent="Head/Camera3D"]
 script = ExtResource("3_weapon")
+
+[node name="RifleViewmodel" type="Node3D" parent="Head/Camera3D"]
+script = ExtResource("4_viewmodel")
 
 [node name="HUD" parent="." instance=ExtResource("2_hud")]

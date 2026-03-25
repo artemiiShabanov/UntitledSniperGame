@@ -4,7 +4,7 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1"]
 shader = ExtResource("1_shader")
-shader_parameter/grain_intensity = 0.15
+shader_parameter/grain_intensity = 0.03
 shader_parameter/grain_speed = 2.0
 
 [node name="FilmGrainOverlay" type="CanvasLayer"]
