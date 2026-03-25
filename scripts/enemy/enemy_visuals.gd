@@ -28,8 +28,10 @@ var show_debug: bool = false
 
 ## Scope glint
 var _glint_sprite: Sprite3D
+var _glint_streak: Sprite3D
 var _glint_light: OmniLight3D
 var _glint_material: StandardMaterial3D
+var _glint_streak_material: StandardMaterial3D
 var _glint_active: bool = false
 var _glint_time: float = 0.0
 
@@ -88,6 +90,8 @@ func update_visuals(delta: float) -> void:
 
 func on_death() -> void:
 	_set_glint_visible(false)
+	if _glint_streak:
+		_glint_streak.visible = false
 	if _laser_mesh_instance:
 		_laser_mesh_instance.visible = false
 	if _debug_mesh_instance:
@@ -101,18 +105,19 @@ func on_death() -> void:
 func _setup_glint() -> void:
 	var glint_pos := Vector3(0, EnemyBase.EYE_HEIGHT, -0.2)
 
-	# Billboard sprite
+	# Core glint — bright center point
 	_glint_sprite = Sprite3D.new()
 	_glint_sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_glint_sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_glint_sprite.position = glint_pos
-	_glint_sprite.pixel_size = 0.005
+	_glint_sprite.pixel_size = 0.004
 	_glint_sprite.visible = false
 
-	# Radial gradient texture
+	# Sharp radial gradient for core
 	var gradient := Gradient.new()
 	gradient.set_color(0, Color.WHITE)
-	gradient.set_color(1, Color(1, 1, 1, 0))
+	gradient.add_point(0.3, Color(1, 1, 1, 0.8))
+	gradient.set_color(2, Color(1, 1, 1, 0))
 	var tex := GradientTexture2D.new()
 	tex.gradient = gradient
 	tex.fill = GradientTexture2D.FILL_RADIAL
@@ -132,7 +137,42 @@ func _setup_glint() -> void:
 
 	enemy.add_child(_glint_sprite)
 
-	# OmniLight
+	# Horizontal lens flare streak
+	_glint_streak = Sprite3D.new()
+	_glint_streak.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_glint_streak.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_glint_streak.position = glint_pos
+	_glint_streak.pixel_size = 0.003
+	_glint_streak.scale = Vector3(4.0, 0.3, 1.0)  # Wide and thin
+	_glint_streak.visible = false
+
+	# Horizontal gradient for streak
+	var streak_grad := Gradient.new()
+	streak_grad.set_color(0, Color(1, 1, 1, 0))
+	streak_grad.add_point(0.3, Color(1, 1, 1, 0.6))
+	streak_grad.add_point(0.5, Color.WHITE)
+	streak_grad.add_point(0.7, Color(1, 1, 1, 0.6))
+	streak_grad.set_color(4, Color(1, 1, 1, 0))
+	var streak_tex := GradientTexture2D.new()
+	streak_tex.gradient = streak_grad
+	streak_tex.fill = GradientTexture2D.FILL_LINEAR
+	streak_tex.fill_from = Vector2(0, 0.5)
+	streak_tex.fill_to = Vector2(1, 0.5)
+	streak_tex.width = 128
+	streak_tex.height = 16
+	_glint_streak.texture = streak_tex
+
+	var streak_mat := StandardMaterial3D.new()
+	streak_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	streak_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	streak_mat.albedo_color = glint_color
+	streak_mat.render_priority = 1
+	_glint_streak.material_override = streak_mat
+	_glint_streak_material = streak_mat
+
+	enemy.add_child(_glint_streak)
+
+	# OmniLight for ambient glow
 	_glint_light = OmniLight3D.new()
 	_glint_light.position = glint_pos
 	_glint_light.omni_range = 2.0
@@ -163,9 +203,26 @@ func _update_glint(delta: float) -> void:
 
 	if should_show:
 		_glint_time += delta
-		var pulse := 0.5 + 0.5 * sin(_glint_time * glint_pulse_speed * TAU)
-		_glint_material.albedo_color = glint_color * (0.5 + pulse * 0.5)
-		_glint_light.light_energy = glint_max_energy * pulse
+
+		# Core pulse — sharp flicker
+		var fast_pulse := 0.5 + 0.5 * sin(_glint_time * glint_pulse_speed * TAU)
+		var flicker := 1.0 if fmod(_glint_time * 12.0, 1.0) > 0.15 else 0.7
+		var intensity := fast_pulse * flicker
+
+		_glint_material.albedo_color = glint_color * (0.6 + intensity * 0.4)
+		_glint_light.light_energy = glint_max_energy * intensity
+
+		# Core scale breath
+		var scale_pulse := 1.0 + 0.2 * sin(_glint_time * 5.0)
+		_glint_sprite.scale = Vector3.ONE * scale_pulse
+
+		# Streak shimmer — slightly offset timing for visual interest
+		if _glint_streak:
+			var streak_pulse := 0.5 + 0.5 * sin(_glint_time * glint_pulse_speed * TAU + 0.5)
+			_glint_streak_material.albedo_color = glint_color * (0.3 + streak_pulse * 0.5)
+			# Streak width oscillates
+			var streak_width := 3.0 + sin(_glint_time * 3.0) * 1.5
+			_glint_streak.scale = Vector3(streak_width, 0.25, 1.0)
 	else:
 		_glint_time = 0.0
 
@@ -176,6 +233,8 @@ func _set_glint_visible(vis: bool) -> void:
 	_glint_active = vis
 	if _glint_sprite:
 		_glint_sprite.visible = vis
+	if _glint_streak:
+		_glint_streak.visible = vis
 	if _glint_light:
 		_glint_light.visible = vis
 

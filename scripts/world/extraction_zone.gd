@@ -22,6 +22,9 @@ func _ready() -> void:
 	_apply_zone_color()
 	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void: _apply_zone_color())
 
+	# Rising particle ring
+	VFXFactory.create_extraction_particles(self, zone_size)
+
 
 func _apply_zone_color() -> void:
 	if mesh:

@@ -98,6 +98,7 @@ var last_known_player_pos: Vector3 = Vector3.ZERO
 var reaction_timer: float = 0.0
 var fire_timer: float = 0.0
 var search_timer: float = 0.0
+var _last_hit_was_headshot: bool = false
 
 ## Search scanning
 var _search_base_yaw: float = 0.0
@@ -386,6 +387,9 @@ func _fire_at_player() -> void:
 	get_tree().root.add_child(bullet)
 	bullet.global_position = eye_pos
 
+	# Muzzle flash
+	VFXFactory.spawn_muzzle_flash(eye_pos, aim_dir, true)
+
 
 func _face_player() -> void:
 	if not player:
@@ -448,8 +452,13 @@ func on_bullet_hit(bullet: Bullet, collision: KinematicCollision3D) -> void:
 		return
 
 	var hit_point := collision.get_position()
+	var hit_normal := collision.get_normal()
 	var is_headshot := _check_headshot(hit_point)
 	var dmg := bullet.damage
+
+	# Headshot-specific VFX (regular impact already spawned by bullet)
+	if is_headshot:
+		VFXFactory.spawn_hit_impact(hit_point, hit_normal, true)
 
 	# Armor reduces damage unless AP or headshot
 	if is_armored and not bullet.penetration and not is_headshot:
@@ -468,6 +477,7 @@ func on_bullet_hit(bullet: Bullet, collision: KinematicCollision3D) -> void:
 			last_known_player_pos = players[0].global_position
 		_set_alert_state(AlertState.ALERT)
 
+	_last_hit_was_headshot = is_headshot
 	if health <= 0.0:
 		_die(is_headshot)
 
@@ -542,22 +552,11 @@ func _die(headshot: bool) -> void:
 
 ## Override in subclasses for custom death behavior
 func _on_death() -> void:
-	if mesh:
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.5, 0.1, 0.1)
-		for child in mesh.get_children():
-			if child is MeshInstance3D:
-				child.material_override = mat
-			elif child is CSGShape3D:
-				child.material = mat
-
 	set_deferred("collision_layer", 0)
 	set_deferred("collision_mask", 0)
 
-	var tree := get_tree()
-	if tree:
-		var timer := tree.create_timer(3.0)
-		timer.timeout.connect(func(): if is_instance_valid(self): queue_free())
+	# VFX handles tilt, fade, and cleanup
+	VFXFactory.spawn_death_effect(self, _last_hit_was_headshot)
 
 
 ## ── Helpers ──────────────────────────────────────────────────────────────────

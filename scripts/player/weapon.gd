@@ -343,6 +343,9 @@ func _spawn_bullet() -> void:
 	get_tree().root.add_child(bullet)
 	bullet.global_position = spawn_pos
 
+	# Muzzle flash VFX
+	VFXFactory.spawn_muzzle_flash(spawn_pos + spawn_dir * 0.3, spawn_dir, false)
+
 	_propagate_gunshot_sound(spawn_pos)
 
 

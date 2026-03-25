@@ -38,9 +38,14 @@ func _ready() -> void:
 		# Enemy bullets hit Environment (1) + Player (2) = mask 3
 		collision_mask = 3
 		_apply_tracer_material(Color(1.0, 0.4, 0.1), 3.0, Vector3(3.0, 3.0, 3.0))
+		VFXFactory.add_tracer_trail(self, Color(1.0, 0.4, 0.1), 1.5)
 	elif tracer_color != Color.WHITE or tracer_emission > 1.0:
 		# Player bullet with colored tracer (non-standard ammo)
 		_apply_tracer_material(tracer_color, tracer_emission, Vector3(1.5, 1.5, 1.5))
+		VFXFactory.add_tracer_trail(self, tracer_color, 2.0)
+	else:
+		# Standard player bullet — subtle white trail
+		VFXFactory.add_tracer_trail(self, Color(0.8, 0.8, 0.8, 0.4), 1.5)
 
 
 func _physics_process(delta: float) -> void:
@@ -63,9 +68,14 @@ func _physics_process(delta: float) -> void:
 			elif is_shock and collider.has_method("stun"):
 				collider.stun(stun_duration)
 				hit_enemy = collider.is_in_group("enemy")
+		# Spawn impact VFX
+		var hit_normal := collision.get_normal()
+		var hit_pos := collision.get_position()
+		VFXFactory.spawn_hit_impact(hit_pos, hit_normal, false)
+
 		# Only player bullets alert enemies to impact sounds
 		if not is_enemy_bullet:
-			_propagate_impact_sound(collision.get_position())
+			_propagate_impact_sound(hit_pos)
 		# Penetrating rounds pass through enemies (not world geometry)
 		if penetration and hit_enemy:
 			_already_hit.append(collider)

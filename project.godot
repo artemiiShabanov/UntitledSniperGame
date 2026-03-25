@@ -28,6 +28,7 @@ PauseMenu="*res://scenes/ui/pause_menu.tscn"
 PaletteManager="*res://scripts/systems/palette_manager.gd"
 PaletteTheme="*res://scripts/ui/palette_theme.gd"
 FilmGrainOverlay="*res://scenes/ui/film_grain_overlay.tscn"
+VFXFactory="*res://scripts/systems/vfx_factory.gd"
 
 [display]
 
