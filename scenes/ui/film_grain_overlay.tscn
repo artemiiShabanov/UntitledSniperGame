@@ -1,10 +1,10 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=3 format=3 uid="uid://hl2ul6vlsoh"]
 
-[ext_resource type="Shader" path="res://shaders/film_grain.gdshader" id="1_shader"]
+[ext_resource type="Shader" uid="uid://c4k7ml05i2o2j" path="res://shaders/film_grain.gdshader" id="1_shader"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1"]
 shader = ExtResource("1_shader")
-shader_parameter/grain_intensity = 0.04
+shader_parameter/grain_intensity = 0.15
 shader_parameter/grain_speed = 2.0
 
 [node name="FilmGrainOverlay" type="CanvasLayer"]

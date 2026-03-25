@@ -1,6 +1,7 @@
 extends Control
 ## Main menu — first screen the player sees.
 
+@onready var background: ColorRect = $Background
 @onready var title: Label = $VBox/Title
 @onready var new_game_btn: Button = $VBox/NewGameButton
 @onready var continue_btn: Button = $VBox/ContinueButton
@@ -31,6 +32,16 @@ func _ready() -> void:
 
 	# Enable continue only if any save exists
 	continue_btn.disabled = not _any_save_exists()
+
+	# Palette-driven colors
+	_apply_palette()
+	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void: _apply_palette())
+
+
+func _apply_palette() -> void:
+	background.color = PaletteManager.get_color(&"fg_dark")
+	title.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
+	title.add_theme_font_size_override("font_size", 48)
 
 
 func _any_save_exists() -> bool:
