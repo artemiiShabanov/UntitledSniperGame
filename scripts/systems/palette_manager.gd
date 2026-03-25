@@ -202,6 +202,14 @@ func _collect_meshes(node: Node) -> Array[MeshInstance3D]:
 
 static func _ensure_unique_material(mesh_node: MeshInstance3D) -> StandardMaterial3D:
 	## Returns a unique StandardMaterial3D for surface 0, creating if needed.
+	## Returns null if the mesh has no surfaces (empty or not yet loaded).
+	if not mesh_node.mesh or mesh_node.mesh.get_surface_count() == 0:
+		# No mesh or no surfaces — use material_override instead
+		if mesh_node.material_override is StandardMaterial3D:
+			return mesh_node.material_override as StandardMaterial3D
+		var mat := StandardMaterial3D.new()
+		mesh_node.material_override = mat
+		return mat
 	var existing := mesh_node.get_surface_override_material(0)
 	if existing is StandardMaterial3D:
 		return existing  # Already unique (we set it)
