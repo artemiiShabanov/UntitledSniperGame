@@ -1,6 +1,98 @@
 extends Node
 ## VFXFactory — autoloaded singleton for spawning one-shot visual effects.
 ## All VFX use palette colors and clean themselves up automatically.
+## Pre-warms particle shaders on startup to avoid first-use stutter.
+
+## ── Cached materials (created once, reused) ─────────────────────────────────
+
+var _sparkle_mesh: QuadMesh
+var _muzzle_mat: StandardMaterial3D
+var _impact_mat: StandardMaterial3D
+var _headshot_mat: StandardMaterial3D
+var _extraction_mat: StandardMaterial3D
+
+
+func _ready() -> void:
+	_create_shared_resources()
+	_prewarm_shaders()
+	PaletteManager.palette_changed.connect(_on_palette_changed)
+
+
+func _create_shared_resources() -> void:
+	# Shared sparkle quad — tiny billboard quad used by all particle effects
+	_sparkle_mesh = QuadMesh.new()
+	_sparkle_mesh.size = Vector2(0.04, 0.04)
+
+	# Muzzle flash material
+	_muzzle_mat = _make_unshaded_billboard_mat(Color(1.0, 0.9, 0.6), 4.0)
+
+	# Impact material
+	_impact_mat = _make_unshaded_billboard_mat(PaletteManager.get_color(&"danger"), 2.0)
+
+	# Headshot material
+	_headshot_mat = _make_unshaded_billboard_mat(Color.WHITE, 5.0)
+
+	# Extraction material
+	var ext_color: Color = PaletteManager.get_color(&"accent_friendly")
+	ext_color.a = 0.7
+	_extraction_mat = _make_unshaded_billboard_mat(ext_color, 1.5)
+
+
+func _make_unshaded_billboard_mat(color: Color, emission_energy: float) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.albedo_color = color
+	mat.emission_enabled = true
+	mat.emission = Color(color, 1.0)
+	mat.emission_energy_multiplier = emission_energy
+	mat.vertex_color_use_as_albedo = true
+	mat.no_depth_test = false
+	mat.render_priority = 1
+	return mat
+
+
+func _prewarm_shaders() -> void:
+	## Spawn invisible one-shot particles offscreen to force shader compilation.
+	## This prevents the stutter on first real use.
+	var warmup := GPUParticles3D.new()
+	warmup.emitting = true
+	warmup.one_shot = true
+	warmup.amount = 1
+	warmup.lifetime = 0.05
+	warmup.explosiveness = 1.0
+	warmup.visibility_aabb = AABB(Vector3.ZERO, Vector3.ONE)
+
+	var mat := ParticleProcessMaterial.new()
+	mat.gravity = Vector3.ZERO
+	mat.scale_min = 0.001
+	mat.scale_max = 0.001
+	warmup.process_material = mat
+	warmup.draw_pass_1 = _sparkle_mesh
+	warmup.material_override = _muzzle_mat
+
+	add_child(warmup)
+	warmup.position = Vector3(0, -1000, 0)  # Far below world
+
+	get_tree().create_timer(0.2).timeout.connect(func():
+		if is_instance_valid(warmup):
+			warmup.queue_free()
+	)
+
+
+func _on_palette_changed(_p: PaletteResource) -> void:
+	# Update cached materials with new palette colors
+	var danger: Color = PaletteManager.get_color(&"danger")
+	_impact_mat.albedo_color = danger
+	_impact_mat.emission = Color(danger, 1.0)
+
+	var friendly: Color = PaletteManager.get_color(&"accent_friendly")
+	friendly.a = 0.7
+	_extraction_mat.albedo_color = friendly
+	_extraction_mat.emission = Color(friendly, 1.0)
+
 
 ## ── Muzzle Flash ────────────────────────────────────────────────────────────
 
@@ -9,34 +101,30 @@ func spawn_muzzle_flash(pos: Vector3, forward: Vector3, is_enemy: bool = false) 
 	particles.emitting = true
 	particles.one_shot = true
 	particles.explosiveness = 1.0
-	particles.amount = 8
-	particles.lifetime = 0.1
+	particles.amount = 12
+	particles.lifetime = 0.08
 	particles.visibility_aabb = AABB(Vector3(-2, -2, -2), Vector3(4, 4, 4))
 
 	var mat := ParticleProcessMaterial.new()
 	mat.direction = Vector3(forward.x, forward.y, forward.z)
-	mat.spread = 25.0
-	mat.initial_velocity_min = 3.0
-	mat.initial_velocity_max = 6.0
+	mat.spread = 35.0
+	mat.initial_velocity_min = 4.0
+	mat.initial_velocity_max = 10.0
 	mat.gravity = Vector3.ZERO
-	mat.scale_min = 0.03
-	mat.scale_max = 0.06
-	mat.color = PaletteManager.get_color(&"danger") if is_enemy else Color(1.0, 0.9, 0.6)
+	mat.scale_min = 0.5
+	mat.scale_max = 1.5
+	mat.damping_min = 8.0
+	mat.damping_max = 12.0
+
+	var color: Color = PaletteManager.get_color(&"danger") if is_enemy else Color(1.0, 0.9, 0.6)
+	mat.color = color
 	particles.process_material = mat
 
-	var mesh := SphereMesh.new()
-	mesh.radius = 0.5
-	mesh.height = 1.0
-	var draw_pass := MeshInstance3D.new()
-	draw_pass.mesh = mesh
-	var draw_mat := StandardMaterial3D.new()
-	draw_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	draw_mat.emission_enabled = true
-	draw_mat.emission = mat.color
-	draw_mat.emission_energy_multiplier = 4.0
-	draw_mat.albedo_color = mat.color
-	draw_pass.material_override = draw_mat
-	particles.draw_pass_1 = mesh
+	particles.draw_pass_1 = _sparkle_mesh
+	var flash_mat := _muzzle_mat.duplicate() as StandardMaterial3D
+	flash_mat.albedo_color = color
+	flash_mat.emission = Color(color, 1.0)
+	particles.material_override = flash_mat
 
 	_add_to_world(particles, pos, 0.5)
 
@@ -48,58 +136,62 @@ func spawn_hit_impact(pos: Vector3, normal: Vector3, is_headshot: bool = false) 
 	particles.emitting = true
 	particles.one_shot = true
 	particles.explosiveness = 1.0
-	particles.amount = 16 if is_headshot else 8
-	particles.lifetime = 0.4 if is_headshot else 0.25
+	particles.amount = 20 if is_headshot else 8
+	particles.lifetime = 0.5 if is_headshot else 0.3
 	particles.visibility_aabb = AABB(Vector3(-3, -3, -3), Vector3(6, 6, 6))
 
 	var mat := ParticleProcessMaterial.new()
 	mat.direction = normal
-	mat.spread = 45.0 if is_headshot else 30.0
-	mat.initial_velocity_min = 2.0
-	mat.initial_velocity_max = 5.0 if is_headshot else 3.0
-	mat.gravity = Vector3(0, -6, 0)
-	mat.scale_min = 0.02
-	mat.scale_max = 0.06 if is_headshot else 0.04
+	mat.spread = 50.0 if is_headshot else 35.0
+	mat.initial_velocity_min = 3.0
+	mat.initial_velocity_max = 8.0 if is_headshot else 5.0
+	mat.gravity = Vector3(0, -8, 0)
+	mat.damping_min = 3.0
+	mat.damping_max = 6.0
+	mat.scale_min = 0.4
+	mat.scale_max = 1.2 if is_headshot else 0.8
 
-	var color: Color = PaletteManager.get_color(&"danger")
+	var color: Color
 	if is_headshot:
-		color = Color(1.0, 1.0, 1.0)  # Bright white for headshots
+		color = Color.WHITE
+	else:
+		color = PaletteManager.get_color(&"danger")
 	mat.color = color
 	particles.process_material = mat
 
-	particles.draw_pass_1 = _make_particle_mesh(color, 3.0 if is_headshot else 2.0)
+	particles.draw_pass_1 = _sparkle_mesh
+	particles.material_override = _headshot_mat if is_headshot else _impact_mat
 
 	_add_to_world(particles, pos, 1.0)
 
-	# Headshot: additional flash sphere
+	# Headshot: additional expanding flash
 	if is_headshot:
 		_spawn_headshot_flash(pos)
 
 
 func _spawn_headshot_flash(pos: Vector3) -> void:
 	var flash := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = 0.15
-	sphere.height = 0.3
-	flash.mesh = sphere
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.2, 0.2)
+	flash.mesh = quad
 
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	mat.albedo_color = Color(1.0, 1.0, 1.0, 0.9)
 	mat.emission_enabled = true
 	mat.emission = Color.WHITE
-	mat.emission_energy_multiplier = 5.0
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.emission_energy_multiplier = 6.0
 	flash.material_override = mat
 
 	get_tree().root.add_child(flash)
 	flash.global_position = pos
 
-	# Quick fade-out tween
 	var tween := flash.create_tween()
-	tween.tween_property(mat, "albedo_color:a", 0.0, 0.2)
-	tween.parallel().tween_property(flash, "scale", Vector3(2.5, 2.5, 2.5), 0.2)
+	tween.tween_property(mat, "albedo_color:a", 0.0, 0.15)
+	tween.parallel().tween_property(flash, "scale", Vector3(3.0, 3.0, 3.0), 0.15)
 	tween.tween_callback(flash.queue_free)
 
 
@@ -163,35 +255,38 @@ func spawn_death_effect(enemy: Node3D, is_headshot: bool) -> void:
 
 func create_extraction_particles(zone: Node3D, zone_size: Vector3) -> GPUParticles3D:
 	## Creates a persistent ring of rising particles around an extraction zone.
-	## Returns the node so the caller can manage its lifetime.
 	var particles := GPUParticles3D.new()
 	particles.emitting = true
 	particles.one_shot = false
 	particles.amount = 24
-	particles.lifetime = 2.0
+	particles.lifetime = 2.5
 	particles.visibility_aabb = AABB(Vector3(-5, -2, -5), Vector3(10, 8, 10))
 
 	var mat := ParticleProcessMaterial.new()
 	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
 	mat.emission_box_extents = Vector3(zone_size.x / 2.0, 0.1, zone_size.z / 2.0)
 	mat.direction = Vector3(0, 1, 0)
-	mat.spread = 10.0
-	mat.initial_velocity_min = 0.5
-	mat.initial_velocity_max = 1.0
+	mat.spread = 8.0
+	mat.initial_velocity_min = 0.3
+	mat.initial_velocity_max = 0.8
 	mat.gravity = Vector3.ZERO
-	mat.scale_min = 0.03
-	mat.scale_max = 0.06
+	mat.damping_min = 0.5
+	mat.damping_max = 1.0
+	mat.scale_min = 0.6
+	mat.scale_max = 1.2
 
 	var color: Color = PaletteManager.get_color(&"accent_friendly")
 	color.a = 0.7
 	mat.color = color
 	particles.process_material = mat
 
-	particles.draw_pass_1 = _make_particle_mesh(color, 1.5)
+	particles.draw_pass_1 = _sparkle_mesh
+	particles.material_override = _extraction_mat
 
 	zone.add_child(particles)
 
-	# Update color on palette swap
+	# Palette swap updates are handled by _on_palette_changed via cached material
+	# Also update process material color
 	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void:
 		var new_color: Color = PaletteManager.get_color(&"accent_friendly")
 		new_color.a = 0.7
@@ -207,41 +302,30 @@ func add_tracer_trail(bullet: Node3D, color: Color = Color.WHITE, length: float 
 	## Adds a stretched trail mesh behind a bullet that follows it each frame.
 	var trail := MeshInstance3D.new()
 	var box := BoxMesh.new()
-	box.size = Vector3(0.01, 0.01, length)
+	box.size = Vector3(0.008, 0.008, length)
 	trail.mesh = box
 
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(color, 0.6)
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.albedo_color = Color(color, 0.5)
 	mat.emission_enabled = true
-	mat.emission = color
+	mat.emission = Color(color, 1.0)
 	mat.emission_energy_multiplier = 2.0
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
 	trail.material_override = mat
 
 	bullet.add_child(trail)
-	# Offset trail behind bullet
 	trail.position = Vector3(0, 0, length / 2.0)
 
 
 ## ── Helpers ─────────────────────────────────────────────────────────────────
-
-func _make_particle_mesh(color: Color, emission_energy: float = 2.0) -> SphereMesh:
-	var sphere := SphereMesh.new()
-	sphere.radius = 0.5
-	sphere.height = 1.0
-	# Note: particle material is set via process_material.color
-	# The mesh just provides the shape
-	return sphere
-
 
 func _add_to_world(node: Node, pos: Vector3, cleanup_time: float) -> void:
 	get_tree().root.add_child(node)
 	if node is Node3D:
 		node.global_position = pos
 
-	# Auto-cleanup
 	get_tree().create_timer(cleanup_time).timeout.connect(func():
 		if is_instance_valid(node):
 			node.queue_free()
