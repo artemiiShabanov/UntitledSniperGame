@@ -31,6 +31,7 @@ func _ready() -> void:
 
 func _on_palette_changed(_palette: PaletteResource) -> void:
 	_build_theme()
+	_apply_to_canvas_layers()
 
 
 ## ── Theme construction ──────────────────────────────────────────────────────
@@ -155,3 +156,27 @@ func _apply_to_viewport() -> void:
 	var root := get_tree().root
 	if root:
 		root.theme = theme
+	# CanvasLayer breaks theme propagation — apply directly to Controls inside them
+	_apply_to_canvas_layers()
+	# Catch future CanvasLayers (scene changes, dynamically added nodes)
+	get_tree().node_added.connect(_on_node_added)
+
+
+func _on_node_added(node: Node) -> void:
+	# When a Control is added under a CanvasLayer, assign our theme
+	if node is Control and node.get_parent() is CanvasLayer:
+		if not node.theme:
+			node.theme = theme
+
+
+func _apply_to_canvas_layers() -> void:
+	## Walk the tree and set theme on Control children of CanvasLayers.
+	var stack: Array[Node] = [get_tree().root]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		if node is CanvasLayer:
+			for child in node.get_children():
+				if child is Control and not child.theme:
+					child.theme = theme
+		for child in node.get_children():
+			stack.append(child)
