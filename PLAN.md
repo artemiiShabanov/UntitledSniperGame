@@ -42,7 +42,10 @@ Fill the world with variety.
 ### Phase 4 — Leftovers
 Parking lot for deferred items — not blocking, not forgotten.
 
-### Phase 5 — Polish & Ship
+### Phase 5 — Level Design
+Build all playable levels as greybox. Get the game feeling right across multiple maps.
+
+### Phase 6 — Polish & Ship
 Make it look, sound, and feel great. Ship it.
 
 ---
@@ -473,13 +476,6 @@ Core features complete. Bug-audited and refactored.
 
 ### Content Production ░░░░░ 10%
 
-#### Levels [~]
-- [~] Industrial Yard (greybox done, needs art pass)
-- [ ] Level 2 — TBD theme (castle/fortress?)
-- [ ] Level 3 — TBD theme (urban rooftops?)
-- [ ] Level 4+ — as needed for progression gates
-> Each level needs: theme, 200m+ map, 2-3 wind corridors, sniper nests, repositioning routes, 15-20 enemy spawns, 2-3 extraction zones
-
 #### Contracts [ ]
 - [ ] Contract templates per level (eliminate HVT, destroy target, accuracy challenge)
 - [ ] Contract reward balancing
@@ -580,7 +576,46 @@ later. Pull items back into active phases when/if they become relevant.
 
 ---
 
-## Phase 5 — Polish & Ship
+## Phase 5 — Level Design
+
+Build all playable levels as greybox (CSG geometry, placeholder meshes). Each level
+gets its own builder script, spawn points, activity points, destructibles, extraction
+zones, ziplines, and level data. Art pass comes later in Content Production.
+
+> Each level needs: theme, 200m+ map, 2-3 wind corridors, sniper nests, repositioning
+> routes, 15-20 enemy spawns, 2-3 extraction zones, NPC activity points, destructibles
+
+### Levels ░░░░░ 25%
+
+#### Industrial Yard [x]
+- [x] Greybox geometry (IndustrialYardBuilder)
+- [x] 17 enemy spawns, 3 extraction zones, 3 ziplines
+- [x] 24 NPC activity points, NPC pool (3-5 NPCs)
+- [x] 8 destructible boxes
+- [ ] Art pass (needs models, textures, props)
+
+#### Level 2 — TBD [ ]
+- [ ] Theme and layout design
+- [ ] Builder script with greybox geometry
+- [ ] Spawn points, extraction zones, ziplines
+- [ ] NPC activity points and pool
+- [ ] Destructible targets
+- [ ] Level data (.tres) with unlock gates
+
+#### Level 3 — TBD [ ]
+- [ ] Theme and layout design
+- [ ] Builder script with greybox geometry
+- [ ] Spawn points, extraction zones, ziplines
+- [ ] NPC activity points and pool
+- [ ] Destructible targets
+- [ ] Level data (.tres) with unlock gates
+
+#### Level 4+ [ ]
+- [ ] As needed for progression gates
+
+---
+
+## Phase 6 — Polish & Ship
 
 ### Steam & Release ░░░░░ 0%
 - [ ] GodotSteam plugin
