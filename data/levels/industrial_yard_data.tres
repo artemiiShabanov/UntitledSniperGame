@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="LevelData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="LevelData" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/level_data.gd" id="1_script"]
 [ext_resource type="Resource" path="res://data/levels/industrial_yard_pool.tres" id="2_pool"]
+[ext_resource type="Resource" path="res://data/levels/industrial_yard_npc_pool.tres" id="3_npc_pool"]
 
 [resource]
 script = ExtResource("1_script")
@@ -13,6 +14,8 @@ unlock_extractions = 2
 enemy_pool = ExtResource("2_pool")
 enemy_count_range = Vector2i(5, 10)
 extraction_count = 1
+npc_pool = ExtResource("3_npc_pool")
+npc_count_range = Vector2i(3, 5)
 max_events_per_run = 2
 available_times_of_day = PackedStringArray("morning", "day", "evening", "night")
 available_weather = PackedStringArray("clear", "snow", "rain", "overcast")

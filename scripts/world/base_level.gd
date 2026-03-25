@@ -160,10 +160,11 @@ func _spawn_npcs() -> void:
 			continue
 
 		var npc: NpcBase = scene.instantiate()
-		add_child(npc)
 
-		# Give the NPC all activity points so it can navigate between them
+		# Set available points BEFORE add_child — _ready() needs them
 		npc.available_points = activity_points
+
+		add_child(npc)
 
 		# Place at a random activity point matching its first activity
 		var start_point := _pick_npc_start_point(npc, activity_points)
