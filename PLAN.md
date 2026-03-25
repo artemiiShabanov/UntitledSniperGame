@@ -20,7 +20,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | World Population    | ██░░░ 66% | NPCs + destructibles done, events next   |
 | UI & Menus          | ████░ 90% | All screens done except cosmetics         |
 | Content             | ░░░░░ 10% | Levels, models, props                    |
-| Art & Audio         | ░░░░░  5% | Art pipeline, sounds, music              |
+| Art & Audio         | ░░░░░  5% | Merged into Phase 3 Content Production   |
 | Polish & Release    | ░░░░░  0% | Steam, controller, balancing             |
 
 ---
@@ -469,9 +469,6 @@ Core features complete. Bug-audited and refactored.
 | `scripts/world/destructible_target.gd` | DestructibleTarget: health, hit, reward, visual death |
 | `scenes/world/destructible_box.tscn` | Box scene (StaticBody3D, collision, mesh) |
 
-#### Events System [ ]
-- [ ] Event types TBD — designed in detail when reached
-
 ---
 
 ### Content Production ░░░░░ 10%
@@ -488,18 +485,19 @@ Core features complete. Bug-audited and refactored.
 - [ ] Contract reward balancing
 - [ ] Contract board variety (enough to feel fresh across runs)
 
-#### Enemy Visuals [ ]
+#### Art Pipeline [ ]
+- [ ] Low-poly stylized art direction (flat/minimal shading, clean geometry)
+- [ ] Color palette per level (accent colors for enemies, objectives, extraction)
+
+#### Character Models [ ]
+- [ ] Player weapon model (sniper rifle with visible upgrade parts)
 - [ ] Lookout model (replace capsule placeholder)
-- [ ] Marksman model (distinct silhouette — backpack, mid-weight)
-- [ ] Countersniper model (scope glint visible at range, lean profile)
-- [ ] Heavy Sniper model (bulky, armored, reads as tough)
-- [ ] Elite Sniper model (tactical gear, smoke grenades visible)
+- [ ] Neutral NPC models (Laborer, Technician, Civilian — distinct from enemies)
+- [ ] Destructible target models (crates, supply caches)
 
 #### Props & Environment Art [ ]
 - [ ] Reusable building kit (walls, roofs, floors, stairs, railings)
 - [ ] Industrial props (crates, barrels, containers, pallets, pipes)
-- [ ] Vehicles (trucks, cars — destructible targets)
-- [ ] Equipment (generators, radios, supply caches — destructible targets)
 - [ ] Cover objects (sandbags, concrete barriers, scaffolding)
 - [ ] Vegetation (trees, bushes — sight blockers at range)
 
@@ -511,33 +509,24 @@ Core features complete. Bug-audited and refactored.
 - [ ] Scope glint shimmer
 - [ ] Extraction zone effect (glow / particle ring)
 - [ ] Death/down effect (enemy ragdoll or collapse)
-- [ ] Smoke grenade (for Elite Sniper)
 - [ ] Weather particles (rain, fog volume)
 
-#### Audio Assets [ ]
+#### Audio [ ]
 - [ ] Player — rifle shot, bolt cycle, reload, dry fire, scope zoom
 - [ ] Player — footsteps per surface (metal, concrete, wood, dirt)
 - [ ] Bullet — impact per surface (metal, ground, wood, flesh)
 - [ ] Enemy — alert callout, search callout, death sound
+- [ ] NPC — panic callout, ambient chatter
 - [ ] Environment — ambient per level theme, time-of-day variation
 - [ ] Music — tension tracks that build with threat phase
 - [ ] UI — menu clicks, extraction countdown, objective complete, deploy whoosh
 
-#### UI Screens [ ]
-- [ ] Main menu (new game, continue, settings, quit)
-- [ ] Save slot selection
-- [ ] Hub layout (navigate between boards/screens)
-- [ ] Contract board
-- [ ] Weapon upgrades screen (rifle preview + parts)
-- [ ] Skill tree screen
-- [ ] Cosmetics screen
-- [ ] Loadout / ammo selection
-- [ ] Level select
-- [ ] Stats screen
-- [ ] Pause menu
-- [ ] Death screen
-- [ ] Run result screen
-- [ ] Settings (controls, audio, video)
+#### UI Art Pass [ ]
+- [ ] Main menu, save slots, settings — visual polish
+- [ ] Hub layout — spatial navigation between stations
+- [ ] In-run HUD — styled crosshair, scope overlay, threat indicator
+- [ ] Result/death screens — styled layout
+- [ ] All panels (contracts, mods, skills, ammo, stats) — consistent visual theme
 
 ---
 
@@ -581,6 +570,10 @@ later. Pull items back into active phases when/if they become relevant.
 - [ ] Higher-risk/higher-reward contracts for harder levels
 - [ ] Contract difficulty scaling based on player progression
 
+### Events System
+- [ ] Event types TBD — designed in detail when needed
+- [ ] Infrastructure exists (LevelEventData, LevelEventRunner, level_events_pool)
+
 ### In-Run Objectives
 - [ ] Optional objectives (all headshots, no alerts, extract before mid-phase, no missed shots, no civilian casualties)
 - [ ] Bonus rewards for completing optional objectives
@@ -588,18 +581,6 @@ later. Pull items back into active phases when/if they become relevant.
 ---
 
 ## Phase 5 — Polish & Ship
-
-### Art & Audio ░░░░░ 5%
-- [ ] Low-poly stylized art pipeline (flat/minimal shading, clean geometry)
-- [ ] Color palette per level (accent colors for enemies, objectives, extraction)
-- [ ] Environment art (blocky architecture, contrasting floor levels, fog/haze)
-- [ ] Weapon model (sniper rifle with visible upgrade parts)
-- [ ] Enemy models (distinct silhouettes per type, scope glint effect)
-- [ ] Neutral NPC models
-- [ ] Non-NPC target models (vehicles, equipment, supply caches)
-- [ ] Time of day lighting (morning, day, evening, night)
-- [ ] Weather effects (fog, rain, overcast)
-- [ ] All audio assets integrated and balanced
 
 ### Steam & Release ░░░░░ 0%
 - [ ] GodotSteam plugin
