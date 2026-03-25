@@ -27,6 +27,7 @@ func _ready() -> void:
 	RunManager.run_completed.connect(_on_run_completed)
 	RunManager.run_timer_updated.connect(_on_run_timer_updated)
 	RunManager.threat_phase_changed.connect(_on_threat_phase_changed)
+	PaletteManager.palette_changed.connect(_on_palette_changed)
 	_update_lives_display()
 	run_timer_label.visible = false
 	threat_phase_label.visible = false
@@ -82,7 +83,7 @@ func hide_interact_prompt() -> void:
 
 func flash_hit() -> void:
 	hit_flash_alpha = 0.4
-	hit_flash.color = Color(1, 0, 0, hit_flash_alpha)
+	hit_flash.color = Color(PaletteManager.get_color(&"danger"), hit_flash_alpha)
 
 
 ## ── RunManager signal callbacks ─────────────────────────────────────────────
@@ -112,11 +113,10 @@ func _on_run_timer_updated(time_left: float) -> void:
 	run_timer_label.visible = RunManager.game_state == RunManager.GameState.IN_RUN or \
 		RunManager.game_state == RunManager.GameState.EXTRACTING
 	run_timer_label.text = FormatUtils.format_time(time_left)
-	# Turn red when under 30 seconds
 	if time_left <= 30.0:
-		run_timer_label.add_theme_color_override("font_color", Color(1, 0.2, 0.2))
+		run_timer_label.add_theme_color_override("font_color", PaletteManager.get_color(&"danger"))
 	else:
-		run_timer_label.remove_theme_color_override("font_color")
+		run_timer_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
 
 
 func _on_threat_phase_changed(_phase: RunManager.ThreatPhase) -> void:
@@ -130,11 +130,16 @@ func _update_threat_display() -> void:
 	threat_phase_label.text = "THREAT: %s" % phase_name
 	match RunManager.threat_phase:
 		RunManager.ThreatPhase.EARLY:
-			threat_phase_label.add_theme_color_override("font_color", Color(0.4, 0.8, 0.4))
+			threat_phase_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
 		RunManager.ThreatPhase.MID:
-			threat_phase_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.2))
+			threat_phase_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 		RunManager.ThreatPhase.LATE:
-			threat_phase_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+			threat_phase_label.add_theme_color_override("font_color", PaletteManager.get_color(&"danger"))
+
+
+func _on_palette_changed(_palette: PaletteResource) -> void:
+	_update_lives_display()
+	_update_threat_display()
 
 
 func _update_lives_display() -> void:
@@ -145,3 +150,5 @@ func _update_lives_display() -> void:
 		else:
 			hearts += "♡ "
 	lives_label.text = hearts.strip_edges()
+	var color_slot := &"danger" if RunManager.lives <= 1 else &"accent_friendly"
+	lives_label.add_theme_color_override("font_color", PaletteManager.get_color(color_slot))

@@ -476,9 +476,14 @@ Core features complete. Bug-audited and refactored.
 
 ### Content Production ░░░░░ 10%
 
-#### Art Pipeline [ ]
-- [ ] Low-poly stylized art direction (flat/minimal shading, clean geometry)
-- [ ] Color palette per level (accent colors for enemies, objectives, extraction)
+#### Art Pipeline [x]
+- [x] Palette-driven art direction (B&W base + 3 accent colors: hostile, loot, friendly)
+- [x] PaletteResource data type with 8 color slots + extension space
+- [x] PaletteManager autoload — auto-discovers palettes, cycles with F8/F7
+- [x] 3 starter palettes (Tactical, Midnight, Noir)
+- [x] palette_surface.gdshader — assigns any palette slot to any mesh
+- [x] Film grain post-process shader
+- [x] Global shader uniforms — palette swap recolors entire scene instantly
 
 #### Character Models [ ]
 - [ ] Player weapon model (sniper rifle with visible upgrade parts)

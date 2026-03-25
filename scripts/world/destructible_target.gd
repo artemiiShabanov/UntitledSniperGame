@@ -14,6 +14,10 @@ var is_destroyed: bool = false
 @onready var mesh: Node3D = $Mesh
 
 
+func _ready() -> void:
+	PaletteManager.bind_meshes(self, &"accent_loot")
+
+
 func on_bullet_hit(bullet: Bullet, _collision: KinematicCollision3D) -> void:
 	if is_destroyed:
 		return
@@ -30,10 +34,10 @@ func _destroy() -> void:
 	# Report reward
 	RunManager.record_target_destroyed(credit_reward, xp_reward)
 
-	# Visual — darken and shrink
+	# Visual — darken to fg_dark
 	if mesh:
 		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.15, 0.12, 0.1)
+		mat.albedo_color = PaletteManager.current.fg_dark
 		for child in mesh.get_children():
 			if child is MeshInstance3D:
 				child.material_override = mat

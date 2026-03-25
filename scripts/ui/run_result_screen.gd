@@ -39,10 +39,10 @@ func _populate(success: bool) -> void:
 	# Title
 	if success:
 		title_label.text = "EXTRACTION SUCCESSFUL"
-		title_label.add_theme_color_override("font_color", Color(0.2, 1.0, 0.3))
+		title_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
 	else:
 		title_label.text = "MISSION FAILED"
-		title_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+		title_label.add_theme_color_override("font_color", PaletteManager.get_color(&"danger"))
 
 	# Clear previous stat rows
 	for child in stats_grid.get_children():
@@ -99,15 +99,15 @@ func _populate(success: bool) -> void:
 	var credits_earned: int = stats.get("credits_earned", 0)
 	if success:
 		credits_label.text = "+$%d" % credits_earned
-		credits_label.add_theme_color_override("font_color", Color(0.2, 1.0, 0.3))
+		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
 	else:
 		credits_label.text = "$0 (lost)"
-		credits_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"danger"))
 
 	# XP (always kept)
 	var xp_earned: int = stats.get("xp_earned", 0)
 	xp_label.text = "+%d XP" % xp_earned
-	xp_label.add_theme_color_override("font_color", Color(0.5, 0.7, 1.0))
+	xp_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
 
 	# Continue prompt
 	continue_label.text = "Press E to continue"
@@ -116,11 +116,11 @@ func _populate(success: bool) -> void:
 func _add_stat_row(label_text: String, value_text: String) -> void:
 	var name_label := Label.new()
 	name_label.text = label_text
-	name_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
 	stats_grid.add_child(name_label)
 
 	var value_label := Label.new()
 	value_label.text = value_text
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	value_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+	value_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
 	stats_grid.add_child(value_label)

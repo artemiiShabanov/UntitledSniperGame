@@ -416,11 +416,20 @@ Audio should reinforce the tension and precision of the sniper fantasy. Silence 
 
 ## 12. Art Direction
 
-### 12.1 Visual Style — Stylized Low-Poly
+### 12.1 Visual Style — Palette-Driven Minimal
 - Clean low-poly geometry, flat or minimal shading
 - Bold readable silhouettes — player can identify enemy types at distance through scope
-- Limited color palette per level (e.g. warm industrial oranges, cold fortress blues)
-- Accent color for important elements (enemies, objectives, extraction point)
+- **Swappable color palettes** — player cycles through palettes in-game with a keybind
+- **B&W base** — non-interactive world geometry rendered in grayscale
+- **Pale palette tones** for backgrounds, large surfaces, terrain
+- **Three accent colors per palette:**
+  - `accent_hostile` — enemies, destructible targets (things to shoot)
+  - `accent_loot` — pickups, ammo, credit rewards (things to collect)
+  - `accent_friendly` — NPCs, interactive objects, HUD elements, extraction (things to protect / use)
+- `danger` color for damage, penalties, alerts
+- `reward` color for credits, XP gains, success states
+- Light **film grain** post-process overlay for atmosphere
+- All materials reference palette slots via shader uniforms — one update recolors the entire scene
 
 ### 12.2 Environments
 - Blocky architecture with sharp angles — fits warehouses, castles, towers
@@ -436,6 +445,7 @@ Audio should reinforce the tension and precision of the sniper fantasy. Silence 
 - Clean, minimal, geometric — matches the world
 - Monospace or angular font
 - Minimal HUD that doesn't obstruct the sniper's view
+- **Snappy fast transitions** — instant palette-aware theming, no sluggish animations
 
 ### 12.5 Audio Pairing
 - Minimal ambient soundscape — wind, distant sounds
@@ -453,3 +463,7 @@ Audio should reinforce the tension and precision of the sniper fantasy. Silence 
 | Sniper Elite | Satisfying sniping mechanics, bullet physics, long-range gameplay |
 | Slay the Spire | Run variation, risk/reward decisions, clean progression systems |
 | Hitman | Level replayability, multiple approaches, contract-based objectives |
+| Neon White | Clean minimal aesthetic, bold accent colors on light environments, snappy UI |
+| SUPERHOT | Red-on-white interactive vs non-interactive color split, gameplay clarity through art |
+| Return of the Obra Dinn | Monochrome + grain atmosphere, proving minimal palette can be striking |
+| Sable | Limited color palette as core art identity, palette as mood control |

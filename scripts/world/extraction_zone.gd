@@ -18,10 +18,15 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 
-	# Green pulsing placeholder visual
+	# Palette: translucent friendly color (needs custom handling for alpha)
+	_apply_zone_color()
+	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void: _apply_zone_color())
+
+
+func _apply_zone_color() -> void:
 	if mesh:
 		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.1, 0.8, 0.2, 0.3)
+		mat.albedo_color = Color(PaletteManager.get_color(&"accent_friendly"), 0.3)
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mesh.material_override = mat

@@ -135,6 +135,9 @@ func _ready() -> void:
 	add_child(_visuals)
 	_visuals.setup(self)
 
+	# Palette: color all meshes as hostile
+	PaletteManager.bind_meshes(self, &"accent_hostile")
+
 
 func _physics_process(delta: float) -> void:
 	if is_dead or RunManager.game_state != RunManager.GameState.IN_RUN:

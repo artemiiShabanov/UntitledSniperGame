@@ -56,13 +56,13 @@ func _on_enemy_killed(info: Dictionary) -> void:
 
 	# Color based on multiplier
 	if info.total_multiplier >= 3.0:
-		label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0))  # Gold
+		label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
 	elif info.total_multiplier >= 2.0:
-		label.add_theme_color_override("font_color", Color(1.0, 0.5, 0.0))  # Orange
+		label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 	elif info.headshot:
-		label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))  # Red
+		label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_hostile"))
 	else:
-		label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))  # White
+		label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
 
 	add_child(label)
 	_entries.append({"label": label, "timer": DISPLAY_DURATION})
@@ -72,7 +72,7 @@ func _on_npc_killed(info: Dictionary) -> void:
 	var label := Label.new()
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	label.text = "CIVILIAN KILLED | -$%d" % info.penalty
-	label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))  # Bright red
+	label.add_theme_color_override("font_color", PaletteManager.get_color(&"danger"))
 	add_child(label)
 	_entries.append({"label": label, "timer": DISPLAY_DURATION})
 
@@ -81,6 +81,6 @@ func _on_target_destroyed(info: Dictionary) -> void:
 	var label := Label.new()
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	label.text = "TARGET DESTROYED | +$%d" % info.credits
-	label.add_theme_color_override("font_color", Color(0.9, 0.75, 0.3))  # Warm yellow
+	label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 	add_child(label)
 	_entries.append({"label": label, "timer": DISPLAY_DURATION})

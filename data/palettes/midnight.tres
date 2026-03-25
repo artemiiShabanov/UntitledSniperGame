@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PaletteResource" load_steps=2 format=3 uid="uid://cch1spjhl4lga"]
+
+[ext_resource type="Script" uid="uid://7o1qlcf8daap" path="res://data/palettes/palette_resource.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+palette_name = &"Midnight"
+bg_light = Color(0.22, 0.24, 0.32, 1)
+bg_mid = Color(0.14, 0.16, 0.22, 1)
+fg_dark = Color(0.06, 0.06, 0.1, 1)
+accent_hostile = Color(0.4, 0.2, 0.85, 1)
+accent_loot = Color(0.3, 0.8, 0.95, 1)
+accent_friendly = Color(0.85, 0.85, 0.95, 1)
+danger = Color(0.9, 0.1, 0.3, 1)
+reward = Color(0.5, 0.8, 1, 1)

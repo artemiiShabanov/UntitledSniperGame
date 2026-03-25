@@ -12,12 +12,18 @@ func _ready() -> void:
 	RunManager.extraction_cancelled.connect(_on_extraction_cancelled)
 	RunManager.extraction_progress_updated.connect(_on_progress_updated)
 	RunManager.run_completed.connect(_on_run_completed)
+	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void: _refresh_color())
+
+
+func _refresh_color() -> void:
+	label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
 
 
 func _on_extraction_started() -> void:
 	visible = true
 	progress_bar.value = 0.0
 	label.text = "EXTRACTING..."
+	_refresh_color()
 
 
 func _on_extraction_cancelled() -> void:

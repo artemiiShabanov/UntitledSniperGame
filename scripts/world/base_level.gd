@@ -60,6 +60,10 @@ func _setup_run_variation() -> void:
 	_roll_events()
 	_setup_enemy_spawner()
 
+	# Palette: color all unscripted world geometry (ground, walls, etc.)
+	# Entities handle their own coloring via PaletteManager.bind_meshes()
+	PaletteManager.color_unscripted_meshes(self)
+
 
 func _pick_environment() -> void:
 	if not level_data:
