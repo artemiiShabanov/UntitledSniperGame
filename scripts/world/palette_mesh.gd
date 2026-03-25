@@ -16,6 +16,7 @@ var _material: StandardMaterial3D
 
 
 func _ready() -> void:
+	@warning_ignore("static_called_on_instance")
 	_material = PaletteManager._ensure_unique_material(self)
 	PaletteManager.palette_changed.connect(_on_palette_changed)
 	_apply_color()

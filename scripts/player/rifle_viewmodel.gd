@@ -35,7 +35,7 @@ func _ready() -> void:
 	_apply_palette()
 
 	if PaletteManager:
-		PaletteManager.palette_changed.connect(_apply_palette)
+		PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void: _apply_palette())
 
 
 func _process(delta: float) -> void:

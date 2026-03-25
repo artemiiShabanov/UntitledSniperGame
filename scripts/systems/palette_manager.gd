@@ -202,24 +202,20 @@ func _collect_meshes(node: Node) -> Array[MeshInstance3D]:
 
 static func _ensure_unique_material(mesh_node: MeshInstance3D) -> StandardMaterial3D:
 	## Returns a unique StandardMaterial3D for surface 0, creating if needed.
-	## Returns null if the mesh has no surfaces (empty or not yet loaded).
-	if not mesh_node.mesh or mesh_node.mesh.get_surface_count() == 0:
-		# No mesh or no surfaces — use material_override instead
-		if mesh_node.material_override is StandardMaterial3D:
-			return mesh_node.material_override as StandardMaterial3D
-		var mat := StandardMaterial3D.new()
-		mesh_node.material_override = mat
-		return mat
-	var existing := mesh_node.get_surface_override_material(0)
-	if existing is StandardMaterial3D:
-		return existing  # Already unique (we set it)
-	var base := mesh_node.get_active_material(0)
+	## Uses material_override as a safe fallback for any edge case.
+	if mesh_node.material_override is StandardMaterial3D:
+		return mesh_node.material_override as StandardMaterial3D
+	# Always use material_override — avoids surface_override_materials
+	# array bounds issues when Godot hasn't initialized the array yet
+	var base: Material = null
+	if mesh_node.mesh and mesh_node.mesh.get_surface_count() > 0:
+		base = mesh_node.mesh.surface_get_material(0)
 	var mat: StandardMaterial3D
 	if base is StandardMaterial3D:
 		mat = base.duplicate() as StandardMaterial3D
 	else:
 		mat = StandardMaterial3D.new()
-	mesh_node.set_surface_override_material(0, mat)
+	mesh_node.material_override = mat
 	return mat
 
 
