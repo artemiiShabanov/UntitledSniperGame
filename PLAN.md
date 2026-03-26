@@ -517,14 +517,48 @@ Core features complete. Bug-audited and refactored.
 - [ ] Weather particles (rain, fog volume)
 
 #### Audio [ ]
-- [ ] Player — rifle shot, bolt cycle, reload, dry fire, scope zoom
-- [ ] Player — footsteps per surface (metal, concrete, wood, dirt)
-- [ ] Bullet — impact per surface (metal, ground, wood, flesh)
-- [ ] Enemy — alert callout, search callout, death sound
-- [ ] NPC — panic callout, ambient chatter
-- [ ] Environment — ambient per level theme, time-of-day variation
-- [ ] Music — tension tracks that build with threat phase
-- [ ] UI — menu clicks, extraction countdown, objective complete, deploy whoosh
+Audio system foundation (AudioManager autoload + bank registry) is in place.
+Placeholder beeps wired to all 24 banks. Replace with real assets below.
+
+**Sources:** Freesound.org (CC0), Sonniss GDC Bundle (royalty-free), jsfxr (generated)
+
+##### Weapon Sounds (Freesound / Sonniss)
+- [ ] `rifle_fire` — [kennysvoice M24](https://freesound.org/people/kennysvoice/sounds/351777/) or [SuperPhat synth](https://freesound.org/people/SuperPhat/sounds/514228/) (CC0)
+- [ ] `rifle_bolt` — [Zott820 Mosin cycle](https://freesound.org/people/Zott820/sounds/370345/) (CC0)
+- [ ] `rifle_dry` — gun dry fire / trigger click (Freesound CC0)
+- [ ] `rifle_reload` — [AugustSandberg K98](https://freesound.org/people/AugustSandberg/sounds/508747/) (CC0)
+
+##### Impact Sounds (Freesound / Sonniss)
+- [ ] `bullet_impact` — [toxicwafflezz impacts](https://freesound.org/people/toxicwafflezz/sounds/150837/) (CC-BY) or Sonniss bundle
+- [ ] `bullet_whizz` — bullet flyby / whiz (Freesound CC0)
+- [ ] `bullet_penetrate` — metal impact / armor piercing (Freesound CC0)
+- [ ] `headshot` — [Kastenfrosch wet impact](https://freesound.org/people/Kastenfrosch/sounds/521957/) + [lolamadeus squelch](https://freesound.org/people/lolamadeus/sounds/159669/) (CC0)
+
+##### UI Sounds (jsfxr — generate at sfxr.me)
+- [ ] `ui_click` — short blip, mid pitch
+- [ ] `ui_confirm` — rising two-tone
+- [ ] `ui_cancel` — falling tone
+- [ ] `ui_error` — buzz / wrong
+- [ ] `ammo_switch` — quick mechanical click
+- [ ] `palette_switch` — soft whoosh / chime
+
+##### World Sounds (Freesound)
+- [ ] `extraction_start` — helicopter distant / radio beep
+- [ ] `extraction_complete` — helicopter arrive / success chime
+- [ ] `enemy_alert` — alert sound / alarm beep
+- [ ] `enemy_death` — body fall / death grunt
+- [ ] `npc_panic` — crowd panic / scream short
+- [ ] `destructible_break` — [wood crate smash](Freesound CC0)
+
+##### Ambient Loops (Freesound / Stable Audio)
+- [ ] `amb_industrial` — [fimrod warehouse](https://freesound.org/people/fimrod/sounds/278987/) + [Kostrava abandoned](https://freesound.org/s/240895/) (CC0)
+- [ ] `amb_wind` — wind outdoor / howling gentle (Freesound CC0)
+
+##### Music (Kevin MacLeod / AI-generated)
+- [ ] Hub theme — calm, methodical, low tension
+- [ ] In-run ambient — tense, minimal, building dread
+- [ ] Combat/alert — pulse, urgency (triggers on enemy alert)
+- [ ] Extraction — relief, short victory sting
 
 #### UI Art Pass [ ]
 - [ ] Main menu, save slots, settings — visual polish
