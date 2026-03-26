@@ -13,6 +13,7 @@ var _level_path: String = ""
 
 func _ready() -> void:
 	close_btn.pressed.connect(func(): contract_selected.emit(null))
+	AudioManager.wire_button(close_btn, &"menu_cancel")
 
 
 func open(level_path: String = "") -> void:
@@ -78,6 +79,7 @@ func _build_contract_row(contract: Contract) -> PanelContainer:
 		btn.text = "Accept (Free)"
 	btn.custom_minimum_size = Vector2(110, 0)
 	btn.pressed.connect(func(): _accept_contract(contract))
+	AudioManager.wire_button(btn, &"menu_confirm")
 	hbox.add_child(btn)
 
 	return panel

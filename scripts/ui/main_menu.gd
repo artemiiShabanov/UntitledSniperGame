@@ -30,9 +30,8 @@ func _ready() -> void:
 	slot_panel.visible = false
 	settings_screen.visible = false
 
-	# Hover sounds for all buttons
-	for btn: Button in [new_game_btn, continue_btn, settings_btn, quit_btn, slot_cancel_btn]:
-		btn.mouse_entered.connect(func() -> void: AudioManager.play_sfx_2d(&"menu_hover"))
+	# Wire sounds to all static buttons
+	AudioManager.wire_buttons(self)
 
 	# Enable continue only if any save exists
 	continue_btn.disabled = not _any_save_exists()
@@ -56,21 +55,18 @@ func _any_save_exists() -> bool:
 
 
 func _on_new_game() -> void:
-	AudioManager.play_sfx_2d(&"menu_click")
 	_is_new_game = true
 	_populate_slots()
 	slot_panel.visible = true
 
 
 func _on_continue() -> void:
-	AudioManager.play_sfx_2d(&"menu_click")
 	_is_new_game = false
 	_populate_slots()
 	slot_panel.visible = true
 
 
 func _on_settings() -> void:
-	AudioManager.play_sfx_2d(&"menu_click")
 	settings_screen.open()
 
 
@@ -79,7 +75,6 @@ func _on_settings_closed() -> void:
 
 
 func _on_quit() -> void:
-	AudioManager.play_sfx_2d(&"menu_click")
 	get_tree().quit()
 
 
@@ -136,6 +131,7 @@ func _populate_slots() -> void:
 				row.add_child(btn)
 
 		slot_list.add_child(row)
+		AudioManager.wire_buttons(row)
 
 
 func _on_slot_selected(slot: int) -> void:

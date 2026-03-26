@@ -18,6 +18,9 @@ func _ready() -> void:
 	master_slider.value_changed.connect(_on_master_changed)
 	fullscreen_check.toggled.connect(_on_fullscreen_toggled)
 	vsync_check.toggled.connect(_on_vsync_toggled)
+	AudioManager.wire_button(back_btn, &"menu_cancel")
+	AudioManager.wire_button(fullscreen_check)
+	AudioManager.wire_button(vsync_check)
 
 
 func open() -> void:

@@ -21,9 +21,8 @@ func _ready() -> void:
 	settings_screen.closed.connect(_close_settings)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-	# Hover sounds
-	for btn: Button in [resume_btn, settings_btn, abandon_btn]:
-		btn.mouse_entered.connect(func() -> void: AudioManager.play_sfx_2d(&"menu_hover"))
+	# Wire sounds to all buttons
+	AudioManager.wire_buttons(panel)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -50,11 +49,9 @@ func _pause() -> void:
 	settings_screen.visible = false
 	abandon_btn.visible = RunManager.game_state != RunManager.GameState.HUB
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	AudioManager.play_sfx_2d(&"menu_click")
 
 
 func _resume() -> void:
-	AudioManager.play_sfx_2d(&"menu_click")
 	is_paused = false
 	get_tree().paused = false
 	panel.visible = false

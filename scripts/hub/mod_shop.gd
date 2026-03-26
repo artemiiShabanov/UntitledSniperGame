@@ -14,6 +14,7 @@ var _current_slot: String = "barrel"
 
 func _ready() -> void:
 	close_btn.pressed.connect(func(): shop_closed.emit())
+	AudioManager.wire_button(close_btn, &"menu_cancel")
 	_build_tabs()
 
 
@@ -28,6 +29,7 @@ func _build_tabs() -> void:
 		var btn := Button.new()
 		btn.text = slot.capitalize()
 		btn.pressed.connect(_on_tab_selected.bind(slot))
+		AudioManager.wire_button(btn)
 		tab_bar.add_child(btn)
 
 
@@ -117,6 +119,7 @@ func _build_mod_row(mod: RifleMod, equipped_id: String) -> PanelContainer:
 		equip_btn.text = "Equip"
 		equip_btn.custom_minimum_size = Vector2(80, 0)
 		equip_btn.pressed.connect(_on_equip.bind(mod))
+		AudioManager.wire_button(equip_btn)
 		hbox.add_child(equip_btn)
 	else:
 		var buy_btn := Button.new()
@@ -127,6 +130,7 @@ func _build_mod_row(mod: RifleMod, equipped_id: String) -> PanelContainer:
 		buy_btn.custom_minimum_size = Vector2(80, 0)
 		buy_btn.disabled = SaveManager.get_credits() < mod.cost
 		buy_btn.pressed.connect(_on_buy.bind(mod))
+		AudioManager.wire_button(buy_btn, &"menu_confirm")
 		hbox.add_child(buy_btn)
 
 	return panel
@@ -146,9 +150,11 @@ func _format_stats(mod: RifleMod) -> String:
 
 func _on_buy(mod: RifleMod) -> void:
 	if SaveManager.purchase_mod(mod.id, mod.cost):
+		AudioManager.play_sfx_2d(&"menu_confirm")
 		_refresh()
 
 
 func _on_equip(mod: RifleMod) -> void:
 	SaveManager.equip_mod(mod.id)
+	AudioManager.play_sfx_2d(&"menu_confirm")
 	_refresh()

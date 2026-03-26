@@ -15,6 +15,7 @@ var _row_controls: Dictionary = {}  ## { ammo_id: { "owned": Label, "buy_btn": B
 
 func _ready() -> void:
 	close_btn.pressed.connect(func(): shop_closed.emit())
+	AudioManager.wire_button(close_btn, &"menu_cancel")
 	_ammo_types = AmmoRegistry.get_all_types()
 
 
@@ -72,6 +73,7 @@ func _rebuild_ui() -> void:
 			row.add_child(btn)
 
 		item_list.add_child(row)
+		AudioManager.wire_buttons(row)
 		_row_controls[ammo.ammo_id] = { "owned": owned_label, "row": row }
 
 	_update_button_states()
@@ -82,6 +84,7 @@ func _on_buy(ammo: AmmoType, amount: int) -> void:
 	if SaveManager.get_credits() < total_cost:
 		return
 
+	AudioManager.play_sfx_2d(&"menu_confirm")
 	SaveManager.add_credits(-total_cost)
 
 	if not SaveManager.data.has("ammo_inventory"):

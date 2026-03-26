@@ -548,7 +548,6 @@ Placeholder beeps wired to all 24 banks. Replace with real assets below.
 - [ ] `menu_hover` — subtle quiet click
 - [ ] `menu_confirm` — rising two-tone
 - [ ] `menu_cancel` — falling tone
-- [ ] `menu_error` — buzz / wrong
 - [ ] `ammo_switch` — quick mechanical click
 - [ ] `palette_switch` — soft whoosh / chime
 - [ ] `credits_gain` — coin/reward chime

@@ -10,6 +10,7 @@ signal shop_closed
 
 func _ready() -> void:
 	close_btn.pressed.connect(func(): shop_closed.emit())
+	AudioManager.wire_button(close_btn, &"menu_cancel")
 
 
 func open() -> void:
@@ -70,6 +71,7 @@ func _build_skill_row(skill: PlayerSkill) -> PanelContainer:
 		buy_btn.custom_minimum_size = Vector2(80, 0)
 		buy_btn.disabled = SaveManager.get_xp() < skill.cost
 		buy_btn.pressed.connect(_on_buy.bind(skill))
+		AudioManager.wire_button(buy_btn, &"menu_confirm")
 		hbox.add_child(buy_btn)
 
 	return panel
@@ -77,4 +79,5 @@ func _build_skill_row(skill: PlayerSkill) -> PanelContainer:
 
 func _on_buy(skill: PlayerSkill) -> void:
 	if SaveManager.purchase_skill(skill.id, skill.cost):
+		AudioManager.play_sfx_2d(&"menu_confirm")
 		_refresh()

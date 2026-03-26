@@ -83,6 +83,10 @@ func _ready() -> void:
 		SaveManager.data["ammo_inventory"] = inv
 		SaveManager.save()
 
+	# Hub music
+	AudioManager.play_music(&"hub_theme")
+	AudioManager.stop_ambient(0.5)
+
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and active_panel:
@@ -136,6 +140,7 @@ func _populate_mission_buttons() -> void:
 			btn.text = "%s — FREE" % data.level_name
 
 		btn.pressed.connect(_on_level_selected.bind(data))
+		AudioManager.wire_button(btn)
 		mission_list.add_child(btn)
 
 

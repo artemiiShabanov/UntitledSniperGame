@@ -59,7 +59,6 @@ var _placeholder_map: Dictionary = {
 	&"menu_hover": "click_quiet",
 	&"menu_confirm": "beep_high",
 	&"menu_cancel": "tone_low",
-	&"menu_error": "beep_fast",
 	&"ammo_switch": "click_low",
 	&"palette_switch": "click",
 	&"credits_gain": "beep_high",
@@ -335,3 +334,20 @@ func _get_free_2d_player() -> AudioStreamPlayer:
 			return player
 	# All busy — steal the oldest
 	return _pool_2d[0]
+
+
+## ── Button sound helpers ─────────────────────────────────────────────────
+
+func wire_button(btn: BaseButton, click_id: StringName = &"menu_click") -> void:
+	## Connects click + hover sounds to any button. Call once in _ready().
+	btn.pressed.connect(func() -> void: play_sfx_2d(click_id))
+	btn.mouse_entered.connect(func() -> void: play_sfx_2d(&"menu_hover"))
+
+
+func wire_buttons(container: Node, click_id: StringName = &"menu_click") -> void:
+	## Recursively wires click + hover sounds to all buttons in a container.
+	for child in container.get_children():
+		if child is BaseButton:
+			wire_button(child, click_id)
+		if child.get_child_count() > 0:
+			wire_buttons(child, click_id)

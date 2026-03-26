@@ -20,6 +20,8 @@ var _count_labels: Dictionary = {}
 func _ready() -> void:
 	deploy_btn.pressed.connect(_on_deploy)
 	cancel_btn.pressed.connect(func(): loadout_cancelled.emit())
+	AudioManager.wire_button(deploy_btn, &"menu_confirm")
+	AudioManager.wire_button(cancel_btn, &"menu_cancel")
 	_ammo_types = AmmoRegistry.get_all_types()
 
 

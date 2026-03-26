@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="AudioBank" load_steps=35 format=3 uid="uid://cvo07nawx1r04"]
+[gd_resource type="Resource" script_class="AudioBank" load_steps=34 format=3 uid="uid://cvo07nawx1r04"]
 
 [ext_resource type="Script" uid="uid://cp8ye6sssyfa1" path="res://scripts/systems/audio_bank.gd" id="1"]
 [ext_resource type="Script" uid="uid://capyglx2gl8of" path="res://scripts/systems/audio_bank_entry.gd" id="2"]
@@ -159,13 +159,6 @@ volume_db = -6.0
 pitch_variance = 0.0
 bus = &"SFX"
 
-[sub_resource type="Resource" id="menu_error"]
-script = ExtResource("2")
-id = &"menu_error"
-volume_db = -3.0
-pitch_variance = 0.0
-bus = &"SFX"
-
 [sub_resource type="Resource" id="menu_hover"]
 script = ExtResource("2")
 id = &"menu_hover"
@@ -224,4 +217,4 @@ bus = &"Ambient"
 
 [resource]
 script = ExtResource("1")
-entries = Array[ExtResource("2")]([SubResource("rifle_fire"), SubResource("rifle_dry"), SubResource("rifle_reload"), SubResource("rifle_bolt"), SubResource("scope_in"), SubResource("scope_out"), SubResource("impact_body"), SubResource("impact_head"), SubResource("impact_world"), SubResource("impact_destructible"), SubResource("bullet_whizz"), SubResource("bullet_penetrate"), SubResource("breath_hold"), SubResource("hit_taken"), SubResource("death"), SubResource("alert_spotted"), SubResource("npc_panic"), SubResource("extraction_start"), SubResource("extraction_complete"), SubResource("menu_click"), SubResource("menu_confirm"), SubResource("menu_cancel"), SubResource("menu_error"), SubResource("menu_hover"), SubResource("ammo_switch"), SubResource("palette_switch"), SubResource("credits_gain"), SubResource("xp_gain"), SubResource("hub_theme"), SubResource("combat_tension"), SubResource("level_ambient")])
+entries = Array[ExtResource("2")]([SubResource("rifle_fire"), SubResource("rifle_dry"), SubResource("rifle_reload"), SubResource("rifle_bolt"), SubResource("scope_in"), SubResource("scope_out"), SubResource("impact_body"), SubResource("impact_head"), SubResource("impact_world"), SubResource("impact_destructible"), SubResource("bullet_whizz"), SubResource("bullet_penetrate"), SubResource("breath_hold"), SubResource("hit_taken"), SubResource("death"), SubResource("alert_spotted"), SubResource("npc_panic"), SubResource("extraction_start"), SubResource("extraction_complete"), SubResource("menu_click"), SubResource("menu_confirm"), SubResource("menu_cancel"), SubResource("menu_hover"), SubResource("ammo_switch"), SubResource("palette_switch"), SubResource("credits_gain"), SubResource("xp_gain"), SubResource("hub_theme"), SubResource("combat_tension"), SubResource("level_ambient")])

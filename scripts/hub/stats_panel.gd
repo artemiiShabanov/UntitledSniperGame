@@ -12,6 +12,7 @@ var _level_list: Array[String] = []
 
 func _ready() -> void:
 	close_btn.pressed.connect(func(): closed.emit())
+	AudioManager.wire_button(close_btn, &"menu_cancel")
 
 
 func open(levels: Array[String] = []) -> void:
