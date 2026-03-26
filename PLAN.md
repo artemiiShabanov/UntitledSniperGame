@@ -543,15 +543,15 @@ Placeholder beeps wired to all 24 banks. Replace with real assets below.
 - [ ] `hit_taken` — pain grunt / impact (Freesound CC0)
 - [ ] `death` — death sound (Freesound CC0)
 
-##### UI Sounds (jsfxr — generate at sfxr.me)
-- [ ] `menu_click` — short blip, mid pitch
-- [ ] `menu_hover` — subtle quiet click
-- [ ] `menu_confirm` — rising two-tone
-- [ ] `menu_cancel` — falling tone
-- [ ] `ammo_switch` — quick mechanical click
-- [ ] `palette_switch` — soft whoosh / chime
-- [ ] `credits_gain` — coin/reward chime
-- [ ] `xp_gain` — XP reward beep
+##### UI Sounds (jsfxr — generate at sfxr.me) [x]
+- [x] `menu_click` — short blip, mid pitch
+- [x] `menu_hover` — subtle quiet click
+- [x] `menu_confirm` — rising two-tone
+- [x] `menu_cancel` — falling tone
+- [x] `ammo_switch` — quick mechanical click
+- [x] `palette_switch` — soft whoosh / chime
+- [x] `credits_gain` — coin/reward chime
+- [x] `xp_gain` — XP reward beep
 
 ##### World Sounds (Freesound)
 - [ ] `extraction_start` — helicopter distant / radio beep

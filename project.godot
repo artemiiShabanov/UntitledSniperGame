@@ -15,6 +15,10 @@ run/main_scene="res://scenes/ui/main_menu.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
+[audio]
+
+default_bus_layout="res://default_bus_layout.tres"
+
 [autoload]
 
 SaveManager="*res://scripts/systems/save_manager.gd"
@@ -30,10 +34,6 @@ PaletteTheme="*res://scripts/ui/palette_theme.gd"
 FilmGrainOverlay="*res://scenes/ui/film_grain_overlay.tscn"
 VFXFactory="*res://scripts/systems/vfx_factory.gd"
 AudioManager="*res://scripts/systems/audio_manager.gd"
-
-[audio]
-
-default_bus_layout="res://default_bus_layout.tres"
 
 [display]
 
