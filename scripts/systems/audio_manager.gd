@@ -123,11 +123,11 @@ func _make_placeholder(kind: String) -> AudioStreamWAV:
 		"noise_short":
 			return AudioPlaceholder.noise_burst(0.06, 0.5)
 		"click":
-			return AudioPlaceholder.click(0.02, 1000.0)
+			return AudioPlaceholder.click(0.05, 1000.0)
 		"click_low":
-			return AudioPlaceholder.click(0.03, 600.0)
+			return AudioPlaceholder.click(0.06, 600.0)
 		"click_quiet":
-			return AudioPlaceholder.click(0.015, 1200.0)
+			return AudioPlaceholder.click(0.04, 1400.0)
 		"tone_short":
 			return AudioPlaceholder.tone(0.3, 330.0, 0.8)
 		"tone_quiet":
