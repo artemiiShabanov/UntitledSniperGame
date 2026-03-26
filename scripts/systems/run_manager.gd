@@ -222,6 +222,7 @@ func _tick_extraction(delta: float) -> void:
 ## ── Run end ──────────────────────────────────────────────────────────────────
 
 func _end_run_success() -> void:
+	AudioManager.play_sfx_2d(&"extraction_complete")
 	_set_game_state(GameState.RESULT)
 
 	# Check contract completion
@@ -457,5 +458,6 @@ func record_kill_with_bonus(enemy: Node3D, headshot: bool, base_credits: int, ba
 		"total_multiplier": total_mult,
 	}
 
+	AudioManager.play_sfx_2d(&"credits_gain")
 	enemy_killed_with_info.emit(info)
 	return info

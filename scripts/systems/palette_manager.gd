@@ -60,6 +60,7 @@ func cycle_next() -> void:
 	_index = (_index + 1) % palettes.size()
 	current = palettes[_index]
 	_save_pref()
+	AudioManager.play_sfx_2d(&"palette_switch")
 
 
 func cycle_prev() -> void:
@@ -68,6 +69,7 @@ func cycle_prev() -> void:
 	_index = (_index - 1 + palettes.size()) % palettes.size()
 	current = palettes[_index]
 	_save_pref()
+	AudioManager.play_sfx_2d(&"palette_switch")
 
 
 func set_palette_by_name(palette_name: StringName) -> void:

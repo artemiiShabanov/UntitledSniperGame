@@ -29,6 +29,11 @@ PaletteManager="*res://scripts/systems/palette_manager.gd"
 PaletteTheme="*res://scripts/ui/palette_theme.gd"
 FilmGrainOverlay="*res://scenes/ui/film_grain_overlay.tscn"
 VFXFactory="*res://scripts/systems/vfx_factory.gd"
+AudioManager="*res://scripts/systems/audio_manager.gd"
+
+[audio]
+
+default_bus_layout="res://default_bus_layout.tres"
 
 [display]
 

@@ -57,6 +57,10 @@ func _apply_audio() -> void:
 	var music_idx := AudioServer.get_bus_index("Music")
 	if music_idx >= 0:
 		AudioServer.set_bus_volume_db(music_idx, linear_to_db(music_volume) if music_volume > 0.0 else -80.0)
+	# Ambient bus follows the SFX volume (or could be separate later)
+	var ambient_idx := AudioServer.get_bus_index("Ambient")
+	if ambient_idx >= 0:
+		AudioServer.set_bus_volume_db(ambient_idx, linear_to_db(sfx_volume) if sfx_volume > 0.0 else -80.0)
 
 
 func _apply_video() -> void:

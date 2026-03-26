@@ -217,6 +217,7 @@ func _enter_panic(threat_origin: Vector3) -> void:
 	panic_state = PanicState.PANICKING
 	panic_timer = npc_type.panic_duration if npc_type else 6.0
 	activity_state = ActivityState.PERFORMING  # Reset activity state
+	AudioManager.play_sfx(&"npc_panic", global_position)
 
 	# Flee away from threat
 	flee_direction = (global_position - threat_origin).normalized()

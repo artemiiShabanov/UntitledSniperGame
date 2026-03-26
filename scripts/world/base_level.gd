@@ -64,6 +64,10 @@ func _setup_run_variation() -> void:
 	# Entities handle their own coloring via PaletteManager.bind_meshes()
 	PaletteManager.color_unscripted_meshes(self)
 
+	# Start level audio
+	AudioManager.play_ambient(&"level_ambient")
+	AudioManager.play_music(&"combat_tension")
+
 
 func _pick_environment() -> void:
 	if not level_data:

@@ -308,11 +308,16 @@ func _is_in_extraction_zone() -> bool:
 
 func on_bullet_hit(_bullet: Node, _collision: KinematicCollision3D) -> void:
 	## Called by Bullet when an enemy projectile hits the player.
+	AudioManager.play_sfx_2d(&"hit_taken")
 	RunManager.take_hit()
 
 
 ## ── Run callbacks ───────────────────────────────────────────────────────────
 
-func _on_run_completed(_success: bool) -> void:
+func _on_run_completed(success: bool) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if not success:
+		AudioManager.play_sfx_2d(&"death")
+	AudioManager.stop_ambient(0.5)
+	AudioManager.stop_music(1.0)
 	# Result screen handles display and return to hub

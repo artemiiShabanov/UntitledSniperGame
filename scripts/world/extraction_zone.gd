@@ -42,6 +42,7 @@ func _process(_delta: float) -> void:
 	if Input.is_action_pressed("interact"):
 		if RunManager.game_state == RunManager.GameState.IN_RUN:
 			RunManager.begin_extraction()
+			AudioManager.play_sfx(&"extraction_start", global_position)
 		# While extracting, RunManager ticks the timer
 	else:
 		# Released E — cancel

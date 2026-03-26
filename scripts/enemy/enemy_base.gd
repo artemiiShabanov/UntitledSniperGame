@@ -272,6 +272,7 @@ func _set_alert_state(new_state: AlertState) -> void:
 			fire_timer = 0.0
 			velocity = Vector3.ZERO
 			_face_player()
+			AudioManager.play_sfx(&"alert_spotted", global_position)
 		AlertState.SEARCHING:
 			search_timer = search_duration
 			velocity = Vector3.ZERO
@@ -387,8 +388,9 @@ func _fire_at_player() -> void:
 	get_tree().root.add_child(bullet)
 	bullet.global_position = eye_pos
 
-	# Muzzle flash
+	# Muzzle flash + audio
 	VFXFactory.spawn_muzzle_flash(eye_pos, aim_dir, true)
+	AudioManager.play_sfx(&"rifle_fire", eye_pos)
 
 
 func _face_player() -> void:

@@ -68,10 +68,21 @@ func _physics_process(delta: float) -> void:
 			elif is_shock and collider.has_method("stun"):
 				collider.stun(stun_duration)
 				hit_enemy = collider.is_in_group("enemy")
-		# Spawn impact VFX
+		# Spawn impact VFX + audio
 		var hit_normal := collision.get_normal()
 		var hit_pos := collision.get_position()
 		VFXFactory.spawn_hit_impact(hit_pos, hit_normal, false)
+
+		# Impact sound based on what was hit
+		if collider and collider.is_in_group("enemy"):
+			if collider.has_method("_check_headshot") and collider._check_headshot(hit_pos):
+				AudioManager.play_sfx(&"impact_head", hit_pos)
+			else:
+				AudioManager.play_sfx(&"impact_body", hit_pos)
+		elif collider and collider is DestructibleTarget:
+			AudioManager.play_sfx(&"impact_destructible", hit_pos)
+		else:
+			AudioManager.play_sfx(&"impact_world", hit_pos)
 
 		# Only player bullets alert enemies to impact sounds
 		if not is_enemy_bullet:
