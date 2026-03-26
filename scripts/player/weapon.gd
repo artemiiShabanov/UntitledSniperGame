@@ -147,6 +147,7 @@ func _process_state_timer(delta: float) -> void:
 	if state_timer <= 0.0:
 		match state:
 			State.BOLT_CYCLING:
+				AudioManager.play_sfx_2d(&"rifle_bolt")
 				bolt_cycled.emit()
 				# Auto-reload if magazine is empty
 				if not ammo.has_ammo() and ammo.can_reload():
@@ -186,10 +187,12 @@ func _process_scope(delta: float) -> void:
 
 	if wants_scope and not is_scoped:
 		is_scoped = true
+		AudioManager.play_sfx_2d(&"scope_in")
 		if state == State.IDLE:
 			_set_state(State.AIMING)
 	elif not wants_scope and is_scoped:
 		is_scoped = false
+		AudioManager.play_sfx_2d(&"scope_out")
 		if state == State.AIMING:
 			_set_state(State.IDLE)
 
@@ -213,12 +216,14 @@ func cycle_ammo_type(direction: int = 1) -> void:
 	if is_busy():
 		return
 	ammo.cycle_type(direction)
+	AudioManager.play_sfx_2d(&"ammo_switch")
 
 
 func select_ammo_type(index: int) -> void:
 	if is_busy():
 		return
 	ammo.select_type(index)
+	AudioManager.play_sfx_2d(&"ammo_switch")
 
 
 ## ── Input ────────────────────────────────────────────────────────────────────
@@ -291,6 +296,7 @@ func _process_breath(delta: float) -> void:
 
 	if wants_hold and not is_holding_breath:
 		is_holding_breath = true
+		AudioManager.play_sfx_2d(&"breath_hold")
 	elif not wants_hold and is_holding_breath:
 		is_holding_breath = false
 
@@ -315,6 +321,8 @@ func get_breath_ratio() -> float:
 
 func try_shoot() -> void:
 	if not can_shoot():
+		if not ammo.has_ammo() and state in [State.IDLE, State.AIMING]:
+			AudioManager.play_sfx_2d(&"rifle_dry")
 		return
 
 	ammo.consume_round()
@@ -343,8 +351,9 @@ func _spawn_bullet() -> void:
 	get_tree().root.add_child(bullet)
 	bullet.global_position = spawn_pos
 
-	# Muzzle flash VFX
+	# Muzzle flash VFX + audio
 	VFXFactory.spawn_muzzle_flash(spawn_pos + spawn_dir * 0.3, spawn_dir, false)
+	AudioManager.play_sfx(&"rifle_fire", spawn_pos)
 
 	_propagate_gunshot_sound(spawn_pos)
 
@@ -356,6 +365,7 @@ func try_reload() -> void:
 	is_scoped = false
 	state_timer = reload_time
 	_set_state(State.RELOADING)
+	AudioManager.play_sfx_2d(&"rifle_reload")
 
 
 func _finish_reload() -> void:

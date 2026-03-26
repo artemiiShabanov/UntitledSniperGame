@@ -531,36 +531,40 @@ Placeholder beeps wired to all 24 banks. Replace with real assets below.
 - [ ] `rifle_reload` — [AugustSandberg K98](https://freesound.org/people/AugustSandberg/sounds/508747/) (CC0)
 
 ##### Impact Sounds (Freesound / Sonniss)
-- [ ] `bullet_impact` — [toxicwafflezz impacts](https://freesound.org/people/toxicwafflezz/sounds/150837/) (CC-BY) or Sonniss bundle
+- [ ] `impact_body` — [toxicwafflezz impacts](https://freesound.org/people/toxicwafflezz/sounds/150837/) (CC-BY) or Sonniss bundle
+- [ ] `impact_world` — bullet hit concrete/metal/wood (Freesound CC0)
+- [ ] `impact_head` — [Kastenfrosch wet impact](https://freesound.org/people/Kastenfrosch/sounds/521957/) + [lolamadeus squelch](https://freesound.org/people/lolamadeus/sounds/159669/) (CC0)
+- [ ] `impact_destructible` — crate/object smash (Freesound CC0)
 - [ ] `bullet_whizz` — bullet flyby / whiz (Freesound CC0)
 - [ ] `bullet_penetrate` — metal impact / armor piercing (Freesound CC0)
-- [ ] `headshot` — [Kastenfrosch wet impact](https://freesound.org/people/Kastenfrosch/sounds/521957/) + [lolamadeus squelch](https://freesound.org/people/lolamadeus/sounds/159669/) (CC0)
+
+##### Player Sounds (Freesound)
+- [ ] `breath_hold` — quiet inhale/hold (Freesound CC0)
+- [ ] `hit_taken` — pain grunt / impact (Freesound CC0)
+- [ ] `death` — death sound (Freesound CC0)
 
 ##### UI Sounds (jsfxr — generate at sfxr.me)
-- [ ] `ui_click` — short blip, mid pitch
-- [ ] `ui_confirm` — rising two-tone
-- [ ] `ui_cancel` — falling tone
-- [ ] `ui_error` — buzz / wrong
+- [ ] `menu_click` — short blip, mid pitch
+- [ ] `menu_hover` — subtle quiet click
+- [ ] `menu_confirm` — rising two-tone
+- [ ] `menu_cancel` — falling tone
+- [ ] `menu_error` — buzz / wrong
 - [ ] `ammo_switch` — quick mechanical click
 - [ ] `palette_switch` — soft whoosh / chime
+- [ ] `credits_gain` — coin/reward chime
+- [ ] `xp_gain` — XP reward beep
 
 ##### World Sounds (Freesound)
 - [ ] `extraction_start` — helicopter distant / radio beep
 - [ ] `extraction_complete` — helicopter arrive / success chime
-- [ ] `enemy_alert` — alert sound / alarm beep
-- [ ] `enemy_death` — body fall / death grunt
+- [ ] `alert_spotted` — alert sound / alarm beep
 - [ ] `npc_panic` — crowd panic / scream short
-- [ ] `destructible_break` — [wood crate smash](Freesound CC0)
 
-##### Ambient Loops (Freesound / Stable Audio)
-- [ ] `amb_industrial` — [fimrod warehouse](https://freesound.org/people/fimrod/sounds/278987/) + [Kostrava abandoned](https://freesound.org/s/240895/) (CC0)
-- [ ] `amb_wind` — wind outdoor / howling gentle (Freesound CC0)
+##### Ambient & Music
+- [ ] `level_ambient` — [fimrod warehouse](https://freesound.org/people/fimrod/sounds/278987/) + [Kostrava abandoned](https://freesound.org/s/240895/) (CC0)
+- [ ] `hub_theme` — calm, methodical, low tension (Kevin MacLeod / AI-generated)
+- [ ] `combat_tension` — tense, minimal, building dread (Kevin MacLeod / AI-generated)
 
-##### Music (Kevin MacLeod / AI-generated)
-- [ ] Hub theme — calm, methodical, low tension
-- [ ] In-run ambient — tense, minimal, building dread
-- [ ] Combat/alert — pulse, urgency (triggers on enemy alert)
-- [ ] Extraction — relief, short victory sting
 
 #### UI Art Pass [ ]
 - [ ] Main menu, save slots, settings — visual polish

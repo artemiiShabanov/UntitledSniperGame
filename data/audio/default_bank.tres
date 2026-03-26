@@ -1,0 +1,227 @@
+[gd_resource type="Resource" script_class="AudioBank" load_steps=35 format=3 uid="uid://cvo07nawx1r04"]
+
+[ext_resource type="Script" uid="uid://cp8ye6sssyfa1" path="res://scripts/systems/audio_bank.gd" id="1"]
+[ext_resource type="Script" uid="uid://capyglx2gl8of" path="res://scripts/systems/audio_bank_entry.gd" id="2"]
+[ext_resource type="AudioStream" uid="uid://b4wlm65ph6rmn" path="res://data/audio/click.wav" id="2_02u55"]
+
+[sub_resource type="Resource" id="rifle_fire"]
+script = ExtResource("2")
+id = &"rifle_fire"
+volume_db = 0.0
+pitch_variance = 0.05
+bus = &"SFX"
+
+[sub_resource type="Resource" id="rifle_dry"]
+script = ExtResource("2")
+id = &"rifle_dry"
+volume_db = -6.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="rifle_reload"]
+script = ExtResource("2")
+id = &"rifle_reload"
+volume_db = -3.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="rifle_bolt"]
+script = ExtResource("2")
+id = &"rifle_bolt"
+volume_db = -3.0
+pitch_variance = 0.02
+bus = &"SFX"
+
+[sub_resource type="Resource" id="scope_in"]
+script = ExtResource("2")
+id = &"scope_in"
+volume_db = -9.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="scope_out"]
+script = ExtResource("2")
+id = &"scope_out"
+volume_db = -9.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="impact_body"]
+script = ExtResource("2")
+id = &"impact_body"
+volume_db = -3.0
+pitch_variance = 0.1
+bus = &"SFX"
+
+[sub_resource type="Resource" id="impact_head"]
+script = ExtResource("2")
+id = &"impact_head"
+volume_db = 0.0
+pitch_variance = 0.05
+bus = &"SFX"
+
+[sub_resource type="Resource" id="impact_world"]
+script = ExtResource("2")
+id = &"impact_world"
+volume_db = -6.0
+pitch_variance = 0.15
+bus = &"SFX"
+
+[sub_resource type="Resource" id="impact_destructible"]
+script = ExtResource("2")
+id = &"impact_destructible"
+volume_db = -3.0
+pitch_variance = 0.1
+bus = &"SFX"
+
+[sub_resource type="Resource" id="bullet_whizz"]
+script = ExtResource("2")
+id = &"bullet_whizz"
+volume_db = -6.0
+pitch_variance = 0.15
+bus = &"SFX"
+
+[sub_resource type="Resource" id="bullet_penetrate"]
+script = ExtResource("2")
+id = &"bullet_penetrate"
+volume_db = -3.0
+pitch_variance = 0.1
+bus = &"SFX"
+
+[sub_resource type="Resource" id="breath_hold"]
+script = ExtResource("2")
+id = &"breath_hold"
+volume_db = -12.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="hit_taken"]
+script = ExtResource("2")
+id = &"hit_taken"
+volume_db = 0.0
+pitch_variance = 0.05
+bus = &"SFX"
+
+[sub_resource type="Resource" id="death"]
+script = ExtResource("2")
+id = &"death"
+volume_db = 0.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="alert_spotted"]
+script = ExtResource("2")
+id = &"alert_spotted"
+volume_db = -6.0
+pitch_variance = 0.1
+bus = &"SFX"
+
+[sub_resource type="Resource" id="npc_panic"]
+script = ExtResource("2")
+id = &"npc_panic"
+volume_db = -6.0
+pitch_variance = 0.1
+bus = &"SFX"
+
+[sub_resource type="Resource" id="extraction_start"]
+script = ExtResource("2")
+id = &"extraction_start"
+volume_db = -3.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="extraction_complete"]
+script = ExtResource("2")
+id = &"extraction_complete"
+volume_db = 0.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="menu_click"]
+script = ExtResource("2")
+id = &"menu_click"
+stream = ExtResource("2_02u55")
+volume_db = -6.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="menu_confirm"]
+script = ExtResource("2")
+id = &"menu_confirm"
+volume_db = -6.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="menu_cancel"]
+script = ExtResource("2")
+id = &"menu_cancel"
+volume_db = -6.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="menu_error"]
+script = ExtResource("2")
+id = &"menu_error"
+volume_db = -3.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="menu_hover"]
+script = ExtResource("2")
+id = &"menu_hover"
+volume_db = -12.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="ammo_switch"]
+script = ExtResource("2")
+id = &"ammo_switch"
+volume_db = -6.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="palette_switch"]
+script = ExtResource("2")
+id = &"palette_switch"
+volume_db = -9.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="credits_gain"]
+script = ExtResource("2")
+id = &"credits_gain"
+volume_db = -6.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="xp_gain"]
+script = ExtResource("2")
+id = &"xp_gain"
+volume_db = -6.0
+pitch_variance = 0.0
+bus = &"SFX"
+
+[sub_resource type="Resource" id="hub_theme"]
+script = ExtResource("2")
+id = &"hub_theme"
+volume_db = -12.0
+pitch_variance = 0.0
+bus = &"Music"
+
+[sub_resource type="Resource" id="combat_tension"]
+script = ExtResource("2")
+id = &"combat_tension"
+volume_db = -12.0
+pitch_variance = 0.0
+bus = &"Music"
+
+[sub_resource type="Resource" id="level_ambient"]
+script = ExtResource("2")
+id = &"level_ambient"
+volume_db = -9.0
+pitch_variance = 0.0
+bus = &"Ambient"
+
+[resource]
+script = ExtResource("1")
+entries = Array[ExtResource("2")]([SubResource("rifle_fire"), SubResource("rifle_dry"), SubResource("rifle_reload"), SubResource("rifle_bolt"), SubResource("scope_in"), SubResource("scope_out"), SubResource("impact_body"), SubResource("impact_head"), SubResource("impact_world"), SubResource("impact_destructible"), SubResource("bullet_whizz"), SubResource("bullet_penetrate"), SubResource("breath_hold"), SubResource("hit_taken"), SubResource("death"), SubResource("alert_spotted"), SubResource("npc_panic"), SubResource("extraction_start"), SubResource("extraction_complete"), SubResource("menu_click"), SubResource("menu_confirm"), SubResource("menu_cancel"), SubResource("menu_error"), SubResource("menu_hover"), SubResource("ammo_switch"), SubResource("palette_switch"), SubResource("credits_gain"), SubResource("xp_gain"), SubResource("hub_theme"), SubResource("combat_tension"), SubResource("level_ambient")])

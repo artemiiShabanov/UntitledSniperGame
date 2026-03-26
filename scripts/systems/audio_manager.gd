@@ -51,9 +51,15 @@ var _placeholder_map: Dictionary = {
 	# Extraction
 	&"extraction_start": "beep_pattern",
 	&"extraction_complete": "beep_high",
+	# Bullet travel
+	&"bullet_whizz": "tone_quiet",
+	&"bullet_penetrate": "noise_short",
 	# UI
 	&"menu_click": "click",
 	&"menu_hover": "click_quiet",
+	&"menu_confirm": "beep_high",
+	&"menu_cancel": "tone_low",
+	&"menu_error": "beep_fast",
 	&"ammo_switch": "click_low",
 	&"palette_switch": "click",
 	&"credits_gain": "beep_high",

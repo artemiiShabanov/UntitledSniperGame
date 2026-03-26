@@ -108,6 +108,8 @@ func _populate(success: bool) -> void:
 	var xp_earned: int = stats.get("xp_earned", 0)
 	xp_label.text = "+%d XP" % xp_earned
 	xp_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
+	if xp_earned > 0:
+		AudioManager.play_sfx_2d(&"xp_gain")
 
 	# Continue prompt
 	continue_label.text = "Press E to continue"
