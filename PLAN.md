@@ -526,6 +526,8 @@ Placeholder beeps wired to all 24 banks. Replace with real assets below.
 - [ ] `rifle_fire` — [kennysvoice M24](https://freesound.org/people/kennysvoice/sounds/351777/) or [SuperPhat synth](https://freesound.org/people/SuperPhat/sounds/514228/) (CC0)
 - [ ] `rifle_bolt` — [Zott820 Mosin cycle](https://freesound.org/people/Zott820/sounds/370345/) (CC0)
 - [ ] `rifle_dry` — gun dry fire / trigger click (Freesound CC0)
+- [ ] `scope_in` — cloth rustle + subtle mechanical zoom (Freesound CC0)
+- [ ] `scope_out` — reverse of scope_in, quick unzoom (Freesound CC0)
 - [ ] `rifle_reload` — [AugustSandberg K98](https://freesound.org/people/AugustSandberg/sounds/508747/) (CC0)
 
 ##### Impact Sounds (Freesound / Sonniss)
