@@ -518,7 +518,7 @@ Core features complete. Bug-audited and refactored.
 
 #### Audio [ ]
 Audio system foundation (AudioManager autoload + bank registry) is in place.
-Placeholder beeps wired to all 24 banks. Replace with real assets below.
+Placeholder beeps wired to all 36 banks. Replace with real assets below.
 
 **Sources:** Freesound.org (CC0), Sonniss GDC Bundle (royalty-free), jsfxr (generated)
 
@@ -539,9 +539,14 @@ Placeholder beeps wired to all 24 banks. Replace with real assets below.
 - [ ] `bullet_penetrate` — metal impact / armor piercing (Freesound CC0)
 
 ##### Player Sounds (Freesound)
-- [ ] `breath_hold` — quiet inhale/hold (Freesound CC0)
+- [ ] `footstep` — footstep (volume/speed varies: crouch quiet+slow, sprint loud+fast, walk normal)
+- [ ] `slide` — slide/scrape on ground
+- [ ] `heartbeat` — heartbeat pulse while holding breath
+- [ ] `breath_hold` — quiet inhale/hold
+- [ ] `breath_exhale` — exhale on breath release (louder on exhaustion)
 - [ ] `hit_taken` — pain grunt / impact (Freesound CC0)
 - [ ] `death` — death sound (Freesound CC0)
+- [ ] `scope_zoom` — subtle click on zoom level change (for future use)
 
 ##### UI Sounds (jsfxr — generate at sfxr.me) [x]
 - [x] `menu_click` — short blip, mid pitch
@@ -560,9 +565,10 @@ Placeholder beeps wired to all 24 banks. Replace with real assets below.
 - [ ] `npc_panic` — crowd panic / scream short
 
 ##### Ambient & Music
-- [ ] `level_ambient` — [fimrod warehouse](https://freesound.org/people/fimrod/sounds/278987/) + [Kostrava abandoned](https://freesound.org/s/240895/) (CC0)
-- [ ] `hub_theme` — calm, methodical, low tension (Kevin MacLeod / AI-generated)
-- [ ] `combat_tension` — tense, minimal, building dread (Kevin MacLeod / AI-generated)
+- [ ] `level_ambient` — per-level ambient soundscape (LevelData.level_ambient)
+- [ ] `level_theme` — per-level music bed (LevelData.level_theme), crossfades to combat on threat
+- [ ] `hub_theme` — calm, methodical, low tension (Kevin MacLeod / Pixabay)
+- [ ] `combat_tension` — tense, minimal, building dread (Kevin MacLeod / Pixabay)
 
 
 #### UI Art Pass [ ]

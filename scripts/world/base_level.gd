@@ -64,9 +64,10 @@ func _setup_run_variation() -> void:
 	# Entities handle their own coloring via PaletteManager.bind_meshes()
 	PaletteManager.color_unscripted_meshes(self)
 
-	# Start level audio
+	# Start level audio — ambient + level theme, combat music triggers on threat
 	AudioManager.play_ambient(&"level_ambient")
-	AudioManager.play_music(&"combat_tension")
+	AudioManager.play_music(&"level_theme")
+	RunManager.threat_phase_changed.connect(_on_threat_phase_changed)
 
 
 func _pick_environment() -> void:
@@ -237,6 +238,16 @@ func _pick_extraction_zone() -> void:
 	extraction_zone = zones[0]
 	for i in range(keep_count, zones.size()):
 		zones[i].queue_free()
+
+
+func _on_threat_phase_changed(phase: RunManager.ThreatPhase) -> void:
+	match phase:
+		RunManager.ThreatPhase.MID:
+			AudioManager.play_music(&"combat_tension")
+		RunManager.ThreatPhase.LATE:
+			pass  # Could swap to a more intense track later
+		RunManager.ThreatPhase.EARLY:
+			AudioManager.stop_music()
 
 
 func _roll_events() -> void:

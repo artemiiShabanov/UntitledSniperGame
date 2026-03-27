@@ -27,6 +27,16 @@ var is_sliding: bool = false
 var slide_timer: float = 0.0
 var slide_direction: Vector3 = Vector3.ZERO
 
+## Footstep timing
+const FOOTSTEP_WALK_INTERVAL: float = 0.5
+const FOOTSTEP_SPRINT_INTERVAL: float = 0.33
+const FOOTSTEP_CROUCH_INTERVAL: float = 0.7
+const FOOTSTEP_CROUCH_VOLUME: float = -8.0  ## dB offset for crouch steps
+const FOOTSTEP_SPRINT_VOLUME: float = 3.0   ## dB offset for sprint steps
+const LANDING_VOLUME: float = 4.0            ## dB offset for landing thud
+var _footstep_timer: float = 0.0
+var _was_on_floor: bool = true
+
 ## Zipline state
 var is_on_zipline: bool = false
 var zipline_ref: Node3D = null
@@ -103,6 +113,11 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+	# Landing sound
+	if is_on_floor() and not _was_on_floor:
+		AudioManager.play_sfx_2d_varied(&"footstep", 0.15, LANDING_VOLUME)
+	_was_on_floor = is_on_floor()
+
 
 ## ── Input ────────────────────────────────────────────────────────────────────
 
@@ -146,6 +161,7 @@ func _start_slide(horizontal_speed: float) -> void:
 	is_crouching = true
 	slide_timer = slide_duration
 	slide_direction = Vector3(velocity.x, 0, velocity.z).normalized()
+	AudioManager.play_sfx_2d_varied(&"slide", 0.1)
 
 
 func _update_slide(delta: float, horizontal_speed: float, wants_crouch: bool) -> void:
@@ -190,6 +206,33 @@ func _process_movement() -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0, current_speed)
 		velocity.z = move_toward(velocity.z, 0, current_speed)
+
+	# Footstep sounds
+	_process_footsteps(direction, is_sprinting)
+
+
+## ── Footsteps ───────────────────────────────────────────────────────────
+
+func _process_footsteps(direction: Vector3, is_sprinting: bool) -> void:
+	if not is_on_floor() or direction.is_zero_approx():
+		_footstep_timer = 0.0
+		return
+
+	var interval: float
+	var volume_offset: float = 0.0
+	if is_crouching:
+		interval = FOOTSTEP_CROUCH_INTERVAL
+		volume_offset = FOOTSTEP_CROUCH_VOLUME
+	elif is_sprinting:
+		interval = FOOTSTEP_SPRINT_INTERVAL
+		volume_offset = FOOTSTEP_SPRINT_VOLUME
+	else:
+		interval = FOOTSTEP_WALK_INTERVAL
+
+	_footstep_timer += get_physics_process_delta_time()
+	if _footstep_timer >= interval:
+		_footstep_timer -= interval
+		AudioManager.play_sfx_2d_varied(&"footstep", 0.2, volume_offset)
 
 
 ## ── Interaction ──────────────────────────────────────────────────────────────

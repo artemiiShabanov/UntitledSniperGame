@@ -57,6 +57,10 @@ func _physics_process(delta: float) -> void:
 	# Bullet drop
 	velocity.y -= bullet_gravity * delta
 
+	# Enemy bullet whizz near player
+	if is_enemy_bullet:
+		_check_whizz()
+
 	var collision := move_and_collide(velocity * delta)
 	if collision:
 		var collider := collision.get_collider()
@@ -91,8 +95,26 @@ func _physics_process(delta: float) -> void:
 		if penetration and hit_enemy:
 			_already_hit.append(collider)
 			damage *= 0.5  # Halve damage per penetration
+			AudioManager.play_sfx(&"bullet_penetrate", hit_pos)
 		else:
 			queue_free()
+
+
+## ── Bullet whizz ──────────────────────────────────────────────────────────
+
+const WHIZZ_DISTANCE: float = 5.0  ## Max distance to player for whizz sound
+var _whizz_played: bool = false
+
+func _check_whizz() -> void:
+	if _whizz_played:
+		return
+	var players := get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return
+	var player_pos: Vector3 = players[0].global_position
+	if global_position.distance_squared_to(player_pos) < WHIZZ_DISTANCE * WHIZZ_DISTANCE:
+		AudioManager.play_sfx(&"bullet_whizz", global_position)
+		_whizz_played = true
 
 
 const IMPACT_LOUDNESS: float = 20.0

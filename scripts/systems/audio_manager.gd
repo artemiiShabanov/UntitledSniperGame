@@ -42,7 +42,6 @@ var _placeholder_map: Dictionary = {
 	&"impact_world": "noise_short",
 	&"impact_destructible": "noise_short",
 	# Player
-	&"breath_hold": "tone_quiet",
 	&"hit_taken": "noise_burst",
 	&"death": "tone_low",
 	# Enemies / NPCs
@@ -63,10 +62,20 @@ var _placeholder_map: Dictionary = {
 	&"palette_switch": "click",
 	&"credits_gain": "beep_high",
 	&"xp_gain": "beep",
+	# Player movement
+	&"footstep": "footstep",
+	&"slide": "slide",
+	# Breath
+	&"heartbeat": "heartbeat",
+	&"breath_hold": "breath_in",
+	&"breath_exhale": "breath_out",
+	# Scope
+	&"scope_zoom": "click_quiet",
 	# Music / Ambient
 	&"hub_theme": "drone",
 	&"combat_tension": "drone",
 	&"level_ambient": "drone",
+	&"level_theme": "drone",
 }
 
 
@@ -144,6 +153,16 @@ func _make_placeholder(kind: String) -> AudioStreamWAV:
 			return AudioPlaceholder.tone(0.2, 1200.0, 1.0)
 		"drone":
 			return AudioPlaceholder.low_drone(2.0, 60.0)
+		"footstep":
+			return AudioPlaceholder.noise_burst(0.08, 0.9)
+		"slide":
+			return AudioPlaceholder.noise_burst(0.3, 0.6)
+		"heartbeat":
+			return AudioPlaceholder.tone(0.25, 55.0, 2.0)
+		"breath_in":
+			return AudioPlaceholder.noise_burst(0.4, 0.5)
+		"breath_out":
+			return AudioPlaceholder.noise_burst(0.3, 0.7)
 		_:
 			return AudioPlaceholder.click()
 
@@ -224,6 +243,24 @@ func play_sfx_2d(id: StringName) -> void:
 	else:
 		player.pitch_scale = 1.0
 
+	player.play()
+
+
+func play_sfx_2d_varied(id: StringName, pitch_range: float = 0.15, volume_offset: float = 0.0) -> void:
+	## Play a 2D sound with random pitch variation and optional volume offset.
+	## Used for footsteps, heartbeats, etc. to prevent repetitive feel.
+	var entry: AudioBankEntry = _bank_map.get(id) as AudioBankEntry
+	if not entry or not entry.stream:
+		return
+
+	var player: AudioStreamPlayer = _get_free_2d_player()
+	if not player:
+		return
+
+	player.stream = entry.stream
+	player.volume_db = entry.volume_db + volume_offset + randf_range(-1.5, 1.5)
+	player.bus = entry.bus
+	player.pitch_scale = 1.0 + randf_range(-pitch_range, pitch_range)
 	player.play()
 
 

@@ -1,19 +1,25 @@
-[gd_resource type="Resource" script_class="AudioBank" load_steps=41 format=3 uid="uid://cvo07nawx1r04"]
+[gd_resource type="Resource" script_class="AudioBank" load_steps=46 format=3 uid="uid://cvo07nawx1r04"]
 
 [ext_resource type="Script" uid="uid://cp8ye6sssyfa1" path="res://scripts/systems/audio_bank.gd" id="1"]
 [ext_resource type="Script" uid="uid://capyglx2gl8of" path="res://scripts/systems/audio_bank_entry.gd" id="2"]
-[ext_resource type="AudioStream" uid="uid://becyqg0atwqcu" path="res://data/audio/click-2.wav" id="2_vgqr8"]
+[ext_resource type="AudioStream" uid="uid://dcxo1nihpjl06" path="res://data/audio/Weapon/fire.mp3" id="2_omlv1"]
 [ext_resource type="AudioStream" uid="uid://ctgml41ybi2lw" path="res://data/audio/generated/menu_confirm.wav" id="3_12p6r"]
-[ext_resource type="AudioStream" uid="uid://hp355n57yonc" path="res://data/audio/hover.wav" id="3_mbb2f"]
-[ext_resource type="AudioStream" uid="uid://5c4l4w562n5l" path="res://data/audio/cancel.wav" id="3_y5c6b"]
+[ext_resource type="AudioStream" uid="uid://c6harhlfh0b6a" path="res://data/audio/Player/hitHurt-2.wav" id="3_j8scr"]
+[ext_resource type="AudioStream" uid="uid://dlqw1wffl6ooc" path="res://data/audio/Player/breath_in.mp3" id="3_s4h8c"]
 [ext_resource type="AudioStream" uid="uid://xm3crl24dr7w" path="res://data/audio/generated/ammo_switch.wav" id="4_mbb2f"]
+[ext_resource type="AudioStream" uid="uid://c50mggnkhv8vk" path="res://data/audio/Player/death.wav" id="4_s4h8c"]
 [ext_resource type="AudioStream" uid="uid://bnuquhuem8xwd" path="res://data/audio/generated/xp_gain.wav" id="4_u4q0y"]
+[ext_resource type="AudioStream" uid="uid://becyqg0atwqcu" path="res://data/audio/UI/click-2.wav" id="5_omiyv"]
 [ext_resource type="AudioStream" uid="uid://bc7bukkwgl755" path="res://data/audio/generated/palette_switch.wav" id="5_u4q0y"]
-[ext_resource type="AudioStream" uid="uid://by8mipuj7tapa" path="res://data/audio/pickupCoin-2.wav" id="6_ixl3d"]
+[ext_resource type="AudioStream" uid="uid://5c4l4w562n5l" path="res://data/audio/UI/cancel.wav" id="7_dgqrj"]
+[ext_resource type="AudioStream" uid="uid://hp355n57yonc" path="res://data/audio/UI/hover.wav" id="8_kiy1o"]
+[ext_resource type="AudioStream" uid="uid://by8mipuj7tapa" path="res://data/audio/UI/pickupCoin-2.wav" id="11_tsyb8"]
+[ext_resource type="AudioStream" uid="uid://ybgpx1167lu6" path="res://data/audio/Music/hub_theme.mp3" id="13_j8scr"]
 
 [sub_resource type="Resource" id="rifle_fire"]
 script = ExtResource("2")
 id = &"rifle_fire"
+stream = ExtResource("2_omlv1")
 volume_db = 0.0
 pitch_variance = 0.05
 bus = &"SFX"
@@ -98,6 +104,7 @@ bus = &"SFX"
 [sub_resource type="Resource" id="breath_hold"]
 script = ExtResource("2")
 id = &"breath_hold"
+stream = ExtResource("3_s4h8c")
 volume_db = -12.0
 pitch_variance = 0.0
 bus = &"SFX"
@@ -105,6 +112,7 @@ bus = &"SFX"
 [sub_resource type="Resource" id="hit_taken"]
 script = ExtResource("2")
 id = &"hit_taken"
+stream = ExtResource("3_j8scr")
 volume_db = 0.0
 pitch_variance = 0.05
 bus = &"SFX"
@@ -112,6 +120,7 @@ bus = &"SFX"
 [sub_resource type="Resource" id="death"]
 script = ExtResource("2")
 id = &"death"
+stream = ExtResource("4_s4h8c")
 volume_db = 0.0
 pitch_variance = 0.0
 bus = &"SFX"
@@ -147,7 +156,7 @@ bus = &"SFX"
 [sub_resource type="Resource" id="menu_click"]
 script = ExtResource("2")
 id = &"menu_click"
-stream = ExtResource("2_vgqr8")
+stream = ExtResource("5_omiyv")
 volume_db = -6.0
 pitch_variance = 0.0
 bus = &"SFX"
@@ -163,7 +172,7 @@ bus = &"SFX"
 [sub_resource type="Resource" id="menu_cancel"]
 script = ExtResource("2")
 id = &"menu_cancel"
-stream = ExtResource("3_y5c6b")
+stream = ExtResource("7_dgqrj")
 volume_db = -6.0
 pitch_variance = 0.0
 bus = &"SFX"
@@ -171,7 +180,7 @@ bus = &"SFX"
 [sub_resource type="Resource" id="menu_hover"]
 script = ExtResource("2")
 id = &"menu_hover"
-stream = ExtResource("3_mbb2f")
+stream = ExtResource("8_kiy1o")
 volume_db = -20.0
 pitch_variance = 0.0
 bus = &"SFX"
@@ -195,7 +204,7 @@ bus = &"SFX"
 [sub_resource type="Resource" id="credits_gain"]
 script = ExtResource("2")
 id = &"credits_gain"
-stream = ExtResource("6_ixl3d")
+stream = ExtResource("11_tsyb8")
 volume_db = -6.0
 pitch_variance = 0.0
 bus = &"SFX"
@@ -211,6 +220,7 @@ bus = &"SFX"
 [sub_resource type="Resource" id="hub_theme"]
 script = ExtResource("2")
 id = &"hub_theme"
+stream = ExtResource("13_j8scr")
 volume_db = -12.0
 pitch_variance = 0.0
 bus = &"Music"
@@ -229,6 +239,48 @@ volume_db = -9.0
 pitch_variance = 0.0
 bus = &"Ambient"
 
+[sub_resource type="Resource" id="footstep"]
+script = ExtResource("2")
+id = &"footstep"
+volume_db = -3.0
+pitch_variance = 0.2
+bus = &"SFX"
+
+[sub_resource type="Resource" id="slide"]
+script = ExtResource("2")
+id = &"slide"
+volume_db = -3.0
+pitch_variance = 0.1
+bus = &"SFX"
+
+[sub_resource type="Resource" id="heartbeat"]
+script = ExtResource("2")
+id = &"heartbeat"
+volume_db = -6.0
+pitch_variance = 0.05
+bus = &"SFX"
+
+[sub_resource type="Resource" id="breath_exhale"]
+script = ExtResource("2")
+id = &"breath_exhale"
+volume_db = -3.0
+pitch_variance = 0.1
+bus = &"SFX"
+
+[sub_resource type="Resource" id="scope_zoom"]
+script = ExtResource("2")
+id = &"scope_zoom"
+volume_db = -6.0
+pitch_variance = 0.05
+bus = &"SFX"
+
+[sub_resource type="Resource" id="level_theme"]
+script = ExtResource("2")
+id = &"level_theme"
+volume_db = -15.0
+pitch_variance = 0.0
+bus = &"Music"
+
 [resource]
 script = ExtResource("1")
-entries = Array[ExtResource("2")]([SubResource("rifle_fire"), SubResource("rifle_dry"), SubResource("rifle_reload"), SubResource("rifle_bolt"), SubResource("scope_in"), SubResource("scope_out"), SubResource("impact_body"), SubResource("impact_head"), SubResource("impact_world"), SubResource("impact_destructible"), SubResource("bullet_whizz"), SubResource("bullet_penetrate"), SubResource("breath_hold"), SubResource("hit_taken"), SubResource("death"), SubResource("alert_spotted"), SubResource("npc_panic"), SubResource("extraction_start"), SubResource("extraction_complete"), SubResource("menu_click"), SubResource("menu_confirm"), SubResource("menu_cancel"), SubResource("menu_hover"), SubResource("ammo_switch"), SubResource("palette_switch"), SubResource("credits_gain"), SubResource("xp_gain"), SubResource("hub_theme"), SubResource("combat_tension"), SubResource("level_ambient")])
+entries = Array[ExtResource("2")]([SubResource("rifle_fire"), SubResource("rifle_dry"), SubResource("rifle_reload"), SubResource("rifle_bolt"), SubResource("scope_in"), SubResource("scope_out"), SubResource("impact_body"), SubResource("impact_head"), SubResource("impact_world"), SubResource("impact_destructible"), SubResource("bullet_whizz"), SubResource("bullet_penetrate"), SubResource("breath_hold"), SubResource("hit_taken"), SubResource("death"), SubResource("alert_spotted"), SubResource("npc_panic"), SubResource("extraction_start"), SubResource("extraction_complete"), SubResource("menu_click"), SubResource("menu_confirm"), SubResource("menu_cancel"), SubResource("menu_hover"), SubResource("ammo_switch"), SubResource("palette_switch"), SubResource("credits_gain"), SubResource("xp_gain"), SubResource("hub_theme"), SubResource("combat_tension"), SubResource("level_ambient"), SubResource("footstep"), SubResource("slide"), SubResource("heartbeat"), SubResource("breath_exhale"), SubResource("scope_zoom"), SubResource("level_theme")])

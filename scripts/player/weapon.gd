@@ -57,6 +57,8 @@ var sway_offset: Vector2 = Vector2.ZERO
 var breath_remaining: float = 3.0
 var is_holding_breath: bool = false
 var breath_exhausted_timer: float = 0.0
+var _heartbeat_timer: float = 0.0
+const HEARTBEAT_INTERVAL: float = 0.8  ## Seconds between heartbeat sounds
 
 ## Ammo manager (owns magazine, reserves, type switching)
 var ammo: AmmoManager = AmmoManager.new()
@@ -188,11 +190,13 @@ func _process_scope(delta: float) -> void:
 	if wants_scope and not is_scoped:
 		is_scoped = true
 		AudioManager.play_sfx_2d(&"scope_in")
+		AudioManager.play_sfx_2d_varied(&"scope_zoom", 0.1)
 		if state == State.IDLE:
 			_set_state(State.AIMING)
 	elif not wants_scope and is_scoped:
 		is_scoped = false
 		AudioManager.play_sfx_2d(&"scope_out")
+		AudioManager.play_sfx_2d_varied(&"scope_zoom", 0.1)
 		if state == State.AIMING:
 			_set_state(State.IDLE)
 
@@ -296,16 +300,26 @@ func _process_breath(delta: float) -> void:
 
 	if wants_hold and not is_holding_breath:
 		is_holding_breath = true
+		_heartbeat_timer = 0.0
 		AudioManager.play_sfx_2d(&"breath_hold")
 	elif not wants_hold and is_holding_breath:
 		is_holding_breath = false
+		_heartbeat_timer = 0.0
+		AudioManager.play_sfx_2d_varied(&"breath_exhale", 0.1)
 
 	if is_holding_breath:
 		breath_remaining -= delta
+		# Heartbeat while holding breath
+		_heartbeat_timer += delta
+		if _heartbeat_timer >= HEARTBEAT_INTERVAL:
+			_heartbeat_timer -= HEARTBEAT_INTERVAL
+			AudioManager.play_sfx_2d_varied(&"heartbeat", 0.05, -3.0)
 		if breath_remaining <= 0.0:
 			breath_remaining = 0.0
 			is_holding_breath = false
+			_heartbeat_timer = 0.0
 			breath_exhausted_timer = breath_penalty_duration
+			AudioManager.play_sfx_2d_varied(&"breath_exhale", 0.1, 3.0)
 	else:
 		breath_remaining = minf(breath_remaining + breath_recharge_rate * delta, breath_max)
 
