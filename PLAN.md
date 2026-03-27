@@ -522,53 +522,53 @@ Placeholder beeps wired to all 36 banks. Replace with real assets below.
 
 **Sources:** Freesound.org (CC0), Sonniss GDC Bundle (royalty-free), jsfxr (generated)
 
-##### Weapon Sounds (Freesound / Sonniss)
+##### Weapon Sounds [x]
 - [x] `rifle_fire` — Weapon/fire.mp3
-- [ ] `rifle_bolt` — [Zott820 Mosin cycle](https://freesound.org/people/Zott820/sounds/370345/) (CC0)
-- [ ] `rifle_dry` — gun dry fire / trigger click (Freesound CC0)
-- [ ] `scope_in` — cloth rustle + subtle mechanical zoom (Freesound CC0)
-- [ ] `scope_out` — reverse of scope_in, quick unzoom (Freesound CC0)
-- [ ] `rifle_reload` — [AugustSandberg K98](https://freesound.org/people/AugustSandberg/sounds/508747/) (CC0)
+- [x] `rifle_bolt` — Pixabay bolt-action
+- [x] `rifle_dry` — Pixabay gun click
+- [x] `scope_in` — Pixabay mechanical click
+- [x] `scope_out` — Pixabay mechanical click
+- [x] `rifle_reload` — Pixabay bolt action rifle
 
-##### Impact Sounds (Freesound / Sonniss)
-- [ ] `impact_body` — [toxicwafflezz impacts](https://freesound.org/people/toxicwafflezz/sounds/150837/) (CC-BY) or Sonniss bundle
-- [ ] `impact_world` — bullet hit concrete/metal/wood (Freesound CC0)
-- [ ] `impact_head` — [Kastenfrosch wet impact](https://freesound.org/people/Kastenfrosch/sounds/521957/) + [lolamadeus squelch](https://freesound.org/people/lolamadeus/sounds/159669/) (CC0)
-- [ ] `impact_destructible` — crate/object smash (Freesound CC0)
-- [ ] `bullet_whizz` — bullet flyby / whiz (Freesound CC0)
-- [ ] `bullet_penetrate` — metal impact / armor piercing (Freesound CC0)
+##### Impact Sounds [x]
+- [x] `impact_body` — Pixabay bullet-hit / body-hit
+- [x] `impact_world` — Pixabay ricochet
+- [x] `impact_head` — Pixabay body-hit (punchy variant)
+- [x] `impact_destructible` — Pixabay wood break
+- [x] `bullet_whizz` — Pixabay bullet whizz / whiz-by
+- [x] `bullet_penetrate` — Pixabay bullet-hit-metal
 
-##### Player Sounds (Freesound)
-- [ ] `footstep` — footstep (volume/speed varies: crouch quiet+slow, sprint loud+fast, walk normal)
-- [ ] `slide` — slide/scrape on ground
-- [ ] `heartbeat` — heartbeat pulse while holding breath
+##### Player Sounds [x]
+- [x] `footstep` — Pixabay concrete footsteps
+- [x] `slide` — Pixabay scrape / sliding
+- [x] `heartbeat` — Pixabay heartbeat (tense)
 - [x] `breath_hold` — Player/breath_in.mp3
 - [x] `breath_exhale` — Player/breath_out.mp3
 - [x] `hit_taken` — Player/hitHurt-2.wav
 - [x] `death` — Player/death.wav
-- [ ] `scope_zoom` — subtle click on zoom level change (for future use)
+- [x] `scope_zoom` — Pixabay mechanical click
 
-##### UI Sounds (jsfxr — generate at sfxr.me) [x]
-- [x] `menu_click` — short blip, mid pitch
-- [x] `menu_hover` — subtle quiet click
-- [x] `menu_confirm` — rising two-tone
-- [x] `menu_cancel` — falling tone
-- [x] `ammo_switch` — quick mechanical click
-- [x] `palette_switch` — soft whoosh / chime
-- [x] `credits_gain` — coin/reward chime
-- [x] `xp_gain` — XP reward beep
+##### UI Sounds [x]
+- [x] `menu_click` — generated
+- [x] `menu_hover` — generated
+- [x] `menu_confirm` — generated
+- [x] `menu_cancel` — generated
+- [x] `ammo_switch` — generated
+- [x] `palette_switch` — generated
+- [x] `credits_gain` — generated
+- [x] `xp_gain` — generated
 
-##### World Sounds (Freesound)
-- [ ] `extraction_start` — helicopter distant / radio beep
-- [ ] `extraction_complete` — helicopter arrive / success chime
-- [ ] `alert_spotted` — alert sound / alarm beep
-- [ ] `npc_panic` — crowd panic / scream short
+##### World Sounds [x]
+- [x] `extraction_start` — Pixabay radio beep
+- [x] `extraction_complete` — Pixabay helicopter
+- [x] `alert_spotted` — Pixabay alarm beep
+- [x] `npc_panic` — Pixabay scream / panic
 
-##### Ambient & Music
-- [x] `level_ambient` — per-level ambient soundscape (LevelData.level_ambient) — warehouse + city wired
-- [x] `level_theme` — per-level music bed (LevelData.level_theme), crossfades to combat on threat — warehouse + city wired
+##### Ambient & Music [x]
+- [x] `level_ambient` — per-level ambient soundscape — warehouse + city wired
+- [x] `level_theme` — per-level music bed, crossfades to combat on threat — warehouse + city wired
 - [x] `hub_theme` — Music/hub_theme.mp3
-- [ ] `combat_tension` — tense, minimal, building dread (Kevin MacLeod / Pixabay)
+- [x] `combat_tension` — Pixabay tension music
 
 
 #### UI Art Pass [ ]
