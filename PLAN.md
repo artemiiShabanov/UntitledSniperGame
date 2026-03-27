@@ -506,7 +506,7 @@ Core features complete. Bug-audited and refactored.
 - [ ] Cover objects (sandbags, concrete barriers, scaffolding)
 - [ ] Vegetation (trees, bushes — sight blockers at range)
 
-#### VFX ██████░░ 75%
+#### VFX ███████░ 88%
 - [x] Muzzle flash (player + enemy)
 - [x] Bullet tracer trail
 - [x] Hit impact (palette-colored particles)
@@ -514,7 +514,7 @@ Core features complete. Bug-audited and refactored.
 - [ ] Scope glint shimmer
 - [x] Extraction zone effect (particle ring)
 - [x] Death effect (enemy collapse)
-- [ ] Weather particles (rain, fog volume)
+- [x] Weather particles (rain, snow — follows camera, palette-colored)
 
 #### Audio [x]
 Audio system foundation (AudioManager autoload + bank registry) is in place.

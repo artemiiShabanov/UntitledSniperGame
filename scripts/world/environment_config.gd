@@ -63,15 +63,15 @@ static var weather_presets: Dictionary = {
 	},
 	"snow": {
 		"fog_enabled": true,
-		"fog_density": 0.01,
+		"fog_density": 0.0033,
 		"fog_color": Color(0.85, 0.88, 0.95),
 		"volumetric_fog_enabled": true,
-		"volumetric_fog_density": 0.03,
+		"volumetric_fog_density": 0.01,
 		"visibility_multiplier": 0.6,   # Reduced visibility from snowfall
 	},
 	"rain": {
 		"fog_enabled": true,
-		"fog_density": 0.005,
+		"fog_density": 0.0017,
 		"fog_color": Color(0.5, 0.55, 0.6),
 		"volumetric_fog_enabled": false,
 		"volumetric_fog_density": 0.0,
@@ -79,7 +79,7 @@ static var weather_presets: Dictionary = {
 	},
 	"overcast": {
 		"fog_enabled": true,
-		"fog_density": 0.003,
+		"fog_density": 0.001,
 		"fog_color": Color(0.6, 0.6, 0.65),
 		"volumetric_fog_enabled": false,
 		"volumetric_fog_density": 0.0,

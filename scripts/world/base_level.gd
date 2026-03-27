@@ -77,6 +77,9 @@ func _setup_run_variation() -> void:
 
 	RunManager.threat_phase_changed.connect(_on_threat_phase_changed)
 
+	# Weather particles (rain/snow) — follows player camera
+	_setup_weather_particles()
+
 
 func _pick_environment() -> void:
 	if not level_data:
@@ -246,6 +249,23 @@ func _pick_extraction_zone() -> void:
 	extraction_zone = zones[0]
 	for i in range(keep_count, zones.size()):
 		zones[i].queue_free()
+
+
+func _setup_weather_particles() -> void:
+	if current_weather == "clear" or current_weather == "overcast":
+		return  # No particles needed
+	# Find the player camera
+	var players := get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return
+	var player_node: Node = players[0]
+	var cam: Camera3D = player_node.get_node_or_null("Head/Camera3D")
+	if not cam:
+		return
+	var weather_fx := WeatherParticles.new()
+	weather_fx.name = "WeatherParticles"
+	weather_fx.setup(current_weather, cam)
+	add_child(weather_fx)
 
 
 func _on_threat_phase_changed(phase: RunManager.ThreatPhase) -> void:
