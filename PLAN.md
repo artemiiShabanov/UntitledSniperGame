@@ -506,17 +506,17 @@ Core features complete. Bug-audited and refactored.
 - [ ] Cover objects (sandbags, concrete barriers, scaffolding)
 - [ ] Vegetation (trees, bushes — sight blockers at range)
 
-#### VFX [ ]
-- [ ] Muzzle flash (player + enemy)
-- [ ] Bullet tracer trail
-- [ ] Hit impact — surface-dependent (metal spark, dirt puff, wood splinter)
-- [ ] Headshot effect
+#### VFX ██████░░ 75%
+- [x] Muzzle flash (player + enemy)
+- [x] Bullet tracer trail
+- [x] Hit impact (palette-colored particles)
+- [x] Headshot effect (flash + larger particles)
 - [ ] Scope glint shimmer
-- [ ] Extraction zone effect (glow / particle ring)
-- [ ] Death/down effect (enemy ragdoll or collapse)
+- [x] Extraction zone effect (particle ring)
+- [x] Death effect (enemy collapse)
 - [ ] Weather particles (rain, fog volume)
 
-#### Audio [ ]
+#### Audio [x]
 Audio system foundation (AudioManager autoload + bank registry) is in place.
 Placeholder beeps wired to all 36 banks. Replace with real assets below.
 
