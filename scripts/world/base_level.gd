@@ -254,13 +254,12 @@ func _pick_extraction_zone() -> void:
 func _setup_weather_particles() -> void:
 	if current_weather == "clear" or current_weather == "overcast":
 		return  # No particles needed
-	# Find the player camera
-	var players := get_tree().get_nodes_in_group("player")
-	if players.is_empty():
+	if not player:
+		push_warning("WeatherParticles: no player found")
 		return
-	var player_node: Node = players[0]
-	var cam: Camera3D = player_node.get_node_or_null("Head/Camera3D")
+	var cam: Camera3D = player.get_node_or_null("Head/Camera3D")
 	if not cam:
+		push_warning("WeatherParticles: no camera at Head/Camera3D")
 		return
 	var weather_fx := WeatherParticles.new()
 	weather_fx.name = "WeatherParticles"

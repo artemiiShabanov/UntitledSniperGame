@@ -42,45 +42,43 @@ func _create_rain() -> void:
 	_rain_particles = GPUParticles3D.new()
 	_rain_particles.name = "RainParticles"
 	_rain_particles.amount = RAIN_AMOUNT
-	_rain_particles.lifetime = 1.2
+	_rain_particles.lifetime = 1.5
+	# Large AABB so particles are never frustum-culled
 	_rain_particles.visibility_aabb = AABB(
-		Vector3(-FOLLOW_AREA / 2.0, -5.0, -FOLLOW_AREA / 2.0),
-		Vector3(FOLLOW_AREA, RAIN_HEIGHT + 10.0, FOLLOW_AREA)
+		Vector3(-50, -50, -50), Vector3(100, 100, 100)
 	)
 
 	# Process material
 	var mat := ParticleProcessMaterial.new()
 	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	mat.emission_box_extents = Vector3(FOLLOW_AREA / 2.0, 0.5, FOLLOW_AREA / 2.0)
+	mat.emission_box_extents = Vector3(FOLLOW_AREA / 2.0, 1.0, FOLLOW_AREA / 2.0)
 
 	# Rain falls fast and straight with slight angle
 	mat.direction = Vector3(0.1, -1.0, 0.05)
-	mat.spread = 3.0
-	mat.initial_velocity_min = 18.0
-	mat.initial_velocity_max = 22.0
-	mat.gravity = Vector3(0.0, -15.0, 0.0)
+	mat.spread = 5.0
+	mat.initial_velocity_min = 15.0
+	mat.initial_velocity_max = 20.0
+	mat.gravity = Vector3(0.0, -12.0, 0.0)
 
-	# Thin streaks
-	mat.scale_min = 0.3
-	mat.scale_max = 0.5
+	# Scale
+	mat.scale_min = 1.0
+	mat.scale_max = 1.5
 
-	# Palette-driven color
+	# Color with alpha
 	var rain_color := PaletteManager.get_color(&"bg_light")
-	rain_color.a = 0.3
-	mat.color = rain_color
+	mat.color = Color(rain_color.r, rain_color.g, rain_color.b, 0.6)
 
 	_rain_particles.process_material = mat
 	_rain_particles.position.y = RAIN_HEIGHT
 
 	# Draw pass — thin stretched quad for rain streaks
 	var mesh := QuadMesh.new()
-	mesh.size = Vector2(0.02, 0.4)
+	mesh.size = Vector2(0.03, 0.5)
 	var draw_mat := StandardMaterial3D.new()
 	draw_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	draw_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	draw_mat.albedo_color = Color(rain_color.r, rain_color.g, rain_color.b, 0.3)
+	draw_mat.albedo_color = Color(rain_color.r, rain_color.g, rain_color.b, 0.6)
 	draw_mat.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
-	draw_mat.no_depth_test = true
 	mesh.material = draw_mat
 	_rain_particles.draw_pass_1 = mesh
 
@@ -89,9 +87,8 @@ func _create_rain() -> void:
 	# Connect palette changes
 	PaletteManager.palette_changed.connect(func(_p: Resource) -> void:
 		var c := PaletteManager.get_color(&"bg_light")
-		c.a = 0.3
-		mat.color = c
-		draw_mat.albedo_color = Color(c.r, c.g, c.b, 0.3)
+		mat.color = Color(c.r, c.g, c.b, 0.6)
+		draw_mat.albedo_color = Color(c.r, c.g, c.b, 0.6)
 	)
 
 
