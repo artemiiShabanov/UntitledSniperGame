@@ -485,17 +485,18 @@ Core features complete. Bug-audited and refactored.
 - [x] Film grain post-process shader
 - [x] Global shader uniforms — palette swap recolors entire scene instantly
 
-#### Character Models [ ]
-- [ ] **Rifle viewmodel** — low-poly first-person rifle (few boxes/cylinders, colored fg_dark)
-  - [ ] Base rifle geometry (stock, receiver, barrel, trigger guard)
-  - [ ] Mod attachments as swappable mesh parts:
-	- [ ] Barrel mods (standard, long — visible length change)
-	- [ ] Stock mods (standard — visible shape change)
-	- [ ] Magazine mods (standard, extended — visible size change)
-	- [ ] Scope mods (iron sights, standard scope — visible on top rail)
-	- [ ] Bolt mods (standard — subtle receiver detail)
-  - [ ] Viewmodel positioning (bottom-right of screen, sway follows weapon sway)
-  - [ ] Scope-in transition (rifle raises, screen enters scope view)
+#### Character Models ██████░░ 60%
+- [x] **Rifle viewmodel** — low-poly first-person rifle (CSG primitives, colored fg_dark)
+  - [x] Base rifle geometry (receiver, trigger guard, grip, top rail)
+  - [x] Mod attachments as swappable mesh parts:
+	- [x] Barrel mods (standard, long — visible length + muzzle brake)
+	- [x] Stock mods (body, buttpad, cheek rest)
+	- [x] Magazine mods (standard, extended — visible size change)
+	- [x] Scope mods (iron sights vs full scope tube with objective/eyepiece/rings)
+	- [x] Bolt mods (handle + knob)
+  - [x] Viewmodel positioning (hip/aim lerp, auto-hide when deeply scoped)
+  - [x] Palette coloring (fg_dark, updates on palette swap)
+  - [x] refresh_loadout() for hot-swapping mods in hub
 - [ ] Lookout model (replace capsule placeholder)
 - [ ] Neutral NPC models (Laborer, Technician, Civilian — distinct from enemies)
 - [ ] Destructible target models (crates, supply caches)
