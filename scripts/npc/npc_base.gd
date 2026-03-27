@@ -77,13 +77,15 @@ func _physics_process(delta: float) -> void:
 	# Apply gravity
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
-		move_and_slide()
 
 	# Panic overrides normal activity
 	if panic_state == PanicState.PANICKING:
 		_update_panic(delta)
 	else:
 		_update_activity(delta)
+
+	# Single move_and_slide per frame (gravity + horizontal movement combined)
+	move_and_slide()
 
 	_visuals.update_visuals()
 
@@ -149,7 +151,6 @@ func _move_toward_target(delta: float) -> void:
 	_face_direction(dir)
 	velocity.x = dir.x * npc_type.move_speed
 	velocity.z = dir.z * npc_type.move_speed
-	move_and_slide()
 
 
 func _find_activity_point(activity_name: String) -> ActivityPoint:
@@ -238,7 +239,6 @@ func _update_panic(delta: float) -> void:
 	_face_direction(flee_direction)
 	velocity.x = flee_direction.x * speed
 	velocity.z = flee_direction.z * speed
-	move_and_slide()
 
 	# If hitting a wall, pick a new flee direction
 	if is_on_wall():

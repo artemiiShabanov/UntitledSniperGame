@@ -240,10 +240,13 @@ func spawn_death_effect(enemy: Node3D, is_headshot: bool) -> void:
 	tween.tween_property(enemy, "global_position:y", enemy.global_position.y - 0.5, tilt_duration) \
 		.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
 
-	# Fade out after tilt
-	tween.set_parallel(false)
-	for mat in materials:
-		tween.tween_property(mat, "albedo_color:a", 0.0, 1.5)
+	# Fade out after tilt (all materials simultaneously)
+	tween.chain()  # Wait for parallel tilt to finish, then continue sequentially
+	if not materials.is_empty():
+		tween.set_parallel(true)
+		for mat in materials:
+			tween.tween_property(mat, "albedo_color:a", 0.0, 1.5)
+		tween.set_parallel(false)
 
 	tween.tween_callback(func():
 		if is_instance_valid(enemy):

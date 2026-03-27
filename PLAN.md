@@ -17,10 +17,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | Save System (core)  | █████ 100%| Complete (stats tracking in Step 6)      |
 | Objectives          | ████░ 80% | Contracts done, in-run objectives deferred |
 | Global Progression  | ████░ 95% | Complete (cosmetics deferred to P4)       |
-| World Population    | ██░░░ 66% | NPCs + destructibles done, events next   |
+| World Population    | █████ 100%| Complete (events deferred to P4)          |
 | UI & Menus          | ████░ 90% | All screens done except cosmetics         |
-| Content             | ░░░░░ 10% | Levels, models, props                    |
-| Art & Audio         | ░░░░░  5% | Merged into Phase 3 Content Production   |
+| Content & Population| █████ 100%| Complete (models/props/UI art → P4)       |
+| Art & Audio         | █████ 100%| Systems complete (asset replacement later) |
 | Polish & Release    | ░░░░░  0% | Steam, controller, balancing             |
 
 ---
@@ -427,20 +427,28 @@ Core features complete. Bug-audited and refactored.
 
 ---
 
-## Phase 3 — Content & Population
+## Phase 3 — Content & Population ✅
 
-### World Population ██░░░ 66%
+All systems complete. Remaining asset work (models, props, UI art pass, scope glint VFX) moved to Phase 4 Leftovers.
 
-#### Neutral NPCs [x]
-- [x] NpcBase class with activity state machine (PERFORMING ↔ TRAVELING) and panic layer (CALM ↔ PANICKING)
-- [x] 3 NPC types: Laborer (work→carry→rest), Technician (operate→inspect→rest), Civilian (walk→eat→idle)
-- [x] ActivityPoint markers in levels define where NPCs perform each activity
-- [x] NpcPool + NpcPoolEntry for weighted random NPC selection per level
-- [x] Panic/flee reaction to gunfire (sound propagation from weapon + bullet impacts)
-- [x] Flat credit penalty for killing NPCs (shown in kill feed, tracked in run stats)
-- [x] Result screen shows civilian kills count
-- [x] NPC scenes with distinct mesh colors (orange laborer, green technician, blue civilian)
-- [x] NpcVisuals with debug state indicator (blue=calm, yellow=panicking)
+**Incomplete items moved to Phase 4:**
+- Character models: Lookout model, NPC models, Destructible target models
+- Props & Environment Art (entire section — building kit, industrial props, cover, vegetation)
+- VFX: Scope glint shimmer
+- UI Art Pass (entire section — menu polish, HUD styling, panel theming)
+
+<details>
+<summary>Neutral NPCs — NPC types, activity system, panic, kill penalty</summary>
+
+- NpcBase class with activity state machine (PERFORMING ↔ TRAVELING) and panic layer (CALM ↔ PANICKING)
+- 3 NPC types: Laborer (work→carry→rest), Technician (operate→inspect→rest), Civilian (walk→eat→idle)
+- ActivityPoint markers in levels define where NPCs perform each activity
+- NpcPool + NpcPoolEntry for weighted random NPC selection per level
+- Panic/flee reaction to gunfire (sound propagation from weapon + bullet impacts)
+- Flat credit penalty for killing NPCs (shown in kill feed, tracked in run stats)
+- Result screen shows civilian kills count
+- NPC scenes with distinct mesh colors (orange laborer, green technician, blue civilian)
+- NpcVisuals with debug state indicator (blue=calm, yellow=panicking)
 
 **Core files:**
 | File | Purpose |
@@ -457,14 +465,18 @@ Core features complete. Bug-audited and refactored.
 | `data/npcs/*.tres` | 3 NPC type definitions |
 | `scenes/npc/*.tscn` | 3 NPC scene files |
 
-#### Non-NPC Targets [x]
-- [x] DestructibleTarget class (StaticBody3D): health, bullet hit, credit/XP reward on destruction
-- [x] Destructible box scene with distinct visual (warm yellow)
-- [x] RunManager.record_target_destroyed() + target_destroyed_with_info signal
-- [x] Kill feed shows "TARGET DESTROYED | +$X" in warm yellow
-- [x] Result screen shows targets destroyed count
-- [x] 8 destructible boxes placed in Industrial Yard (1 far-north high-value)
-- [x] 3 destructible boxes placed in dev test level
+</details>
+
+<details>
+<summary>Destructible Targets — shoot-to-destroy objects with rewards</summary>
+
+- DestructibleTarget class (StaticBody3D): health, bullet hit, credit/XP reward on destruction
+- Destructible box scene with distinct visual (warm yellow)
+- RunManager.record_target_destroyed() + target_destroyed_with_info signal
+- Kill feed shows "TARGET DESTROYED | +$X" in warm yellow
+- Result screen shows targets destroyed count
+- 8 destructible boxes placed in Industrial Yard (1 far-north high-value)
+- 3 destructible boxes placed in dev test level
 
 **Core files:**
 | File | Purpose |
@@ -472,112 +484,144 @@ Core features complete. Bug-audited and refactored.
 | `scripts/world/destructible_target.gd` | DestructibleTarget: health, hit, reward, visual death |
 | `scenes/world/destructible_box.tscn` | Box scene (StaticBody3D, collision, mesh) |
 
----
+</details>
 
-### Content Production ░░░░░ 10%
+<details>
+<summary>Palette System — swappable color palettes, B&W world + accent colors</summary>
 
-#### Art Pipeline [x]
-- [x] Palette-driven art direction (B&W base + 3 accent colors: hostile, loot, friendly)
-- [x] PaletteResource data type with 8 color slots + extension space
-- [x] PaletteManager autoload — auto-discovers palettes, cycles with F8/F7
-- [x] 3 starter palettes (Tactical, Midnight, Noir)
-- [x] palette_surface.gdshader — assigns any palette slot to any mesh
-- [x] Film grain post-process shader
-- [x] Global shader uniforms — palette swap recolors entire scene instantly
+- Palette-driven art direction (B&W base + 3 accent colors: hostile, loot, friendly)
+- PaletteResource data type with 8 color slots + extension space
+- PaletteManager autoload — auto-discovers palettes, cycles with F8/F7
+- 3 starter palettes (Tactical, Midnight, Noir)
+- palette_surface.gdshader — assigns any palette slot to any mesh
+- Film grain post-process shader
+- Global shader uniforms — palette swap recolors entire scene instantly
 
-#### Character Models ██████░░ 60%
-- [x] **Rifle viewmodel** — low-poly first-person rifle (CSG primitives, colored fg_dark)
-  - [x] Base rifle geometry (receiver, trigger guard, grip, top rail)
-  - [x] Mod attachments as swappable mesh parts:
-	- [x] Barrel mods (standard, long — visible length + muzzle brake)
-	- [x] Stock mods (body, buttpad, cheek rest)
-	- [x] Magazine mods (standard, extended — visible size change)
-	- [x] Scope mods (iron sights vs full scope tube with objective/eyepiece/rings)
-	- [x] Bolt mods (handle + knob)
-  - [x] Viewmodel positioning (hip/aim lerp, auto-hide when deeply scoped)
-  - [x] Palette coloring (fg_dark, updates on palette swap)
-  - [x] refresh_loadout() for hot-swapping mods in hub
-- [ ] Lookout model (replace capsule placeholder)
-- [ ] Neutral NPC models (Laborer, Technician, Civilian — distinct from enemies)
-- [ ] Destructible target models (crates, supply caches)
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/systems/palette_manager.gd` | Autoload: palette discovery, cycling, global shader uniform updates |
+| `data/palettes/palette_resource.gd` | PaletteResource: 8 color slots + extension space |
+| `data/palettes/*.tres` | 3 palette definitions (Tactical, Midnight, Noir) |
+| `shaders/palette_surface.gdshader` | Per-mesh palette slot assignment shader |
+| `shaders/film_grain.gdshader` | Film grain post-process effect |
+| `scripts/world/palette_mesh.gd` | Helper for palette-colored meshes |
 
-#### Props & Environment Art [ ]
-- [ ] Reusable building kit (walls, roofs, floors, stairs, railings)
-- [ ] Industrial props (crates, barrels, containers, pallets, pipes)
-- [ ] Cover objects (sandbags, concrete barriers, scaffolding)
-- [ ] Vegetation (trees, bushes — sight blockers at range)
+</details>
 
-#### VFX ███████░ 88%
-- [x] Muzzle flash (player + enemy)
-- [x] Bullet tracer trail
-- [x] Hit impact (palette-colored particles)
-- [x] Headshot effect (flash + larger particles)
-- [ ] Scope glint shimmer
-- [x] Extraction zone effect (particle ring)
-- [x] Death effect (enemy collapse)
-- [x] Weather particles (rain, snow — follows camera, palette-colored)
+<details>
+<summary>UI Theme — PaletteTheme auto-generated theme, monospace font, palette-reactive</summary>
 
-#### Audio [x]
-Audio system foundation (AudioManager autoload + bank registry) is in place.
-Placeholder beeps wired to all 36 banks. Replace with real assets below.
+- PaletteTheme generates Godot Theme from active palette colors
+- Monospace font for consistent UI styling
+- All UI panels react to palette swaps in real time
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/ui/palette_theme.gd` | Auto-generated Theme from palette colors |
+| `scripts/ui/player_hud.gd` | In-run HUD: weapon, lives, timer, threat, interaction |
+
+</details>
+
+<details>
+<summary>Rifle Viewmodel — modular first-person weapon with mod slots</summary>
+
+- Low-poly first-person rifle (CSG primitives, colored fg_dark)
+- Base rifle geometry (receiver, trigger guard, grip, top rail)
+- Mod attachments as swappable mesh parts:
+  - Barrel mods (standard, long — visible length + muzzle brake)
+  - Stock mods (body, buttpad, cheek rest)
+  - Magazine mods (standard, extended — visible size change)
+  - Scope mods (iron sights vs full scope tube with objective/eyepiece/rings)
+  - Bolt mods (handle + knob)
+- Viewmodel positioning (hip/aim lerp, auto-hide when deeply scoped)
+- Palette coloring (fg_dark, updates on palette swap)
+- refresh_loadout() for hot-swapping mods in hub
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/player/rifle_viewmodel.gd` | Viewmodel: CSG geometry, mod slot meshes, palette coloring, hip/aim positioning |
+
+</details>
+
+<details>
+<summary>VFX System — muzzle flash, tracers, impacts, headshot, extraction, death, weather</summary>
+
+- Muzzle flash (player + enemy)
+- Bullet tracer trail
+- Hit impact (palette-colored particles)
+- Headshot effect (flash + larger particles)
+- Extraction zone effect (particle ring)
+- Death effect (enemy collapse)
+- Weather particles (rain, snow — follows camera, palette-colored)
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/systems/vfx_factory.gd` | VFX creation: muzzle flash, tracers, impacts, headshot, extraction, death effects |
+| `scripts/world/weather_particles.gd` | Rain/snow particle systems, camera-following, palette-colored |
+
+</details>
+
+<details>
+<summary>Audio System — AudioManager, bank registry, 36 sound banks, per-level audio</summary>
+
+AudioManager autoload + bank registry. Placeholder beeps wired to all 36 banks.
 
 **Sources:** Freesound.org (CC0), Sonniss GDC Bundle (royalty-free), jsfxr (generated)
 
-##### Weapon Sounds [x]
-- [x] `rifle_fire` — Weapon/fire.mp3
-- [x] `rifle_bolt` — Pixabay bolt-action
-- [x] `rifle_dry` — Pixabay gun click
-- [x] `scope_in` — Pixabay mechanical click
-- [x] `scope_out` — Pixabay mechanical click
-- [x] `rifle_reload` — Pixabay bolt action rifle
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/systems/audio_manager.gd` | Autoload: bank registry, play by key, bus routing, fade/crossfade |
+| `scripts/systems/audio_bank.gd` | AudioBank resource: named collection of entries |
+| `scripts/systems/audio_bank_entry.gd` | AudioBankEntry: key, stream, volume, bus, variations |
+| `scripts/systems/audio_placeholder.gd` | Placeholder beep generator for unwired banks |
+| `data/audio/default_bank.tres` | Default bank with all 36 sound entries |
+| `tools/generate_ui_sounds.gd` | Editor tool script for generating UI sound WAVs |
 
-##### Impact Sounds [x]
-- [x] `impact_body` — Pixabay bullet-hit / body-hit
-- [x] `impact_world` — Pixabay ricochet
-- [x] `impact_head` — Pixabay body-hit (punchy variant)
-- [x] `impact_destructible` — Pixabay wood break
-- [x] `bullet_whizz` — Pixabay bullet whizz / whiz-by
-- [x] `bullet_penetrate` — Pixabay bullet-hit-metal
+<details>
+<summary>Full sound bank listing (36 entries)</summary>
 
-##### Player Sounds [x]
-- [x] `footstep` — Pixabay concrete footsteps
-- [x] `slide` — Pixabay scrape / sliding
-- [x] `heartbeat` — Pixabay heartbeat (tense)
-- [x] `breath_hold` — Player/breath_in.mp3
-- [x] `breath_exhale` — Player/breath_out.mp3
-- [x] `hit_taken` — Player/hitHurt-2.wav
-- [x] `death` — Player/death.wav
-- [x] `scope_zoom` — Pixabay mechanical click
+**Weapon Sounds:**
+`rifle_fire` (Weapon/fire.mp3), `rifle_bolt` (Pixabay bolt-action), `rifle_dry` (Pixabay gun click), `scope_in` (Pixabay mechanical click), `scope_out` (Pixabay mechanical click), `rifle_reload` (Pixabay bolt action rifle)
 
-##### UI Sounds [x]
-- [x] `menu_click` — generated
-- [x] `menu_hover` — generated
-- [x] `menu_confirm` — generated
-- [x] `menu_cancel` — generated
-- [x] `ammo_switch` — generated
-- [x] `palette_switch` — generated
-- [x] `credits_gain` — generated
-- [x] `xp_gain` — generated
+**Impact Sounds:**
+`impact_body` (Pixabay bullet-hit), `impact_world` (Pixabay ricochet), `impact_head` (Pixabay body-hit punchy), `impact_destructible` (Pixabay wood break), `bullet_whizz` (Pixabay bullet whizz), `bullet_penetrate` (Pixabay bullet-hit-metal)
 
-##### World Sounds [x]
-- [x] `extraction_start` — Pixabay radio beep
-- [x] `extraction_complete` — Pixabay helicopter
-- [x] `alert_spotted` — Pixabay alarm beep
-- [x] `npc_panic` — Pixabay scream / panic
+**Player Sounds:**
+`footstep` (Pixabay concrete footsteps), `slide` (Pixabay scrape), `heartbeat` (Pixabay heartbeat), `breath_hold` (Player/breath_in.mp3), `breath_exhale` (Player/breath_out.mp3), `hit_taken` (Player/hitHurt-2.wav), `death` (Player/death.wav), `scope_zoom` (Pixabay mechanical click)
 
-##### Ambient & Music [x]
-- [x] `level_ambient` — per-level ambient soundscape — warehouse + city wired
-- [x] `level_theme` — per-level music bed, crossfades to combat on threat — warehouse + city wired
-- [x] `hub_theme` — Music/hub_theme.mp3
-- [x] `combat_tension` — Pixabay tension music
+**UI Sounds:**
+`menu_click`, `menu_hover`, `menu_confirm`, `menu_cancel`, `ammo_switch`, `palette_switch`, `credits_gain`, `xp_gain` (all generated)
 
+**World Sounds:**
+`extraction_start` (Pixabay radio beep), `extraction_complete` (Pixabay helicopter), `alert_spotted` (Pixabay alarm beep), `npc_panic` (Pixabay scream)
 
-#### UI Art Pass [ ]
-- [ ] Main menu, save slots, settings — visual polish
-- [ ] Hub layout — spatial navigation between stations
-- [ ] In-run HUD — styled crosshair, scope overlay, threat indicator
-- [ ] Result/death screens — styled layout
-- [ ] All panels (contracts, mods, skills, ammo, stats) — consistent visual theme
+**Ambient & Music:**
+`level_ambient` (per-level ambient), `level_theme` (per-level music bed), `hub_theme` (Music/hub_theme.mp3), `combat_tension` (Pixabay tension music)
+
+</details>
+
+</details>
+
+<details>
+<summary>Weather System — rain/snow particles, fog presets, environment config</summary>
+
+- Rain and snow particle systems following camera
+- Fog density presets (clear, snow, rain, overcast)
+- Visibility multiplier affects enemy sight range (fog halves it, night reduces by 40%)
+- Per-level weather and time-of-day configuration
+
+**Core files:**
+| File | Purpose |
+|------|---------|
+| `scripts/world/weather_particles.gd` | Rain/snow GPUParticles3D, camera-following, palette-colored |
+| `scripts/world/environment_config.gd` | Static presets: time of day (sun, sky), weather (fog, visibility) |
+
+</details>
 
 ---
 
@@ -586,11 +630,30 @@ Placeholder beeps wired to all 36 banks. Replace with real assets below.
 Items moved here from other phases — not blocking progress, but tracked for
 later. Pull items back into active phases when/if they become relevant.
 
+### Character Models (Remaining)
+- [ ] Lookout model (replace capsule placeholder)
+- [ ] Neutral NPC models (Laborer, Technician, Civilian — distinct from enemies)
+- [ ] Destructible target models (crates, supply caches)
+
+### Props & Environment Art
+- [ ] Reusable building kit (walls, roofs, floors, stairs, railings)
+- [ ] Industrial props (crates, barrels, containers, pallets, pipes)
+- [ ] Cover objects (sandbags, concrete barriers, scaffolding)
+- [ ] Vegetation (trees, bushes — sight blockers at range)
+
+### UI Art Pass
+- [ ] Main menu, save slots, settings — visual polish
+- [ ] Hub layout — spatial navigation between stations
+- [ ] In-run HUD — styled crosshair, scope overlay, threat indicator
+- [ ] Result/death screens — styled layout
+- [ ] All panels (contracts, mods, skills, ammo, stats) — consistent visual theme
+
 ### Additional Enemy Types
 - [ ] Marksman (repositions between nests, medium awareness, decent accuracy)
 - [ ] Countersniper (scope glint visible, actively scans for player, accurate and fast)
 - [ ] Heavy Sniper (armored, requires AP ammo or headshot, high damage)
 - [ ] Elite Sniper (flanks to different nests, uses smoke/repositioning)
+- [ ] Scope glint shimmer VFX (deferred from Phase 3)
 
 ### Per-Run Variation Extras
 - [ ] Color palette variation per run

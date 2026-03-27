@@ -20,9 +20,8 @@ func setup(owner_npc: NpcBase) -> void:
 	npc = owner_npc
 	show_debug = npc.show_debug
 
-	# Apply mesh color from NPC type
-	if npc.npc_type and npc.mesh:
-		_apply_mesh_color(npc.npc_type.mesh_color)
+	# Note: mesh color is driven by PaletteManager.bind_meshes() in NpcBase._ready(),
+	# so npc_type.mesh_color is intentionally not applied here (palette takes priority).
 
 	if show_debug:
 		_setup_debug_visuals()
@@ -36,16 +35,6 @@ func update_visuals() -> void:
 func on_death() -> void:
 	if _state_indicator:
 		_state_indicator.visible = false
-
-
-func _apply_mesh_color(color: Color) -> void:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	for child in npc.mesh.get_children():
-		if child is MeshInstance3D:
-			child.material_override = mat
-		elif child is CSGShape3D:
-			child.material = mat
 
 
 func _setup_debug_visuals() -> void:

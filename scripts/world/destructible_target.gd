@@ -37,7 +37,7 @@ func _destroy() -> void:
 	# Visual — darken to fg_dark
 	if mesh:
 		var mat := StandardMaterial3D.new()
-		mat.albedo_color = PaletteManager.current.fg_dark
+		mat.albedo_color = PaletteManager.get_color(&"fg_dark")
 		for child in mesh.get_children():
 			if child is MeshInstance3D:
 				child.material_override = mat

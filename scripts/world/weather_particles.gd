@@ -32,7 +32,7 @@ func setup(weather: String, camera: Camera3D) -> void:
 
 
 func _process(_delta: float) -> void:
-	if _camera:
+	if _camera and is_instance_valid(_camera):
 		global_position = _camera.global_position
 
 
