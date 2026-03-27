@@ -64,9 +64,17 @@ func _setup_run_variation() -> void:
 	# Entities handle their own coloring via PaletteManager.bind_meshes()
 	PaletteManager.color_unscripted_meshes(self)
 
-	# Start level audio — ambient + level theme, combat music triggers on threat
-	AudioManager.play_ambient(&"level_ambient")
-	AudioManager.play_music(&"level_theme")
+	# Start level audio — per-level streams with fallback to generic bank
+	if level_data and level_data.level_ambient:
+		AudioManager.play_ambient_stream(level_data.level_ambient)
+	else:
+		AudioManager.play_ambient(&"level_ambient")
+
+	if level_data and level_data.level_theme:
+		AudioManager.play_music_stream(level_data.level_theme)
+	else:
+		AudioManager.play_music(&"level_theme")
+
 	RunManager.threat_phase_changed.connect(_on_threat_phase_changed)
 
 

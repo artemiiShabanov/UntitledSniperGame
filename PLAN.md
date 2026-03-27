@@ -523,7 +523,7 @@ Placeholder beeps wired to all 36 banks. Replace with real assets below.
 **Sources:** Freesound.org (CC0), Sonniss GDC Bundle (royalty-free), jsfxr (generated)
 
 ##### Weapon Sounds (Freesound / Sonniss)
-- [ ] `rifle_fire` — [kennysvoice M24](https://freesound.org/people/kennysvoice/sounds/351777/) or [SuperPhat synth](https://freesound.org/people/SuperPhat/sounds/514228/) (CC0)
+- [x] `rifle_fire` — Weapon/fire.mp3
 - [ ] `rifle_bolt` — [Zott820 Mosin cycle](https://freesound.org/people/Zott820/sounds/370345/) (CC0)
 - [ ] `rifle_dry` — gun dry fire / trigger click (Freesound CC0)
 - [ ] `scope_in` — cloth rustle + subtle mechanical zoom (Freesound CC0)
@@ -542,10 +542,10 @@ Placeholder beeps wired to all 36 banks. Replace with real assets below.
 - [ ] `footstep` — footstep (volume/speed varies: crouch quiet+slow, sprint loud+fast, walk normal)
 - [ ] `slide` — slide/scrape on ground
 - [ ] `heartbeat` — heartbeat pulse while holding breath
-- [ ] `breath_hold` — quiet inhale/hold
-- [ ] `breath_exhale` — exhale on breath release (louder on exhaustion)
-- [ ] `hit_taken` — pain grunt / impact (Freesound CC0)
-- [ ] `death` — death sound (Freesound CC0)
+- [x] `breath_hold` — Player/breath_in.mp3
+- [x] `breath_exhale` — Player/breath_out.mp3
+- [x] `hit_taken` — Player/hitHurt-2.wav
+- [x] `death` — Player/death.wav
 - [ ] `scope_zoom` — subtle click on zoom level change (for future use)
 
 ##### UI Sounds (jsfxr — generate at sfxr.me) [x]
@@ -565,9 +565,9 @@ Placeholder beeps wired to all 36 banks. Replace with real assets below.
 - [ ] `npc_panic` — crowd panic / scream short
 
 ##### Ambient & Music
-- [ ] `level_ambient` — per-level ambient soundscape (LevelData.level_ambient)
-- [ ] `level_theme` — per-level music bed (LevelData.level_theme), crossfades to combat on threat
-- [ ] `hub_theme` — calm, methodical, low tension (Kevin MacLeod / Pixabay)
+- [x] `level_ambient` — per-level ambient soundscape (LevelData.level_ambient) — warehouse + city wired
+- [x] `level_theme` — per-level music bed (LevelData.level_theme), crossfades to combat on threat — warehouse + city wired
+- [x] `hub_theme` — Music/hub_theme.mp3
 - [ ] `combat_tension` — tense, minimal, building dread (Kevin MacLeod / Pixabay)
 
 

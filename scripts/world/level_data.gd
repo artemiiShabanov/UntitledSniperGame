@@ -50,6 +50,10 @@ func get_unlock_requirements_text() -> String:
 @export var level_events_pool: Array[LevelEventData] = []
 @export var max_events_per_run: int = 1
 
+@export_group("Audio")
+@export var level_ambient: AudioStream  ## Per-level ambient soundscape
+@export var level_theme: AudioStream    ## Per-level music bed
+
 @export_group("Environment")
 @export var available_times_of_day: PackedStringArray = ["day"]
 @export var available_weather: PackedStringArray = ["clear"]

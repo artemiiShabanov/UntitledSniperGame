@@ -284,6 +284,26 @@ func play_music(id: StringName, fade_time: float = 1.0) -> void:
 		_start_music_track(entry, fade_time)
 
 
+func play_music_stream(stream: AudioStream, volume_db: float = -12.0, fade_time: float = 1.0) -> void:
+	## Play a music track directly from an AudioStream (for per-level themes).
+	if not stream:
+		return
+	var entry := AudioBankEntry.new()
+	entry.stream = stream
+	entry.volume_db = volume_db
+	entry.bus = &"Music"
+
+	if _music_fade_tween and _music_fade_tween.is_valid():
+		_music_fade_tween.kill()
+
+	if fade_time > 0.0 and _music_player.playing:
+		_music_fade_tween = create_tween()
+		_music_fade_tween.tween_property(_music_player, "volume_db", -40.0, fade_time * 0.5)
+		_music_fade_tween.tween_callback(_start_music_track.bind(entry, fade_time * 0.5))
+	else:
+		_start_music_track(entry, fade_time)
+
+
 func stop_music(fade_time: float = 1.0) -> void:
 	if _music_fade_tween and _music_fade_tween.is_valid():
 		_music_fade_tween.kill()
@@ -317,6 +337,26 @@ func play_ambient(id: StringName, fade_time: float = 0.5) -> void:
 	var entry: AudioBankEntry = _bank_map.get(id) as AudioBankEntry
 	if not entry or not entry.stream:
 		return
+
+	if _ambient_fade_tween and _ambient_fade_tween.is_valid():
+		_ambient_fade_tween.kill()
+
+	if fade_time > 0.0 and _ambient_player.playing:
+		_ambient_fade_tween = create_tween()
+		_ambient_fade_tween.tween_property(_ambient_player, "volume_db", -40.0, fade_time * 0.5)
+		_ambient_fade_tween.tween_callback(_start_ambient_track.bind(entry, fade_time * 0.5))
+	else:
+		_start_ambient_track(entry, fade_time)
+
+
+func play_ambient_stream(stream: AudioStream, volume_db: float = -9.0, fade_time: float = 0.5) -> void:
+	## Play an ambient track directly from an AudioStream (for per-level ambience).
+	if not stream:
+		return
+	var entry := AudioBankEntry.new()
+	entry.stream = stream
+	entry.volume_db = volume_db
+	entry.bus = &"Ambient"
 
 	if _ambient_fade_tween and _ambient_fade_tween.is_valid():
 		_ambient_fade_tween.kill()
