@@ -87,6 +87,9 @@ func _ready() -> void:
 	AudioManager.play_music(&"hub_theme")
 	AudioManager.stop_ambient(0.5)
 
+	# Palette reactivity
+	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void: _update_credits_display())
+
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and active_panel:
@@ -246,3 +249,4 @@ func _on_save_completed() -> void:
 
 func _update_credits_display() -> void:
 	credits_label.text = "Credits: $%d | XP: %d" % [SaveManager.get_credits(), SaveManager.get_xp()]
+	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))

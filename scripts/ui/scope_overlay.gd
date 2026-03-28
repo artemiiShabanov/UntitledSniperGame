@@ -2,15 +2,25 @@ extends Control
 ## Draws a simple scope overlay — dark vignette ring with crosshairs.
 ## Shown when the player is scoped in, hidden otherwise.
 
-@export var ring_color: Color = Color(0, 0, 0, 0.85)
-@export var crosshair_color: Color = Color(0, 0, 0, 0.6)
 @export var crosshair_thickness: float = 1.0
 @export var scope_radius_ratio: float = 0.45  ## Fraction of screen height
+
+var ring_color: Color = Color(0, 0, 0, 0.85)
+var crosshair_color: Color = Color(0, 0, 0, 0.6)
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
+	PaletteManager.palette_changed.connect(_on_palette_changed)
+	_on_palette_changed(PaletteManager.current)
+
+
+func _on_palette_changed(_palette: PaletteResource) -> void:
+	ring_color = Color(PaletteManager.get_color(&"fg_dark"), 0.9)
+	crosshair_color = Color(PaletteManager.get_color(&"accent_friendly"), 0.5)
+	if visible:
+		queue_redraw()
 
 
 func _draw() -> void:

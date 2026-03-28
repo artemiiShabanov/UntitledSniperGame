@@ -25,6 +25,7 @@ func _refresh() -> void:
 
 func _update_xp_label() -> void:
 	xp_label.text = "XP: %d" % SaveManager.get_xp()
+	xp_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 
 
 func _rebuild_skill_list() -> void:
@@ -53,12 +54,12 @@ func _build_skill_row(skill: PlayerSkill) -> PanelContainer:
 	name_label.text = skill.skill_name
 	if owned:
 		name_label.text += "  [UNLOCKED]"
-		name_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+		name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
 	info_vbox.add_child(name_label)
 
 	var desc_label := Label.new()
 	desc_label.text = skill.description
-	desc_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	desc_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_mid"))
 	desc_label.add_theme_font_size_override("font_size", 12)
 	info_vbox.add_child(desc_label)
 

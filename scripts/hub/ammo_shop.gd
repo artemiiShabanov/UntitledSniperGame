@@ -54,7 +54,7 @@ func _rebuild_ui() -> void:
 		var price_label := Label.new()
 		price_label.text = "$%d/rd" % ammo.cost_per_round
 		price_label.custom_minimum_size = Vector2(60, 0)
-		price_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.5))
+		price_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 		row.add_child(price_label)
 
 		# Owned count
@@ -103,6 +103,7 @@ func _on_buy(ammo: AmmoType, amount: int) -> void:
 
 func _update_credits_label() -> void:
 	credits_label.text = "Credits: $%d" % SaveManager.get_credits()
+	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 
 
 func _update_button_states() -> void:

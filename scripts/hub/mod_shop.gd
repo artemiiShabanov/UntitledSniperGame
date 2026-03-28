@@ -46,6 +46,7 @@ func _refresh() -> void:
 
 func _update_credits_label() -> void:
 	credits_label.text = "Credits: $%d" % SaveManager.get_credits()
+	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 
 
 func _update_tab_highlight() -> void:
@@ -54,7 +55,7 @@ func _update_tab_highlight() -> void:
 		var btn: Button = tabs[i]
 		var slot: String = ModRegistry.SLOTS[i]
 		if slot == _current_slot:
-			btn.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+			btn.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 		else:
 			btn.remove_theme_color_override("font_color")
 
@@ -88,14 +89,14 @@ func _build_mod_row(mod: RifleMod, equipped_id: String) -> PanelContainer:
 	name_label.text = mod.mod_name
 	if is_equipped:
 		name_label.text += "  [EQUIPPED]"
-		name_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+		name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
 	elif is_owned:
-		name_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+		name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
 	info_vbox.add_child(name_label)
 
 	var desc_label := Label.new()
 	desc_label.text = mod.description
-	desc_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	desc_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_mid"))
 	desc_label.add_theme_font_size_override("font_size", 12)
 	info_vbox.add_child(desc_label)
 
@@ -104,7 +105,7 @@ func _build_mod_row(mod: RifleMod, equipped_id: String) -> PanelContainer:
 	if stats_text != "":
 		var stats_label := Label.new()
 		stats_label.text = stats_text
-		stats_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.5))
+		stats_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 		stats_label.add_theme_font_size_override("font_size", 12)
 		info_vbox.add_child(stats_label)
 

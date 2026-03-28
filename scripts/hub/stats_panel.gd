@@ -13,6 +13,7 @@ var _level_list: Array[String] = []
 func _ready() -> void:
 	close_btn.pressed.connect(func(): closed.emit())
 	AudioManager.wire_button(close_btn, &"menu_cancel")
+	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void: _rebuild())
 
 
 func open(levels: Array[String] = []) -> void:
@@ -69,7 +70,7 @@ func _add_section(title: String) -> void:
 	var label := Label.new()
 	label.text = title
 	label.add_theme_font_size_override("font_size", 18)
-	label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+	label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 	content.add_child(label)
 
 
@@ -79,7 +80,7 @@ func _add_row(label_text: String, value_text: String) -> void:
 	var name_label := Label.new()
 	name_label.text = label_text
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
 	hbox.add_child(name_label)
 
 	var value_label := Label.new()

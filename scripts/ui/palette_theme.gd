@@ -50,6 +50,8 @@ func _build_theme() -> void:
 	_build_check_button(p)
 	_build_slider(p)
 	_build_line_edit(p)
+	_build_separator(p)
+	_build_scroll_container(p)
 
 
 func _build_fonts() -> void:
@@ -129,6 +131,34 @@ func _build_line_edit(p: PaletteResource) -> void:
 	theme.set_stylebox("focus", "LineEdit", focus)
 	theme.set_color("font_color", "LineEdit", p.accent_friendly)
 	theme.set_color("caret_color", "LineEdit", p.accent_friendly)
+
+
+func _build_separator(p: PaletteResource) -> void:
+	var sep_style := StyleBoxFlat.new()
+	sep_style.bg_color = Color(p.accent_friendly, 0.2)
+	sep_style.set_content_margin_all(0)
+	sep_style.content_margin_top = 1
+	sep_style.content_margin_bottom = 1
+	theme.set_stylebox("separator", "HSeparator", sep_style)
+	theme.set_stylebox("separator", "VSeparator", sep_style)
+	theme.set_constant("separation", "HSeparator", 8)
+	theme.set_constant("separation", "VSeparator", 8)
+
+
+func _build_scroll_container(p: PaletteResource) -> void:
+	# Scrollbar styling
+	var grabber := _flat_box(Color(p.accent_friendly, 0.4), 2)
+	grabber.set_content_margin_all(4)
+	var grabber_hl := _flat_box(Color(p.accent_friendly, 0.6), 2)
+	grabber_hl.set_content_margin_all(4)
+	var grabber_pressed := _flat_box(Color(p.accent_friendly, 0.8), 2)
+	grabber_pressed.set_content_margin_all(4)
+	var scroll_bg := _flat_box(Color(p.fg_dark, 0.3), 2)
+	scroll_bg.set_content_margin_all(4)
+	theme.set_stylebox("scroll", "VScrollBar", scroll_bg)
+	theme.set_stylebox("grabber", "VScrollBar", grabber)
+	theme.set_stylebox("grabber_highlight", "VScrollBar", grabber_hl)
+	theme.set_stylebox("grabber_pressed", "VScrollBar", grabber_pressed)
 
 
 ## ── Helpers ─────────────────────────────────────────────────────────────────

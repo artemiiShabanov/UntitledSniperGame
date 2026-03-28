@@ -47,12 +47,12 @@ func _build_contract_row(contract: Contract) -> PanelContainer:
 
 	var name_label := Label.new()
 	name_label.text = contract.contract_name
-	name_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+	name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 	info.add_child(name_label)
 
 	var desc_label := Label.new()
 	desc_label.text = contract.description
-	desc_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	desc_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
 	desc_label.add_theme_font_size_override("font_size", 12)
 	info.add_child(desc_label)
 
@@ -64,7 +64,7 @@ func _build_contract_row(contract: Contract) -> PanelContainer:
 		reward_parts.append("+%d XP" % contract.bonus_xp)
 	var reward_label := Label.new()
 	reward_label.text = "Reward: " + " ".join(reward_parts)
-	reward_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+	reward_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
 	reward_label.add_theme_font_size_override("font_size", 12)
 	info.add_child(reward_label)
 

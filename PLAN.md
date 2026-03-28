@@ -822,11 +822,15 @@ later. Pull items back into active phases when/if they become relevant.
 </details>
 
 ### UI Art Pass
-- [ ] Main menu, save slots, settings — visual polish
-- [ ] Hub layout — spatial navigation between stations
-- [ ] In-run HUD — styled crosshair, scope overlay, threat indicator
-- [ ] Result/death screens — styled layout
-- [ ] All panels (contracts, mods, skills, ammo, stats) — consistent visual theme
+- [x] All hub panels palette-colored (ammo, mods, skills, contracts, stats, credits)
+- [x] Scope overlay palette-reactive (ring + crosshair recolor on palette swap)
+- [x] HSeparator, ScrollBar, VScrollBar theme styling
+- [x] Crosshair, breath meter, kill feed, extraction bar — already palette-reactive
+- [ ] Main menu visual polish (background pattern, version text, subtle animation)
+- [ ] Hub layout — spatial navigation cues between stations
+- [ ] Scope overlay — advanced reticle (mil-dots, rangefinder markings)
+- [ ] Result/death screens — styled layout with animations
+- [ ] Settings screen — section headers, better slider visuals
 
 ### Additional Enemy Types
 - [ ] Marksman (repositions between nests, medium awareness, decent accuracy)
