@@ -31,4 +31,8 @@ func _load_all() -> void:
 	for path in paths:
 		var res := load(path)
 		if res is AmmoType:
+			if not res.icon:
+				var icon_path := "res://assets/icons/ammo/%s.png" % res.ammo_id
+				if ResourceLoader.exists(icon_path):
+					res.icon = load(icon_path)
 			_types.append(res)

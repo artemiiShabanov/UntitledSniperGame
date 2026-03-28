@@ -821,6 +821,153 @@ later. Pull items back into active phases when/if they become relevant.
 
 </details>
 
+### Image Assets
+
+> **Status:** Placeholder images created for all items below. Replace with final art.
+> **Folder:** `assets/` — icons, sprites, textures, UI art.
+
+<details>
+<summary>UI Icons — ammo, mods, skills, contracts, kill feed, HUD, ratings (40 files)</summary>
+
+**Ammo Type Icons** (`assets/icons/ammo/`, 64×64)
+| File | Ammo Type | Used In |
+|------|-----------|---------|
+| `standard.png` | Standard rounds | Ammo shop, loadout panel, HUD ammo switch |
+| `armor_piercing.png` | Armor-Piercing | Ammo shop, loadout panel, HUD ammo switch |
+| `high_damage.png` | High-Damage | Ammo shop, loadout panel, HUD ammo switch |
+| `shock.png` | Shock (non-lethal) | Ammo shop, loadout panel, HUD ammo switch |
+| `golden.png` | Golden | Ammo shop, loadout panel, HUD ammo switch |
+
+**Mod Slot Icons** (`assets/icons/mods/slot_*.png`, 64×64)
+| File | Slot | Used In |
+|------|------|---------|
+| `slot_barrel.png` | Barrel | Mod shop tab icons |
+| `slot_stock.png` | Stock | Mod shop tab icons |
+| `slot_bolt.png` | Bolt | Mod shop tab icons |
+| `slot_magazine.png` | Magazine | Mod shop tab icons |
+| `slot_scope.png` | Scope | Mod shop tab icons |
+
+**Specific Mod Icons** (`assets/icons/mods/*.png`, 48×48)
+| File | Mod | Used In |
+|------|-----|---------|
+| `barrel_standard.png` | Standard Barrel | Mod shop cells |
+| `barrel_long.png` | Long Barrel | Mod shop cells |
+| `stock_standard.png` | Standard Stock | Mod shop cells |
+| `bolt_standard.png` | Standard Bolt | Mod shop cells |
+| `magazine_standard.png` | Standard Mag | Mod shop cells |
+| `magazine_extended.png` | Extended Mag | Mod shop cells |
+| `scope_standard.png` | Iron Sights | Mod shop cells |
+
+**Skill Icons** (`assets/icons/skills/`, 64×64)
+| File | Skill | Used In |
+|------|-------|---------|
+| `iron_lungs.png` | Iron Lungs | Skill shop |
+| `quick_hands.png` | Quick Hands | Skill shop |
+| `zipline_runner.png` | Zipline Runner | Skill shop |
+| `extra_life.png` | Last Stand | Skill shop |
+
+**Contract Type Icons** (`assets/icons/contracts/`, 64×64)
+| File | Contract Type | Used In |
+|------|---------------|---------|
+| `kill_count.png` | Kill Count | Contract panel |
+| `headshot_count.png` | Headshot Count | Contract panel |
+| `accuracy.png` | Accuracy | Contract panel |
+| `no_hits.png` | No Hits (Ghost) | Contract panel |
+| `speed_extract.png` | Speed Extract | Contract panel |
+| `kill_target.png` | Kill Target (future) | Contract panel |
+| `destroy_target.png` | Destroy Target (future) | Contract panel |
+
+**Kill Feed Icons** (`assets/icons/killfeed/`, 32×32)
+| File | Event | Used In |
+|------|-------|---------|
+| `kill.png` | Enemy killed | Kill feed entries |
+| `headshot.png` | Headshot kill | Kill feed entries |
+| `long_range.png` | Long-range kill | Kill feed entries |
+| `penetration.png` | Penetration kill | Kill feed entries |
+| `target_destroyed.png` | Target destroyed | Kill feed entries |
+
+**HUD Icons** (`assets/icons/hud/`, 32×32)
+| File | Icon | Used In |
+|------|------|---------|
+| `heart_full.png` | Full heart (life remaining) | Player HUD lives display |
+| `heart_empty.png` | Empty heart (life lost) | Player HUD lives display |
+
+**Rating Badges** (`assets/icons/ratings/`, 128×128)
+| File | Rating | Used In |
+|------|--------|---------|
+| `rating_S.png` | S rank | Run result screen |
+| `rating_A.png` | A rank | Run result screen |
+| `rating_B.png` | B rank | Run result screen |
+| `rating_C.png` | C rank | Run result screen |
+| `rating_D.png` | D rank | Run result screen |
+
+</details>
+
+<details>
+<summary>VFX Sprites (5 files)</summary>
+
+`assets/sprites/vfx/`
+| File | Size | Used In |
+|------|------|---------|
+| `muzzle_flash.png` | 64×64 | VfxFactory muzzle flash particles (player + enemy) |
+| `impact_dust.png` | 32×32 | VfxFactory bullet impact on world surfaces |
+| `impact_blood.png` | 32×32 | VfxFactory bullet impact on enemies/NPCs |
+| `smoke_puff.png` | 64×64 | VfxFactory smoke effects, enemy repositioning |
+| `shell_casing.png` | 16×16 | Shell ejection particle (bolt cycle) |
+
+</details>
+
+<details>
+<summary>UI Art — logo, menu background (2 files)</summary>
+
+`assets/ui/`
+| File | Size | Used In |
+|------|------|---------|
+| `game_logo.png` | 512×128 | Main menu title |
+| `menu_background.png` | 1920×1080 | Main menu background |
+
+</details>
+
+<details>
+<summary>Surface Textures — 6 materials, albedo + normal (13 files)</summary>
+
+`assets/textures/surfaces/`
+| Material | Albedo | Normal | Used In |
+|----------|--------|--------|---------|
+| Concrete | `concrete_albedo.png` | `concrete_normal.png` | Floors, walls, barriers |
+| Metal | `metal_albedo.png` | `metal_normal.png` | Containers, railings, industrial |
+| Wood | `wood_albedo.png` | `wood_normal.png` | Crates, pallets, fences |
+| Dirt | `dirt_albedo.png` | `dirt_normal.png` | Ground, terrain |
+| Asphalt | `asphalt_albedo.png` | `asphalt_normal.png` | Roads, parking areas |
+| Brick | `brick_albedo.png` | `brick_normal.png` | Building walls |
+
+`assets/textures/weapons/`
+| File | Used In |
+|------|---------|
+| `rifle_default.png` | Default rifle skin texture |
+
+</details>
+
+<details>
+<summary>Image asset totals</summary>
+
+| Category | Count |
+|----------|-------|
+| Ammo icons | 5 |
+| Mod icons (slots + specific) | 12 |
+| Skill icons | 4 |
+| Contract icons | 7 |
+| Kill feed icons | 5 |
+| HUD icons (hearts) | 2 |
+| Rating badges | 5 |
+| VFX sprites | 5 |
+| UI art | 2 |
+| Surface textures (albedo + normal) | 12 |
+| Weapon textures | 1 |
+| **Total image assets** | **60** |
+
+</details>
+
 ### UI Art Pass
 - [x] All hub panels palette-colored (ammo, mods, skills, contracts, stats, credits)
 - [x] Scope overlay palette-reactive (ring + crosshair recolor on palette swap)

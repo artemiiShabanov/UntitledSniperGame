@@ -23,6 +23,7 @@ enum Type {
 @export var bonus_xp: int = 0
 @export var level_restriction: String = ""  ## Level path; empty = any level
 @export var target_id: String = ""  ## For KILL_TARGET/DESTROY_TARGET (future)
+@export var icon: Texture2D  ## UI icon (assets/icons/contracts/)
 
 
 func is_available_for_level(level_path: String) -> bool:

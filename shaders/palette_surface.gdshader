@@ -20,6 +20,10 @@ global uniform vec4 palette_danger;
 global uniform vec4 palette_reward;
 
 uniform int palette_slot: hint_range(0, 7, 1) = 0;
+uniform sampler2D albedo_texture: hint_default_white;
+uniform sampler2D normal_texture: hint_normal;
+uniform bool use_texture = false;
+uniform float texture_blend: hint_range(0.0, 1.0) = 0.5;  // 0 = pure palette, 1 = full texture
 
 void fragment() {
 	vec4 col;
@@ -34,5 +38,11 @@ void fragment() {
 		case 7: col = palette_reward; break;
 		default: col = vec4(1.0, 0.0, 1.0, 1.0); break; // magenta = error
 	}
-	ALBEDO = col.rgb;
+	if (use_texture) {
+		vec3 tex_col = texture(albedo_texture, UV).rgb;
+		ALBEDO = mix(col.rgb, tex_col * col.rgb, texture_blend);
+		NORMAL_MAP = texture(normal_texture, UV).rgb;
+	} else {
+		ALBEDO = col.rgb;
+	}
 }

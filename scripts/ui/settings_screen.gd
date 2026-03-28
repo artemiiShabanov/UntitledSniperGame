@@ -32,6 +32,7 @@ func open() -> void:
 	fullscreen_check.button_pressed = SettingsManager.fullscreen
 	vsync_check.button_pressed = SettingsManager.vsync
 	visible = true
+	sensitivity_slider.grab_focus()
 
 
 func _on_sensitivity_changed(value: float) -> void:
@@ -53,6 +54,14 @@ func _on_fullscreen_toggled(pressed: bool) -> void:
 func _on_vsync_toggled(pressed: bool) -> void:
 	SettingsManager.vsync = pressed
 	SettingsManager.apply_all()
+
+
+func _input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event.is_action_pressed("ui_cancel"):
+		_on_back()
+		get_viewport().set_input_as_handled()
 
 
 func _on_back() -> void:

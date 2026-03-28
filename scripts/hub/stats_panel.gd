@@ -1,6 +1,6 @@
 extends Control
 ## Stats panel — displays lifetime stats, best records, and per-level breakdown.
-## Read-only, no purchases or interactions.
+## Compact two-column layout with dotted-line fill between label and value.
 
 signal closed
 
@@ -20,6 +20,7 @@ func open(levels: Array[String] = []) -> void:
 	_level_list = levels
 	visible = true
 	_rebuild()
+	close_btn.grab_focus()
 
 
 func _rebuild() -> void:
@@ -69,23 +70,39 @@ func _rebuild() -> void:
 func _add_section(title: String) -> void:
 	var label := Label.new()
 	label.text = title
-	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_font_size_override("font_size", 36)
 	label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	var bold_font: Font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	if bold_font:
+		label.add_theme_font_override("font", bold_font)
 	content.add_child(label)
 
 
 func _add_row(label_text: String, value_text: String) -> void:
 	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 12)
 
 	var name_label := Label.new()
 	name_label.text = label_text
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
 	hbox.add_child(name_label)
+
+	# Dot fill — stretches between name and value
+	var dots := Label.new()
+	dots.text = "·" # Single dot; clip handles the rest visually
+	dots.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dots.add_theme_color_override("font_color", Color(PaletteManager.get_color(&"bg_mid"), 0.3))
+	dots.clip_text = true
+	# Fill with dots
+	dots.text = "· " .repeat(80)
+	hbox.add_child(dots)
 
 	var value_label := Label.new()
 	value_label.text = value_text
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var bold_font: Font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	if bold_font:
+		value_label.add_theme_font_override("font", bold_font)
 	hbox.add_child(value_label)
 
 	content.add_child(hbox)
@@ -93,5 +110,5 @@ func _add_row(label_text: String, value_text: String) -> void:
 
 func _add_separator() -> void:
 	var sep := HSeparator.new()
-	sep.add_theme_constant_override("separation", 8)
+	sep.add_theme_constant_override("separation", 16)
 	content.add_child(sep)

@@ -57,7 +57,12 @@ var current_interactable: Interactable = null
 @onready var hud = $HUD  ## PlayerHUD script on the HUD CanvasLayer
 
 
+## Track whether mouse was captured before losing focus (for alt-tab restore)
+var _was_mouse_captured: bool = false
+
+
 func _ready() -> void:
+	Input.use_accumulated_input = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	weapon.state_changed.connect(_on_weapon_state_changed)
 	weapon.shot_fired.connect(_on_shot_fired)
@@ -66,6 +71,21 @@ func _ready() -> void:
 	# Force initial HUD update (weapon._ready() fires before player connects)
 	hud.update_scope_visuals(weapon.is_scoped)
 	hud.update_weapon_display(weapon)
+
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_FOCUS_OUT:
+			# Release mouse when alt-tabbing so the OS cursor isn't trapped
+			_was_mouse_captured = (Input.mouse_mode == Input.MOUSE_MODE_CAPTURED)
+			if _was_mouse_captured:
+				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		NOTIFICATION_APPLICATION_FOCUS_IN:
+			# Recapture mouse when returning, but only if it was captured before
+			# and no UI panel is currently open (pause menu handles its own state)
+			if _was_mouse_captured and not get_tree().paused:
+				Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			_was_mouse_captured = false
 
 
 func _input(event: InputEvent) -> void:

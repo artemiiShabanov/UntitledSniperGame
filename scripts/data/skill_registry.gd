@@ -50,4 +50,8 @@ func _register_all() -> void:
 
 
 func _add(skill: PlayerSkill) -> void:
+	if not skill.icon:
+		var icon_path := "res://assets/icons/skills/%s.png" % skill.id
+		if ResourceLoader.exists(icon_path):
+			skill.icon = load(icon_path)
 	_skills[skill.id] = skill

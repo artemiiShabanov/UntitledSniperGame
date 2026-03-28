@@ -14,6 +14,9 @@ var LEVEL_LIST: Array[String] = [
 @onready var skill_board: Interactable = $SkillBoard
 @onready var stats_terminal: Interactable = $StatsTerminal
 
+## UI layer — holds all station panels + dimmer
+@onready var station_ui: CanvasLayer = $StationUI
+
 ## UI panels
 @onready var deploy_panel: Control = $StationUI/DeployPanel
 @onready var ammo_shop: Control = $StationUI/AmmoShop
@@ -35,11 +38,31 @@ var selected_level_path: String = ""
 var selected_level_data: LevelData = null
 var _level_data_cache: Array[LevelData] = []
 
+## Background dimmer — blocks clicks and darkens 3D view when a panel is open
+var _dimmer: ColorRect
+## Reference to player for disabling input while panels are open
+var _player: CharacterBody3D
+
 
 func _ready() -> void:
 	RunManager._set_game_state(RunManager.GameState.HUB)
 	RunManager.is_dead = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+	# Find player
+	var players := get_tree().get_nodes_in_group("player")
+	if players.size() > 0:
+		_player = players[0]
+
+	# Create dimmer as first child of StationUI so it sits behind panels
+	_dimmer = ColorRect.new()
+	_dimmer.name = "Dimmer"
+	_dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_dimmer.color = Color(0, 0, 0, 0.7)
+	_dimmer.mouse_filter = Control.MOUSE_FILTER_STOP  # Blocks clicks to 3D
+	_dimmer.visible = false
+	station_ui.add_child(_dimmer)
+	station_ui.move_child(_dimmer, 0)  # Behind all panels
 
 	deploy_board.deploy_requested.connect(_on_deploy_requested)
 	ammo_crate.loadout_requested.connect(_on_ammo_crate_requested)
@@ -90,6 +113,14 @@ func _ready() -> void:
 	# Palette reactivity
 	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void: _update_credits_display())
 
+	# Re-grab focus after alt-tab
+	get_tree().root.focus_entered.connect(_on_window_focus)
+
+
+func _process(_delta: float) -> void:
+	if active_panel:
+		_update_credits_display()
+
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and active_panel:
@@ -102,14 +133,56 @@ func _open_panel(panel: Control) -> void:
 		active_panel.visible = false
 	active_panel = panel
 	panel.visible = true
+	_dimmer.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	# Disable player input while panel is open
+	if _player:
+		_player.set_process_input(false)
+		_player.set_physics_process(false)
+	# Focus the first focusable child so arrow keys work immediately
+	_focus_first_button(panel)
+
+
+func _focus_first_button(node: Control) -> void:
+	## Collect all buttons, chain focus neighbors, focus the first one.
+	var buttons: Array[Button] = []
+	_collect_buttons(node, buttons)
+	_chain_focus_neighbors(buttons)
+	for btn in buttons:
+		if btn.visible and not btn.disabled:
+			btn.grab_focus()
+			return
+
+
+func _collect_buttons(node: Node, out: Array[Button]) -> void:
+	## Recursively gather all visible Buttons in tree order.
+	if node is Button and node.visible:
+		out.append(node)
+	for child in node.get_children():
+		_collect_buttons(child, out)
+
+
+func _chain_focus_neighbors(buttons: Array[Button]) -> void:
+	## Link buttons so Up/Down arrows traverse the full list, wrapping around.
+	if buttons.size() < 2:
+		return
+	for i in range(buttons.size()):
+		var prev_idx := (i - 1) % buttons.size()
+		var next_idx := (i + 1) % buttons.size()
+		buttons[i].focus_neighbor_top = buttons[prev_idx].get_path()
+		buttons[i].focus_neighbor_bottom = buttons[next_idx].get_path()
 
 
 func _close_active_panel() -> void:
 	if active_panel:
 		active_panel.visible = false
 		active_panel = null
+	_dimmer.visible = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	# Re-enable player input
+	if _player:
+		_player.set_process_input(true)
+		_player.set_physics_process(true)
 	_update_credits_display()
 
 
@@ -246,6 +319,11 @@ func _on_save_completed() -> void:
 
 
 ## ── Credits ──────────────────────────────────────────────────────────────────
+
+func _on_window_focus() -> void:
+	if active_panel:
+		_focus_first_button(active_panel)
+
 
 func _update_credits_display() -> void:
 	credits_label.text = "Credits: $%d | XP: %d" % [SaveManager.get_credits(), SaveManager.get_xp()]

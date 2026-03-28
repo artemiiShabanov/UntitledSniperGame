@@ -19,6 +19,12 @@ extends CanvasLayer
 var hit_flash_alpha: float = 0.0
 const HIT_FLASH_FADE_SPEED: float = 3.0
 
+## Heart icon textures
+var _heart_full_tex: Texture2D
+var _heart_empty_tex: Texture2D
+var _heart_icons: Array[TextureRect] = []
+var _heart_container: HBoxContainer = null
+
 
 func _ready() -> void:
 	RunManager.life_lost.connect(_on_life_lost)
@@ -28,9 +34,21 @@ func _ready() -> void:
 	RunManager.run_timer_updated.connect(_on_run_timer_updated)
 	RunManager.threat_phase_changed.connect(_on_threat_phase_changed)
 	PaletteManager.palette_changed.connect(_on_palette_changed)
+	# Load heart icons
+	_heart_full_tex = _try_load_tex("res://assets/icons/hud/heart_full.png")
+	_heart_empty_tex = _try_load_tex("res://assets/icons/hud/heart_empty.png")
 	_update_lives_display()
 	run_timer_label.visible = false
 	threat_phase_label.visible = false
+	# Bold HUD elements
+	var bold_font: Font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	if bold_font:
+		weapon_state_label.add_theme_font_override("font", bold_font)
+		lives_label.add_theme_font_override("font", bold_font)
+		run_timer_label.add_theme_font_override("font", bold_font)
+		threat_phase_label.add_theme_font_override("font", bold_font)
+	# Hide run-only elements when in hub
+	_update_hud_visibility()
 
 
 func _process(delta: float) -> void:
@@ -47,9 +65,10 @@ func update_breath(ratio: float, exhausted: bool, scoped: bool) -> void:
 
 
 func update_scope_visuals(scoped: bool) -> void:
-	crosshair.visible = not scoped
-	scope_overlay.visible = scoped
-	if scoped:
+	var in_run := RunManager.game_state != RunManager.GameState.HUB
+	crosshair.visible = in_run and not scoped
+	scope_overlay.visible = in_run and scoped
+	if scoped and in_run:
 		scope_overlay.queue_redraw()
 
 
@@ -70,6 +89,33 @@ func update_weapon_display(weapon: Weapon) -> void:
 		weapon_state_label.add_theme_color_override("font_color", ammo.tracer_color)
 	else:
 		weapon_state_label.remove_theme_color_override("font_color")
+
+	# Update ammo icon in HUD (lazily created TextureRect next to weapon label)
+	_update_ammo_icon(ammo)
+
+
+var _ammo_icon_rect: TextureRect = null
+
+func _update_ammo_icon(ammo: AmmoType) -> void:
+	if not ammo or not ammo.icon:
+		if _ammo_icon_rect:
+			_ammo_icon_rect.visible = false
+		return
+	if not _ammo_icon_rect:
+		_ammo_icon_rect = TextureRect.new()
+		_ammo_icon_rect.custom_minimum_size = Vector2(28, 28)
+		_ammo_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		# Position next to weapon state label (top-right)
+		_ammo_icon_rect.anchors_preset = Control.PRESET_TOP_RIGHT
+		_ammo_icon_rect.anchor_left = 1.0
+		_ammo_icon_rect.anchor_right = 1.0
+		_ammo_icon_rect.offset_left = -530.0
+		_ammo_icon_rect.offset_top = 25.0
+		_ammo_icon_rect.offset_right = -502.0
+		_ammo_icon_rect.offset_bottom = 53.0
+		add_child(_ammo_icon_rect)
+	_ammo_icon_rect.texture = ammo.icon
+	_ammo_icon_rect.visible = true
 
 
 func update_interact_prompt(text: String) -> void:
@@ -94,8 +140,7 @@ func _on_life_lost(_lives_remaining: int) -> void:
 
 
 func _on_run_started() -> void:
-	run_timer_label.visible = true
-	threat_phase_label.visible = true
+	_update_hud_visibility()
 	_update_lives_display()
 	_update_threat_display()
 
@@ -142,13 +187,57 @@ func _on_palette_changed(_palette: PaletteResource) -> void:
 	_update_threat_display()
 
 
+func _update_hud_visibility() -> void:
+	## Hide run-specific HUD elements when in hub.
+	var in_run := RunManager.game_state != RunManager.GameState.HUB
+	crosshair.visible = in_run and not scope_overlay.visible
+	weapon_state_label.visible = in_run
+	lives_label.visible = in_run
+	run_timer_label.visible = in_run
+	threat_phase_label.visible = in_run
+	breath_meter.visible = false  # Shown dynamically by update_breath
+
+
+static func _try_load_tex(path: String) -> Texture2D:
+	if ResourceLoader.exists(path):
+		return load(path)
+	return null
+
+
 func _update_lives_display() -> void:
-	var hearts := ""
-	for i in range(RunManager.max_lives):
-		if i < RunManager.lives:
-			hearts += "♥ "
-		else:
-			hearts += "♡ "
-	lives_label.text = hearts.strip_edges()
-	var color_slot := &"danger" if RunManager.lives <= 1 else &"accent_friendly"
-	lives_label.add_theme_color_override("font_color", PaletteManager.get_color(color_slot))
+	if _heart_full_tex and _heart_empty_tex:
+		# Icon-based hearts
+		lives_label.text = ""
+		if not _heart_container:
+			_heart_container = HBoxContainer.new()
+			_heart_container.add_theme_constant_override("separation", 4)
+			# Position next to lives_label
+			lives_label.add_child(_heart_container)
+		# Rebuild heart icons
+		for icon in _heart_icons:
+			icon.queue_free()
+		_heart_icons.clear()
+		var tint := PaletteManager.get_color(&"danger") if RunManager.lives <= 1 else PaletteManager.get_color(&"accent_friendly")
+		for i in range(RunManager.max_lives):
+			var icon := TextureRect.new()
+			icon.custom_minimum_size = Vector2(28, 28)
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			if i < RunManager.lives:
+				icon.texture = _heart_full_tex
+				icon.modulate = tint
+			else:
+				icon.texture = _heart_empty_tex
+				icon.modulate = PaletteManager.get_color(&"bg_mid")
+			_heart_container.add_child(icon)
+			_heart_icons.append(icon)
+	else:
+		# Fallback: text hearts
+		var hearts := ""
+		for i in range(RunManager.max_lives):
+			if i < RunManager.lives:
+				hearts += "♥ "
+			else:
+				hearts += "♡ "
+		lives_label.text = hearts.strip_edges()
+		var color_slot := &"danger" if RunManager.lives <= 1 else &"accent_friendly"
+		lives_label.add_theme_color_override("font_color", PaletteManager.get_color(color_slot))

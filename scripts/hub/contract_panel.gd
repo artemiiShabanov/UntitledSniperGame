@@ -20,6 +20,7 @@ func open(level_path: String = "") -> void:
 	_level_path = level_path
 	visible = true
 	_rebuild()
+	close_btn.grab_focus()
 
 
 func _rebuild() -> void:
@@ -36,10 +37,18 @@ func _rebuild() -> void:
 func _build_contract_row(contract: Contract) -> PanelContainer:
 	var panel := PanelContainer.new()
 	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 12)
+	hbox.add_theme_constant_override("separation", 20)
 	panel.add_child(hbox)
 
 	var can_afford: bool = contract.cost == 0 or SaveManager.get_credits() >= contract.cost
+
+	# Contract icon
+	if contract.icon:
+		var icon := TextureRect.new()
+		icon.texture = contract.icon
+		icon.custom_minimum_size = Vector2(48, 48)
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		hbox.add_child(icon)
 
 	# Info
 	var info := VBoxContainer.new()
@@ -53,7 +62,7 @@ func _build_contract_row(contract: Contract) -> PanelContainer:
 	var desc_label := Label.new()
 	desc_label.text = contract.description
 	desc_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
-	desc_label.add_theme_font_size_override("font_size", 12)
+	desc_label.add_theme_font_size_override("font_size", 22)
 	info.add_child(desc_label)
 
 	# Reward + cost line
@@ -65,7 +74,7 @@ func _build_contract_row(contract: Contract) -> PanelContainer:
 	var reward_label := Label.new()
 	reward_label.text = "Reward: " + " ".join(reward_parts)
 	reward_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
-	reward_label.add_theme_font_size_override("font_size", 12)
+	reward_label.add_theme_font_size_override("font_size", 22)
 	info.add_child(reward_label)
 
 	hbox.add_child(info)
@@ -77,7 +86,7 @@ func _build_contract_row(contract: Contract) -> PanelContainer:
 		btn.disabled = not can_afford
 	else:
 		btn.text = "Accept (Free)"
-	btn.custom_minimum_size = Vector2(110, 0)
+	btn.custom_minimum_size = Vector2(200, 48)
 	btn.pressed.connect(func(): _accept_contract(contract))
 	AudioManager.wire_button(btn, &"menu_confirm")
 	hbox.add_child(btn)

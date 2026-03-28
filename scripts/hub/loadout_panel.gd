@@ -44,24 +44,31 @@ func _rebuild_ui() -> void:
 			continue  # Don't show types with zero inventory
 
 		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 8)
+		row.add_theme_constant_override("separation", 16)
 
-		# Color indicator
-		var color_rect := ColorRect.new()
-		color_rect.custom_minimum_size = Vector2(16, 16)
-		color_rect.color = ammo.tracer_color
-		row.add_child(color_rect)
+		# Ammo icon (fall back to color rect if no icon)
+		if ammo.icon:
+			var icon := TextureRect.new()
+			icon.texture = ammo.icon
+			icon.custom_minimum_size = Vector2(32, 32)
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			row.add_child(icon)
+		else:
+			var color_rect := ColorRect.new()
+			color_rect.custom_minimum_size = Vector2(24, 24)
+			color_rect.color = ammo.tracer_color
+			row.add_child(color_rect)
 
 		# Name
 		var name_label := Label.new()
 		name_label.text = ammo.ammo_name
-		name_label.custom_minimum_size = Vector2(120, 0)
+		name_label.custom_minimum_size = Vector2(200, 0)
 		row.add_child(name_label)
 
 		# Count label
 		var count_label := Label.new()
 		count_label.text = "%d / %d" % [owned, owned]
-		count_label.custom_minimum_size = Vector2(70, 0)
+		count_label.custom_minimum_size = Vector2(140, 0)
 		count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		row.add_child(count_label)
 		_count_labels[ammo.ammo_id] = count_label
@@ -72,7 +79,7 @@ func _rebuild_ui() -> void:
 		slider.max_value = owned
 		slider.value = owned  # Default: bring all
 		slider.step = 1
-		slider.custom_minimum_size = Vector2(150, 0)
+		slider.custom_minimum_size = Vector2(300, 0)
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var ammo_id := ammo.ammo_id  # Capture for lambda
 		slider.value_changed.connect(func(v: float):

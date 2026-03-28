@@ -70,6 +70,15 @@ size = Vector3(12, 0.2, 12)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+move_speed = null
+sprint_speed = null
+jump_velocity = null
+crouch_speed = null
+gravity = null
+slide_min_speed = null
+slide_friction = null
+slide_duration = null
+interact_range = null
 
 [node name="DeployBoard" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -5.85)
@@ -168,25 +177,22 @@ layer = 20
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -250.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = 40.0
+offset_left = -500.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 60.0
 grow_horizontal = 0
+theme_override_font_sizes/font_size = 32
 text = "Credits: 0 | XP: 0"
 horizontal_alignment = 2
 
 [node name="DeployPanel" type="PanelContainer" parent="StationUI"]
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -150.0
-offset_right = 200.0
-offset_bottom = 150.0
+anchors_preset = -1
+anchor_left = 0.15
+anchor_top = 0.1
+anchor_right = 0.85
+anchor_bottom = 0.9
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -195,7 +201,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="StationUI/DeployPanel/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 42
 text = "SELECT MISSION"
 horizontal_alignment = 1
 
@@ -216,32 +222,28 @@ text = "Cancel"
 
 [node name="AmmoShop" type="PanelContainer" parent="StationUI"]
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -200.0
-offset_right = 250.0
-offset_bottom = 200.0
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.05
+anchor_right = 0.9
+anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("6_ammo_shop")
 
 [node name="VBox" type="VBoxContainer" parent="StationUI/AmmoShop"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="StationUI/AmmoShop/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 42
 text = "AMMO SHOP"
 horizontal_alignment = 1
 
 [node name="CreditsLabel" type="Label" parent="StationUI/AmmoShop/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 28
 text = "Credits: $0"
 horizontal_alignment = 1
 
@@ -256,7 +258,7 @@ horizontal_scroll_mode = 0
 [node name="ItemList" type="VBoxContainer" parent="StationUI/AmmoShop/VBox/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 12
 
 [node name="CloseButton" type="Button" parent="StationUI/AmmoShop/VBox"]
 layout_mode = 2
@@ -264,26 +266,22 @@ text = "Close"
 
 [node name="LoadoutPanel" type="PanelContainer" parent="StationUI"]
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -200.0
-offset_right = 250.0
-offset_bottom = 200.0
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.05
+anchor_right = 0.9
+anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("7_loadout")
 
 [node name="VBox" type="VBoxContainer" parent="StationUI/LoadoutPanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="StationUI/LoadoutPanel/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 42
 text = "SELECT LOADOUT"
 horizontal_alignment = 1
 
@@ -298,7 +296,7 @@ horizontal_scroll_mode = 0
 [node name="ItemList" type="VBoxContainer" parent="StationUI/LoadoutPanel/VBox/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 12
 
 [node name="DeployButton" type="Button" parent="StationUI/LoadoutPanel/VBox"]
 layout_mode = 2
@@ -328,32 +326,28 @@ vertical_alignment = 1
 
 [node name="ModShop" type="PanelContainer" parent="StationUI"]
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -250.0
-offset_right = 300.0
-offset_bottom = 250.0
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.05
+anchor_right = 0.9
+anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("8_mod_shop")
 
 [node name="VBox" type="VBoxContainer" parent="StationUI/ModShop"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="StationUI/ModShop/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 42
 text = "RIFLE MODIFICATIONS"
 horizontal_alignment = 1
 
 [node name="CreditsLabel" type="Label" parent="StationUI/ModShop/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 28
 text = "Credits: $0"
 horizontal_alignment = 1
 
@@ -372,7 +366,7 @@ horizontal_scroll_mode = 0
 [node name="ItemList" type="VBoxContainer" parent="StationUI/ModShop/VBox/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 12
 
 [node name="CloseButton" type="Button" parent="StationUI/ModShop/VBox"]
 layout_mode = 2
@@ -380,32 +374,28 @@ text = "Close"
 
 [node name="SkillShop" type="PanelContainer" parent="StationUI"]
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -200.0
-offset_right = 250.0
-offset_bottom = 200.0
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.05
+anchor_right = 0.9
+anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("10_skill_shop")
 
 [node name="VBox" type="VBoxContainer" parent="StationUI/SkillShop"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="StationUI/SkillShop/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 42
 text = "SKILL UNLOCKS"
 horizontal_alignment = 1
 
 [node name="XPLabel" type="Label" parent="StationUI/SkillShop/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 28
 text = "XP: 0"
 horizontal_alignment = 1
 
@@ -420,7 +410,7 @@ horizontal_scroll_mode = 0
 [node name="ItemList" type="VBoxContainer" parent="StationUI/SkillShop/VBox/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 12
 
 [node name="CloseButton" type="Button" parent="StationUI/SkillShop/VBox"]
 layout_mode = 2
@@ -428,26 +418,22 @@ text = "Close"
 
 [node name="ContractPanel" type="PanelContainer" parent="StationUI"]
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -220.0
-offset_right = 280.0
-offset_bottom = 220.0
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.05
+anchor_right = 0.9
+anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("12_contract")
 
 [node name="VBox" type="VBoxContainer" parent="StationUI/ContractPanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="StationUI/ContractPanel/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 42
 text = "SELECT CONTRACT"
 horizontal_alignment = 1
 
@@ -467,7 +453,7 @@ horizontal_scroll_mode = 0
 [node name="ItemList" type="VBoxContainer" parent="StationUI/ContractPanel/VBox/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 12
 
 [node name="SkipButton" type="Button" parent="StationUI/ContractPanel/VBox"]
 layout_mode = 2
@@ -475,26 +461,22 @@ text = "Skip (No Contract)"
 
 [node name="StatsPanel" type="PanelContainer" parent="StationUI"]
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -280.0
-offset_right = 280.0
-offset_bottom = 280.0
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.05
+anchor_right = 0.9
+anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("13_stats_panel")
 
 [node name="VBox" type="VBoxContainer" parent="StationUI/StatsPanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="StationUI/StatsPanel/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 42
 text = "PLAYER STATS"
 horizontal_alignment = 1
 

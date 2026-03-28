@@ -19,6 +19,7 @@ extends Resource
 @export_group("Visuals")
 @export var tracer_color: Color = Color(1.0, 1.0, 1.0)  ## Bullet trail color
 @export var tracer_emission: float = 2.0  ## Emission energy for glow
+@export var icon: Texture2D  ## UI icon (assets/icons/ammo/)
 
 @export_group("Economy")
 @export var cost_per_round: int = 1       ## Credits to buy one round

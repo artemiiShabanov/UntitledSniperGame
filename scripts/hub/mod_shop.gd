@@ -1,6 +1,7 @@
 extends Control
 ## Mod Shop panel — browse, buy, and equip rifle modifications.
-## Built dynamically from ModRegistry data.
+## Each mod is a PanelContainer cell with a clickable Button + detail labels.
+## Buying requires confirmation.
 
 signal shop_closed
 
@@ -10,23 +11,46 @@ signal shop_closed
 @onready var close_btn: Button = $VBox/CloseButton
 
 var _current_slot: String = "barrel"
+var _confirm_popup: PanelContainer = null
+var _bold_font: Font = null
+var _mod_buttons: Dictionary = {}  ## { mod_id: Button }
+var _slot_icons: Dictionary = {}  ## { slot: Texture2D }
 
 
 func _ready() -> void:
 	close_btn.pressed.connect(func(): shop_closed.emit())
 	AudioManager.wire_button(close_btn, &"menu_cancel")
+	_bold_font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	for slot in ModRegistry.SLOTS:
+		var icon_path := "res://assets/icons/mods/slot_%s.png" % slot
+		if ResourceLoader.exists(icon_path):
+			_slot_icons[slot] = load(icon_path)
 	_build_tabs()
+
+
+func _input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event.is_action_pressed("ui_cancel") and _confirm_popup:
+		_close_confirm_and_refocus()
+		get_viewport().set_input_as_handled()
 
 
 func open() -> void:
 	visible = true
 	_current_slot = "barrel"
+	_close_confirm()
 	_refresh()
+	var tabs := tab_bar.get_children()
+	if tabs.size() > 0:
+		tabs[0].grab_focus()
 
 
 func _build_tabs() -> void:
 	for slot in ModRegistry.SLOTS:
 		var btn := Button.new()
+		if _slot_icons.has(slot):
+			btn.icon = _slot_icons[slot]
 		btn.text = slot.capitalize()
 		btn.pressed.connect(_on_tab_selected.bind(slot))
 		AudioManager.wire_button(btn)
@@ -35,6 +59,7 @@ func _build_tabs() -> void:
 
 func _on_tab_selected(slot: String) -> void:
 	_current_slot = slot
+	_close_confirm()
 	_refresh()
 
 
@@ -63,78 +88,181 @@ func _update_tab_highlight() -> void:
 func _rebuild_mod_list() -> void:
 	for child in item_list.get_children():
 		child.queue_free()
+	_mod_buttons.clear()
 
 	var mods := ModRegistry.get_mods_for_slot(_current_slot)
 	var equipped_id: String = SaveManager.get_equipped_mod(_current_slot)
 
+	var all_buttons: Array[Button] = []
+	for tab_btn in tab_bar.get_children():
+		all_buttons.append(tab_btn)
+
 	for mod in mods:
-		var row := _build_mod_row(mod, equipped_id)
-		item_list.add_child(row)
+		var cell := _build_mod_cell(mod, equipped_id)
+		item_list.add_child(cell)
+		all_buttons.append(_mod_buttons[mod.id])
+
+	all_buttons.append(close_btn)
+	_chain_focus(all_buttons)
+
+	# Focus first mod card
+	for mod in mods:
+		if _mod_buttons.has(mod.id):
+			_mod_buttons[mod.id].grab_focus()
+			break
 
 
-func _build_mod_row(mod: RifleMod, equipped_id: String) -> PanelContainer:
-	var panel := PanelContainer.new()
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 12)
-	panel.add_child(hbox)
-
+func _build_mod_cell(mod: RifleMod, equipped_id: String) -> VBoxContainer:
+	## Each mod cell is a VBox: Button (name + status) + detail labels.
 	var is_equipped: bool = mod.id == equipped_id
 	var is_owned: bool = SaveManager.owns_mod(mod.id)
 
-	# Left side: info
-	var info_vbox := VBoxContainer.new()
-	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var cell := VBoxContainer.new()
+	cell.add_theme_constant_override("separation", 4)
 
-	var name_label := Label.new()
-	name_label.text = mod.mod_name
+	# Mod icon
+	if mod.icon:
+		var icon := TextureRect.new()
+		icon.texture = mod.icon
+		icon.custom_minimum_size = Vector2(40, 40)
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		cell.add_child(icon)
+
+	# Main button — clickable row
+	var btn := Button.new()
+	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	btn.custom_minimum_size = Vector2(0, 56)
+	if _bold_font:
+		btn.add_theme_font_override("font", _bold_font)
+
+	var status: String
 	if is_equipped:
-		name_label.text += "  [EQUIPPED]"
-		name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
+		status = "[EQUIPPED]"
+		btn.disabled = true
+		btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(&"reward"))
 	elif is_owned:
-		name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
-	info_vbox.add_child(name_label)
+		status = "▸ EQUIP"
+		btn.pressed.connect(_on_equip.bind(mod))
+		AudioManager.wire_button(btn)
+	else:
+		status = "$%d" % mod.cost if mod.cost > 0 else "FREE"
+		btn.disabled = SaveManager.get_credits() < mod.cost
+		btn.pressed.connect(_on_buy_requested.bind(mod))
+		AudioManager.wire_button(btn, &"menu_confirm")
 
-	var desc_label := Label.new()
-	desc_label.text = mod.description
-	desc_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_mid"))
-	desc_label.add_theme_font_size_override("font_size", 12)
-	info_vbox.add_child(desc_label)
+	btn.text = "  %s    %s" % [mod.mod_name, status]
+	cell.add_child(btn)
+	_mod_buttons[mod.id] = btn
 
-	# Stats line
+	# Description label
+	var desc := Label.new()
+	desc.text = "     %s" % mod.description
+	desc.add_theme_font_size_override("font_size", 22)
+	desc.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_mid"))
+	cell.add_child(desc)
+
+	# Stats label
 	var stats_text := _format_stats(mod)
 	if stats_text != "":
-		var stats_label := Label.new()
-		stats_label.text = stats_text
-		stats_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
-		stats_label.add_theme_font_size_override("font_size", 12)
-		info_vbox.add_child(stats_label)
+		var stats := Label.new()
+		stats.text = "     %s" % stats_text
+		stats.add_theme_font_size_override("font_size", 22)
+		stats.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+		cell.add_child(stats)
 
-	hbox.add_child(info_vbox)
+	return cell
 
-	# Right side: action button
-	if is_equipped:
-		# No button needed — already equipped
-		pass
-	elif is_owned:
-		var equip_btn := Button.new()
-		equip_btn.text = "Equip"
-		equip_btn.custom_minimum_size = Vector2(80, 0)
-		equip_btn.pressed.connect(_on_equip.bind(mod))
-		AudioManager.wire_button(equip_btn)
-		hbox.add_child(equip_btn)
-	else:
-		var buy_btn := Button.new()
-		if mod.cost == 0:
-			buy_btn.text = "FREE"
-		else:
-			buy_btn.text = "Buy $%d" % mod.cost
-		buy_btn.custom_minimum_size = Vector2(80, 0)
-		buy_btn.disabled = SaveManager.get_credits() < mod.cost
-		buy_btn.pressed.connect(_on_buy.bind(mod))
-		AudioManager.wire_button(buy_btn, &"menu_confirm")
-		hbox.add_child(buy_btn)
 
-	return panel
+## ── Buy confirmation ────────────────────────────────────────────────────────
+
+func _on_buy_requested(mod: RifleMod) -> void:
+	_close_confirm()
+
+	_confirm_popup = PanelContainer.new()
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 16)
+	_confirm_popup.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "BUY %s?" % mod.mod_name.to_upper()
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 36)
+	if _bold_font:
+		title.add_theme_font_override("font", _bold_font)
+	vbox.add_child(title)
+
+	var desc := Label.new()
+	desc.text = mod.description
+	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	desc.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(desc)
+
+	var stats_text := _format_stats(mod)
+	if stats_text != "":
+		var stats := Label.new()
+		stats.text = stats_text
+		stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		stats.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+		stats.add_theme_font_size_override("font_size", 22)
+		vbox.add_child(stats)
+
+	var cost_label := Label.new()
+	cost_label.text = "Cost: $%d" % mod.cost if mod.cost > 0 else "Cost: FREE"
+	cost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cost_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	if _bold_font:
+		cost_label.add_theme_font_override("font", _bold_font)
+	vbox.add_child(cost_label)
+
+	var btn_row := HBoxContainer.new()
+	btn_row.add_theme_constant_override("separation", 16)
+	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_child(btn_row)
+
+	var confirm_btn := Button.new()
+	confirm_btn.text = "CONFIRM"
+	confirm_btn.custom_minimum_size = Vector2(180, 56)
+	confirm_btn.pressed.connect(_on_buy_confirmed.bind(mod))
+	AudioManager.wire_button(confirm_btn, &"menu_confirm")
+	btn_row.add_child(confirm_btn)
+
+	var cancel_btn := Button.new()
+	cancel_btn.text = "Cancel"
+	cancel_btn.custom_minimum_size = Vector2(180, 56)
+	cancel_btn.pressed.connect(_close_confirm_and_refocus)
+	AudioManager.wire_button(cancel_btn, &"menu_cancel")
+	btn_row.add_child(cancel_btn)
+
+	confirm_btn.focus_neighbor_right = cancel_btn.get_path()
+	cancel_btn.focus_neighbor_left = confirm_btn.get_path()
+
+	item_list.add_child(_confirm_popup)
+	confirm_btn.grab_focus()
+
+
+func _close_confirm() -> void:
+	if _confirm_popup and is_instance_valid(_confirm_popup):
+		_confirm_popup.queue_free()
+	_confirm_popup = null
+
+
+func _close_confirm_and_refocus() -> void:
+	_close_confirm()
+	_refresh()
+
+
+func _on_buy_confirmed(mod: RifleMod) -> void:
+	if SaveManager.purchase_mod(mod.id, mod.cost):
+		AudioManager.play_sfx_2d(&"menu_confirm")
+	_close_confirm()
+	_refresh()
+
+
+func _on_equip(mod: RifleMod) -> void:
+	SaveManager.equip_mod(mod.id)
+	AudioManager.play_sfx_2d(&"menu_confirm")
+	_refresh()
 
 
 func _format_stats(mod: RifleMod) -> String:
@@ -149,13 +277,9 @@ func _format_stats(mod: RifleMod) -> String:
 	return " | ".join(parts)
 
 
-func _on_buy(mod: RifleMod) -> void:
-	if SaveManager.purchase_mod(mod.id, mod.cost):
-		AudioManager.play_sfx_2d(&"menu_confirm")
-		_refresh()
-
-
-func _on_equip(mod: RifleMod) -> void:
-	SaveManager.equip_mod(mod.id)
-	AudioManager.play_sfx_2d(&"menu_confirm")
-	_refresh()
+func _chain_focus(buttons: Array[Button]) -> void:
+	if buttons.size() < 2:
+		return
+	for i in range(buttons.size()):
+		buttons[i].focus_neighbor_top = buttons[(i - 1) % buttons.size()].get_path()
+		buttons[i].focus_neighbor_bottom = buttons[(i + 1) % buttons.size()].get_path()

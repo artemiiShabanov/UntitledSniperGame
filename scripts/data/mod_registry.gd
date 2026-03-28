@@ -77,4 +77,8 @@ func _register_all() -> void:
 
 
 func _add(mod: RifleMod) -> void:
+	if not mod.icon:
+		var icon_path := "res://assets/icons/mods/%s.png" % mod.id
+		if ResourceLoader.exists(icon_path):
+			mod.icon = load(icon_path)
 	_mods[mod.id] = mod

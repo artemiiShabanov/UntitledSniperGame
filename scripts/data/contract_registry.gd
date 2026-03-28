@@ -76,4 +76,22 @@ func _register_all() -> void:
 
 
 func _add(contract: Contract) -> void:
+	if not contract.icon:
+		var icon_name := _get_icon_name_for_type(contract.type)
+		if icon_name != "":
+			var icon_path := "res://assets/icons/contracts/%s.png" % icon_name
+			if ResourceLoader.exists(icon_path):
+				contract.icon = load(icon_path)
 	_contracts[contract.id] = contract
+
+
+func _get_icon_name_for_type(type: int) -> String:
+	match type:
+		0: return "kill_count"       # KILL_COUNT
+		1: return "headshot_count"   # HEADSHOT_COUNT
+		2: return "accuracy"         # ACCURACY
+		3: return "no_hits"          # NO_HITS
+		4: return "speed_extract"    # SPEED_EXTRACT
+		5: return "kill_target"      # KILL_TARGET
+		6: return "destroy_target"   # DESTROY_TARGET
+	return ""

@@ -9,6 +9,7 @@ extends Resource
 @export var description: String = ""
 @export var stat_overrides: Dictionary = {}  ## Maps weapon property name → value
 @export var special: String = ""  ## Special behavior key (e.g. "variable_zoom")
+@export var icon: Texture2D  ## UI icon (assets/icons/mods/)
 
 
 static func create(p_id: String, p_name: String, p_slot: String, p_cost: int, p_desc: String, p_stats: Dictionary = {}, p_special: String = "") -> RifleMod:

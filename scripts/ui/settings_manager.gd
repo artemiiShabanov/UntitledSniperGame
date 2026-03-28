@@ -15,7 +15,10 @@ var vsync: bool = true
 
 func _ready() -> void:
 	load_settings()
-	apply_all()
+	_apply_audio()
+	# Defer video settings — DisplayServer window mode doesn't stick if called
+	# before the window is fully initialized during autoload _ready().
+	call_deferred("_apply_video")
 
 
 func save_settings() -> void:

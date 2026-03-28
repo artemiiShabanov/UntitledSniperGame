@@ -2,10 +2,10 @@ extends Control
 ## Draws a centered crosshair on screen.
 ## Attach to a Control node that fills the viewport (anchors full-rect).
 
-@export var length: float = 6.0   ## Half-length of each arm
-@export var thickness: float = 2.0
-@export var gap: float = 3.0      ## Empty space around center
-@export var outline_width: float = 1.0
+@export var length: float = 12.0   ## Half-length of each arm
+@export var thickness: float = 3.0
+@export var gap: float = 6.0      ## Empty space around center
+@export var outline_width: float = 2.0
 
 var color: Color = Color.WHITE
 var outline_color: Color = Color(0, 0, 0, 0.6)

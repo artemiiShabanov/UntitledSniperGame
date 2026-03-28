@@ -11,11 +11,33 @@ var _impact_mat: StandardMaterial3D
 var _headshot_mat: StandardMaterial3D
 var _extraction_mat: StandardMaterial3D
 
+## VFX sprite textures (placeholder → replace with final art)
+var _muzzle_flash_tex: Texture2D
+var _impact_dust_tex: Texture2D
+var _impact_blood_tex: Texture2D
+var _smoke_puff_tex: Texture2D
+var _shell_casing_tex: Texture2D
+
 
 func _ready() -> void:
+	_load_vfx_textures()
 	_create_shared_resources()
 	_prewarm_shaders()
 	PaletteManager.palette_changed.connect(_on_palette_changed)
+
+
+func _load_vfx_textures() -> void:
+	_muzzle_flash_tex = _try_load_tex("res://assets/sprites/vfx/muzzle_flash.png")
+	_impact_dust_tex = _try_load_tex("res://assets/sprites/vfx/impact_dust.png")
+	_impact_blood_tex = _try_load_tex("res://assets/sprites/vfx/impact_blood.png")
+	_smoke_puff_tex = _try_load_tex("res://assets/sprites/vfx/smoke_puff.png")
+	_shell_casing_tex = _try_load_tex("res://assets/sprites/vfx/shell_casing.png")
+
+
+func _try_load_tex(path: String) -> Texture2D:
+	if ResourceLoader.exists(path):
+		return load(path)
+	return null
 
 
 func _create_shared_resources() -> void:
@@ -25,12 +47,18 @@ func _create_shared_resources() -> void:
 
 	# Muzzle flash material
 	_muzzle_mat = _make_unshaded_billboard_mat(Color(1.0, 0.9, 0.6), 4.0)
+	if _muzzle_flash_tex:
+		_muzzle_mat.albedo_texture = _muzzle_flash_tex
 
 	# Impact material
 	_impact_mat = _make_unshaded_billboard_mat(PaletteManager.get_color(&"danger"), 2.0)
+	if _impact_dust_tex:
+		_impact_mat.albedo_texture = _impact_dust_tex
 
 	# Headshot material
 	_headshot_mat = _make_unshaded_billboard_mat(Color.WHITE, 5.0)
+	if _impact_blood_tex:
+		_headshot_mat.albedo_texture = _impact_blood_tex
 
 	# Extraction material
 	var ext_color: Color = PaletteManager.get_color(&"accent_friendly")

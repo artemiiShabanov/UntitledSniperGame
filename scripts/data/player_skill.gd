@@ -8,6 +8,7 @@ extends Resource
 @export var cost: int = 0  ## XP cost
 @export var effect_key: String = ""  ## Used by systems to check if skill is active
 @export var stat_bonus: Dictionary = {}  ## Optional stat modifiers (additive)
+@export var icon: Texture2D  ## UI icon (assets/icons/skills/)
 
 
 static func create(p_id: String, p_name: String, p_desc: String, p_cost: int, p_effect: String, p_stats: Dictionary = {}) -> PlayerSkill:

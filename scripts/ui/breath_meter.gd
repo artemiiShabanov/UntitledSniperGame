@@ -2,9 +2,9 @@ extends Control
 ## Breath meter — shows remaining hold-breath time as a horizontal bar.
 ## Only visible when scoped.
 
-@export var bar_width: float = 120.0
-@export var bar_height: float = 6.0
-@export var bar_offset_y: float = 40.0  ## Pixels below center
+@export var bar_width: float = 240.0
+@export var bar_height: float = 12.0
+@export var bar_offset_y: float = 60.0  ## Pixels below center
 
 var bar_color: Color = Color(0.7, 0.85, 1.0, 0.8)
 var bar_bg_color: Color = Color(0.2, 0.2, 0.2, 0.5)
