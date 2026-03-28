@@ -432,10 +432,11 @@ Core features complete. Bug-audited and refactored.
 All systems complete. Remaining asset work (models, props, UI art pass, scope glint VFX) moved to Phase 4 Leftovers.
 
 **Incomplete items moved to Phase 4:**
-- Character models: Lookout model, NPC models, Destructible target models
-- Props & Environment Art (entire section — building kit, industrial props, cover, vegetation)
+- Rifle viewmodel: CSG placeholder needs proper 3D model
+- Character models: Lookout, NPC models, future enemy types
+- Props & Environment Art (building kit, industrial/city/castle props, cover, vegetation)
 - VFX: Scope glint shimmer
-- UI Art Pass (entire section — menu polish, HUD styling, panel theming)
+- UI Art Pass (menu polish, HUD styling, panel theming)
 
 <details>
 <summary>Neutral NPCs — NPC types, activity system, panic, kill penalty</summary>
@@ -525,9 +526,9 @@ All systems complete. Remaining asset work (models, props, UI art pass, scope gl
 </details>
 
 <details>
-<summary>Rifle Viewmodel — modular first-person weapon with mod slots</summary>
+<summary>Rifle Viewmodel — modular first-person weapon with mod slots (CSG placeholder, needs proper model)</summary>
 
-- Low-poly first-person rifle (CSG primitives, colored fg_dark)
+- Low-poly first-person rifle (CSG placeholder, colored fg_dark — needs proper model)
 - Base rifle geometry (receiver, trigger guard, grip, top rail)
 - Mod attachments as swappable mesh parts:
   - Barrel mods (standard, long — visible length + muzzle brake)
@@ -630,16 +631,195 @@ AudioManager autoload + bank registry. Placeholder beeps wired to all 36 banks.
 Items moved here from other phases — not blocking progress, but tracked for
 later. Pull items back into active phases when/if they become relevant.
 
-### Character Models (Remaining)
-- [ ] Lookout model (replace capsule placeholder)
-- [ ] Neutral NPC models (Laborer, Technician, Civilian — distinct from enemies)
-- [ ] Destructible target models (crates, supply caches)
+### 3D Models & Animations
 
-### Props & Environment Art
-- [ ] Reusable building kit (walls, roofs, floors, stairs, railings)
-- [ ] Industrial props (crates, barrels, containers, pallets, pipes)
-- [ ] Cover objects (sandbags, concrete barriers, scaffolding)
-- [ ] Vegetation (trees, bushes — sight blockers at range)
+> **Pipeline:** Low-poly asset packs (Kenney/Quaternius) for characters → Mixamo auto-rig + animations → Godot AnimationTree. Props: simple Blender box-modeling or asset packs. Strip textures, apply palette colors.
+
+<details>
+<summary>Characters — models + shared skeleton</summary>
+
+**Player:**
+| Model | Status | Notes |
+|-------|--------|-------|
+| Rifle viewmodel | [ ] Needs upgrade | CSG placeholder exists, needs proper model |
+| First-person arms/hands | [ ] | Only if visible hands are desired |
+
+**Enemies (shared humanoid skeleton):**
+| Model | Status | Silhouette | Distinct Feature |
+|-------|--------|------------|------------------|
+| Lookout | [ ] | Standing, light build | No helmet, basic vest |
+| Marksman | [ ] | Crouching/repositioning | Beret or cap, rifle slung |
+| Countersniper | [ ] | Prone or nested | Scope glint, ghillie elements |
+| Heavy Sniper | [ ] | Bulky, armored | Heavy vest, helmet with visor |
+| Elite Sniper | [ ] | Tactical, lean | Balaclava, tac gear, smoke grenades |
+
+**NPCs (shared humanoid skeleton, recolored via palette):**
+| Model | Status | Silhouette | Distinct Feature |
+|-------|--------|------------|------------------|
+| Laborer | [ ] | Stocky, work clothes | Hard hat, tool belt |
+| Technician | [ ] | Medium build, uniform | Clipboard/tablet, safety vest |
+| Civilian | [ ] | Varied casual | No gear, normal clothes |
+
+</details>
+
+<details>
+<summary>Character Animations (Mixamo)</summary>
+
+**Enemy animations (shared):**
+| Animation | Used By | Mixamo Search |
+|-----------|---------|---------------|
+| Idle (standing) | All | "idle" |
+| Idle (rifle ready) | All | "rifle idle" |
+| Walk (patrol) | Marksman, Elite | "walk with rifle" |
+| Aim rifle | All | "rifle aiming idle" |
+| Shoot rifle | All | "rifle shooting" |
+| Look around (suspicious) | All | "looking around" |
+| Crouch idle | Marksman, Countersniper | "crouch idle" |
+| Death (shot, fall back) | All | "death from front" |
+| Death (headshot, snap) | All | "death headshot" |
+| Stunned (shock ammo) | All | "electrocuted" / "stagger" |
+| Prone idle | Countersniper | "prone idle" |
+| Run/reposition | Marksman, Elite | "rifle run" |
+
+**NPC animations (shared):**
+| Animation | Used By | Mixamo Search |
+|-----------|---------|---------------|
+| Idle (standing) | All | "idle" |
+| Walk | All | "walking" |
+| Run (panic flee) | All | "running scared" / "sprint" |
+| Work (hammering/lifting) | Laborer | "hammering" / "shoveling" |
+| Carry box | Laborer | "carrying box walk" |
+| Rest (lean/sit) | All | "leaning idle" / "sitting" |
+| Operate (typing/switches) | Technician | "typing standing" |
+| Inspect (clipboard) | Technician | "reading clipboard" |
+| Eat (standing) | Civilian | "eating standing" / "drinking" |
+| Death (collapse) | All | "death backward" |
+| Crouch/cower (panic idle) | All | "cowering" |
+
+**Level-specific NPC animations:**
+| Animation | Level | Notes |
+|-----------|-------|-------|
+| Sitting on bench | City | Civilian activity point |
+| Sweeping/cleaning | City | Laborer city variant |
+| Phone call (standing) | City | Civilian ambient |
+| Chopping wood | Nature/Castle | Laborer nature variant |
+| Tending fire | Nature/Castle | Activity point |
+| Patrolling with torch | Nature/Castle | Guard/ambient NPC |
+
+</details>
+
+<details>
+<summary>Props — shared across levels</summary>
+
+| Model | Status | Notes |
+|-------|--------|-------|
+| Destructible crate/box (2–3 variants) | [ ] | Replace CSG box |
+| Sandbag wall | [ ] | Cover object, reusable |
+| Concrete barrier (jersey barrier) | [ ] | Cover object |
+| Metal barrel | [ ] | Prop + potential destructible |
+| Wooden pallet | [ ] | Ground clutter |
+| Zipline pole + cable | [ ] | Currently functional but invisible |
+| Extraction marker (radio/flare) | [ ] | Visual anchor for extraction zones |
+| Rifle (world/dropped) | [ ] | Low-detail version for enemies, ground |
+
+</details>
+
+<details>
+<summary>Hub models</summary>
+
+| Model | Status | Notes |
+|-------|--------|-------|
+| Hub room shell | [ ] | Walls, floor, lighting — the space itself |
+| Deploy board (map table) | [ ] | Level selection station |
+| Ammo crate | [ ] | Wooden crate with ammo markings |
+| Mod bench (workbench) | [ ] | Table with tools/parts |
+| Save terminal (computer/radio) | [ ] | Desk with screen |
+| Skill board (notice board) | [ ] | Wall-mounted board |
+| Stats terminal (monitor) | [ ] | Screen with charts |
+
+</details>
+
+<details>
+<summary>Industrial Yard props</summary>
+
+| Model | Status | Notes |
+|-------|--------|-------|
+| Warehouse building shell | [ ] | Large box with door openings, roofline |
+| Shipping container | [ ] | 2–3 color variants via palette |
+| Scaffolding | [ ] | Multi-level, climbable look |
+| Pipe runs (horizontal/vertical) | [ ] | Industrial detail |
+| Forklift (static) | [ ] | Parked prop |
+| Chain-link fence + gate | [ ] | Perimeter definition |
+| Guard tower / sniper nest | [ ] | Elevated platform with railing |
+| Loading dock | [ ] | Raised platform with ramp |
+| Overhead crane | [ ] | Large skyline silhouette |
+| Dumpster | [ ] | Cover + clutter |
+| Stack of crates | [ ] | Composed from destructible crate model |
+
+</details>
+
+<details>
+<summary>City level props</summary>
+
+| Model | Status | Notes |
+|-------|--------|-------|
+| Building facades (3–4 variants) | [ ] | Flat front with window cutouts, fire escapes |
+| Street/sidewalk tiles | [ ] | Modular ground pieces |
+| Car (parked, static, 1–2 variants) | [ ] | Cover object |
+| Bus/truck (static) | [ ] | Large cover, sight blocker |
+| Traffic light | [ ] | Street detail |
+| Street lamp | [ ] | Silhouette at range |
+| Bench | [ ] | NPC sit point |
+| Dumpster / trash can | [ ] | Reuse from industrial |
+| Phone booth / newspaper box | [ ] | Urban clutter |
+| Rooftop AC units | [ ] | Rooftop cover |
+| Water tower | [ ] | Rooftop landmark, sniper nest |
+| Fire escape / ladder | [ ] | Vertical movement |
+| Store awning | [ ] | Overhang detail |
+| Construction barrier | [ ] | Reuse concrete barrier |
+
+</details>
+
+<details>
+<summary>Nature / Castle level props</summary>
+
+| Model | Status | Notes |
+|-------|--------|-------|
+| Castle wall sections (straight, corner, tower) | [ ] | Modular stone blocks |
+| Castle gate / archway | [ ] | Entry point |
+| Battlement / parapet | [ ] | Sniper nest cover |
+| Stone tower (round/square) | [ ] | Elevated position |
+| Tree (2–3 variants) | [ ] | Sight blocker, low-poly trunk + crown |
+| Bush / shrub | [ ] | Low cover, sight concealment |
+| Rock formation (small, medium, large) | [ ] | Natural cover |
+| Wooden fence / stone wall (low) | [ ] | Field boundaries |
+| Ruins / broken wall | [ ] | Partial cover |
+| Wooden cart | [ ] | Prop + cover |
+| Hay bale | [ ] | Cover object |
+| Campfire / torch | [ ] | Activity point marker |
+| Wooden bridge | [ ] | Terrain crossing |
+| Well / fountain | [ ] | Courtyard centerpiece |
+| Watchtower (wooden) | [ ] | Sniper nest, zipline anchor |
+| Tent / market stall | [ ] | NPC activity area |
+
+</details>
+
+<details>
+<summary>Asset totals</summary>
+
+| Category | Count |
+|----------|-------|
+| Characters (enemies + NPCs + player) | ~10 |
+| Character animations (shared + level-specific) | ~25 |
+| Shared props | ~8 |
+| Hub models | ~7 |
+| Industrial Yard props | ~11 |
+| City level props | ~14 |
+| Nature/Castle level props | ~16 |
+| **Total models** | **~63** |
+| **Total animations** | **~25** |
+
+</details>
 
 ### UI Art Pass
 - [ ] Main menu, save slots, settings — visual polish
@@ -715,19 +895,19 @@ zones, ziplines, and level data. Art pass comes later in Content Production.
 - [x] 8 destructible boxes
 - [ ] Art pass (needs models, textures, props)
 
-#### Level 2 — TBD [ ]
-- [ ] Theme and layout design
+#### Level 2 — City [ ]
+- [ ] Theme and layout design (rooftops, streets, alleys, long sight lines between buildings)
 - [ ] Builder script with greybox geometry
 - [ ] Spawn points, extraction zones, ziplines
-- [ ] NPC activity points and pool
+- [ ] NPC activity points and pool (bench sitting, phone calls, sweeping)
 - [ ] Destructible targets
 - [ ] Level data (.tres) with unlock gates
 
-#### Level 3 — TBD [ ]
-- [ ] Theme and layout design
+#### Level 3 — Nature / Castle [ ]
+- [ ] Theme and layout design (castle ruins, forest clearings, stone walls, watchtowers)
 - [ ] Builder script with greybox geometry
 - [ ] Spawn points, extraction zones, ziplines
-- [ ] NPC activity points and pool
+- [ ] NPC activity points and pool (chopping wood, tending fire, patrolling)
 - [ ] Destructible targets
 - [ ] Level data (.tres) with unlock gates
 
