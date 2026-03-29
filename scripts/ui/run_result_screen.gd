@@ -256,6 +256,7 @@ func _add_rating_row(rating: String) -> void:
 		icon.texture = _rating_icons[rating]
 		icon.custom_minimum_size = Vector2(64, 64)
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		rating_container.add_child(icon)
 
 	var rating_label := Label.new()

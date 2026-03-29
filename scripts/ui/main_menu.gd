@@ -31,6 +31,7 @@ func _ready() -> void:
 		var logo := TextureRect.new()
 		logo.texture = _logo_texture
 		logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		logo.custom_minimum_size = Vector2(400, 100)
 		var vbox: VBoxContainer = $VBox
 		vbox.add_child(logo)
@@ -42,6 +43,7 @@ func _ready() -> void:
 		bg.texture = _bg_texture
 		bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		bg.modulate.a = 0.3  # Subtle behind palette-colored background
 		add_child(bg)
 		move_child(bg, 0)  # Behind everything

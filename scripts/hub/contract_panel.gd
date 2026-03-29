@@ -48,6 +48,7 @@ func _build_contract_row(contract: Contract) -> PanelContainer:
 		icon.texture = contract.icon
 		icon.custom_minimum_size = Vector2(48, 48)
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		hbox.add_child(icon)
 
 	# Info

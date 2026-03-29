@@ -48,6 +48,7 @@ func _rebuild_ui() -> void:
 			icon.texture = ammo.icon
 			icon.custom_minimum_size = Vector2(32, 32)
 			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			header_row.add_child(icon)
 
 		var header := Label.new()

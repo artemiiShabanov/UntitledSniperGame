@@ -51,6 +51,7 @@ func _build_tabs() -> void:
 		var btn := Button.new()
 		if _slot_icons.has(slot):
 			btn.icon = _slot_icons[slot]
+			btn.add_theme_constant_override("icon_max_width", 28)
 		btn.text = slot.capitalize()
 		btn.pressed.connect(_on_tab_selected.bind(slot))
 		AudioManager.wire_button(btn)
@@ -120,18 +121,23 @@ func _build_mod_cell(mod: RifleMod, equipped_id: String) -> VBoxContainer:
 	var cell := VBoxContainer.new()
 	cell.add_theme_constant_override("separation", 4)
 
-	# Mod icon
+	# Top row: icon + button side by side
+	var top_row := HBoxContainer.new()
+	top_row.add_theme_constant_override("separation", 12)
+
 	if mod.icon:
 		var icon := TextureRect.new()
 		icon.texture = mod.icon
 		icon.custom_minimum_size = Vector2(40, 40)
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		cell.add_child(icon)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		top_row.add_child(icon)
 
 	# Main button — clickable row
 	var btn := Button.new()
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.custom_minimum_size = Vector2(0, 56)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if _bold_font:
 		btn.add_theme_font_override("font", _bold_font)
 
@@ -151,12 +157,18 @@ func _build_mod_cell(mod: RifleMod, equipped_id: String) -> VBoxContainer:
 		AudioManager.wire_button(btn, &"menu_confirm")
 
 	btn.text = "  %s    %s" % [mod.mod_name, status]
-	cell.add_child(btn)
+	top_row.add_child(btn)
+	cell.add_child(top_row)
 	_mod_buttons[mod.id] = btn
+
+	# Indent for detail labels (aligned with button text past the icon)
+	var indent := "     "
+	if mod.icon:
+		indent = "            "  # Extra indent to clear icon width
 
 	# Description label
 	var desc := Label.new()
-	desc.text = "     %s" % mod.description
+	desc.text = "%s%s" % [indent, mod.description]
 	desc.add_theme_font_size_override("font_size", 22)
 	desc.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_mid"))
 	cell.add_child(desc)
@@ -165,7 +177,7 @@ func _build_mod_cell(mod: RifleMod, equipped_id: String) -> VBoxContainer:
 	var stats_text := _format_stats(mod)
 	if stats_text != "":
 		var stats := Label.new()
-		stats.text = "     %s" % stats_text
+		stats.text = "%s%s" % [indent, stats_text]
 		stats.add_theme_font_size_override("font_size", 22)
 		stats.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
 		cell.add_child(stats)

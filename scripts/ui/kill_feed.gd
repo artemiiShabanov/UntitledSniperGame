@@ -67,6 +67,7 @@ func _make_feed_row(icon: Texture2D = null) -> HBoxContainer:
 		tex.texture = icon
 		tex.custom_minimum_size = Vector2(24, 24)
 		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		row.add_child(tex)
 	return row
 

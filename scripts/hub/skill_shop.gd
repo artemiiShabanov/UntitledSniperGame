@@ -59,6 +59,7 @@ func _rebuild_skill_list() -> void:
 			icon.texture = skill.icon
 			icon.custom_minimum_size = Vector2(48, 48)
 			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			icon_row.add_child(icon)
 			var skill_title := Label.new()
 			skill_title.text = skill.skill_name.to_upper()

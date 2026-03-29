@@ -105,6 +105,7 @@ func _update_ammo_icon(ammo: AmmoType) -> void:
 		_ammo_icon_rect = TextureRect.new()
 		_ammo_icon_rect.custom_minimum_size = Vector2(28, 28)
 		_ammo_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		_ammo_icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		# Position next to weapon state label (top-right)
 		_ammo_icon_rect.anchors_preset = Control.PRESET_TOP_RIGHT
 		_ammo_icon_rect.anchor_left = 1.0
@@ -222,6 +223,7 @@ func _update_lives_display() -> void:
 			var icon := TextureRect.new()
 			icon.custom_minimum_size = Vector2(28, 28)
 			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			if i < RunManager.lives:
 				icon.texture = _heart_full_tex
 				icon.modulate = tint

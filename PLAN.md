@@ -821,10 +821,11 @@ later. Pull items back into active phases when/if they become relevant.
 
 </details>
 
-### Image Assets
+### Image Assets ✅
 
-> **Status:** Placeholder images created for all items below. Replace with final art.
+> **Status:** Placeholders created, folders structured, all wired into code. Replace with final art.
 > **Folder:** `assets/` — icons, sprites, textures, UI art.
+> **Production:** UI icons → game-icons.net (CC BY 3.0), VFX → Kenney Particle Pack (CC0), surface textures → ambientCG (CC0), logo → hand-drawn, menu bg → AI-generate or Unsplash.
 
 <details>
 <summary>UI Icons — ammo, mods, skills, contracts, kill feed, HUD, ratings (40 files)</summary>
