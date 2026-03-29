@@ -13,6 +13,7 @@ var LEVEL_LIST: Array[String] = [
 @onready var mod_bench: Interactable = $ModBench
 @onready var skill_board: Interactable = $SkillBoard
 @onready var stats_terminal: Interactable = $StatsTerminal
+@onready var palette_station: Interactable = $PaletteStation
 
 ## UI layer — holds all station panels + dimmer
 @onready var station_ui: CanvasLayer = $StationUI
@@ -25,6 +26,7 @@ var LEVEL_LIST: Array[String] = [
 @onready var skill_shop: Control = $StationUI/SkillShop
 @onready var contract_panel: Control = $StationUI/ContractPanel
 @onready var stats_panel: Control = $StationUI/StatsPanel
+@onready var palette_panel: Control = $StationUI/PalettePanel
 @onready var save_feedback: Label = $StationUI/SaveFeedback
 
 ## Deploy UI
@@ -74,6 +76,8 @@ func _ready() -> void:
 	contract_panel.contract_selected.connect(_on_contract_selected)
 	stats_terminal.stats_requested.connect(_on_stats_requested)
 	stats_panel.closed.connect(_on_stats_closed)
+	palette_station.palette_requested.connect(_on_palette_requested)
+	palette_panel.panel_closed.connect(_on_palette_closed)
 
 	# Loadout panel signals
 	loadout_panel.deploy_confirmed.connect(_on_loadout_confirmed)
@@ -90,6 +94,7 @@ func _ready() -> void:
 	skill_shop.visible = false
 	contract_panel.visible = false
 	stats_panel.visible = false
+	palette_panel.visible = false
 	save_feedback.visible = false
 
 	_load_level_list()
@@ -306,6 +311,19 @@ func _on_stats_requested() -> void:
 
 
 func _on_stats_closed() -> void:
+	_close_active_panel()
+
+
+## ── Palette Station ─────────────────────────────────────────────────────
+
+func _on_palette_requested() -> void:
+	# Check for newly unlocked palettes before opening
+	SaveManager.check_and_unlock_palettes()
+	palette_panel.open()
+	_open_panel(palette_panel)
+
+
+func _on_palette_closed() -> void:
 	_close_active_panel()
 
 

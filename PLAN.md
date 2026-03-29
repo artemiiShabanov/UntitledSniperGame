@@ -16,9 +16,9 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 | HUD                 | █████ 100%| Complete (trackers added with F7)        |
 | Save System (core)  | █████ 100%| Complete (stats tracking in Step 6)      |
 | Objectives          | ████░ 80% | Contracts done, in-run objectives deferred |
-| Global Progression  | ████░ 95% | Complete (cosmetics deferred to P4)       |
+| Global Progression  | █████ 100%| Complete (palette unlocks implemented)    |
 | World Population    | █████ 100%| Complete (events deferred to P4)          |
-| UI & Menus          | ████░ 90% | All screens done except cosmetics         |
+| UI & Menus          | █████ 100%| All screens done (palette panel added)    |
 | Content & Population| █████ 100%| Complete (models/props/UI art → P4)       |
 | Art & Audio         | █████ 100%| Systems complete (asset replacement later) |
 | Polish & Release    | ░░░░░  0% | Steam, controller, balancing             |
@@ -207,9 +207,8 @@ All features complete. Bug-audited and refactored.
 Core features complete. Bug-audited and refactored.
 
 **Incomplete items moved to Phase 4:**
-- Cosmetics system: save data placeholder exists, no backend/shop/UI
+- ~~Cosmetics system~~ → Replaced by palette unlock system (implemented in Phase 3)
 - KILL_TARGET / DESTROY_TARGET contracts: enum + fields exist, `check_completed()` returns false
-- Hub cosmetics screen: listed but not implemented (no cosmetics backend)
 
 <details>
 <summary>Currency & Resources — Credits flow, XP flow, hub display</summary>
@@ -494,6 +493,9 @@ All systems complete. Remaining asset work (models, props, UI art pass, scope gl
 - PaletteResource data type with 8 color slots + extension space
 - PaletteManager autoload — auto-discovers palettes, cycles with F8/F7
 - 3 starter palettes (Tactical, Midnight, Noir)
+- **Palette unlock system** — achievement-gated unlocks (Tactical free, Midnight = 5 extractions, Noir = 50 kills)
+- **Palette selection hub panel** — browse all palettes, preview colors, equip unlocked ones
+- **Palette HUD indicator** — small widget showing palette name + 5 accent swatches (hub + in-run)
 - palette_surface.gdshader — assigns any palette slot to any mesh
 - Film grain post-process shader
 - Global shader uniforms — palette swap recolors entire scene instantly
@@ -501,12 +503,15 @@ All systems complete. Remaining asset work (models, props, UI art pass, scope gl
 **Core files:**
 | File | Purpose |
 |------|---------|
-| `scripts/systems/palette_manager.gd` | Autoload: palette discovery, cycling, global shader uniform updates |
+| `scripts/systems/palette_manager.gd` | Autoload: palette discovery, cycling, unlock-aware cycling, global shader uniform updates |
 | `data/palettes/palette_resource.gd` | PaletteResource: 8 color slots + extension space |
 | `data/palettes/*.tres` | 3 palette definitions (Tactical, Midnight, Noir) |
 | `shaders/palette_surface.gdshader` | Per-mesh palette slot assignment shader |
 | `shaders/film_grain.gdshader` | Film grain post-process effect |
 | `scripts/world/palette_mesh.gd` | Helper for palette-colored meshes |
+| `scripts/hub/palette_panel.gd` | Hub palette selection UI with color preview + unlock status |
+| `scripts/hub/palette_station.gd` | Interactable station that opens palette panel |
+| `scripts/ui/palette_indicator.gd` | HUD widget: palette name + accent color swatches |
 
 </details>
 
@@ -537,7 +542,7 @@ All systems complete. Remaining asset work (models, props, UI art pass, scope gl
   - Scope mods (iron sights vs full scope tube with objective/eyepiece/rings)
   - Bolt mods (handle + knob)
 - Viewmodel positioning (hip/aim lerp, auto-hide when deeply scoped)
-- Palette coloring (fg_dark, updates on palette swap)
+- Palette coloring (accent_hostile, PBR shading with metallic/roughness, updates on palette swap)
 - refresh_loadout() for hot-swapping mods in hub
 
 **Core files:**
@@ -942,10 +947,7 @@ later. Pull items back into active phases when/if they become relevant.
 | Asphalt | `asphalt_albedo.png` | `asphalt_normal.png` | Roads, parking areas |
 | Brick | `brick_albedo.png` | `brick_normal.png` | Building walls |
 
-`assets/textures/weapons/`
-| File | Used In |
-|------|---------|
-| `rifle_default.png` | Default rifle skin texture |
+~~`assets/textures/weapons/`~~ — Removed (weapon uses palette color + PBR material instead of textures)
 
 </details>
 
@@ -964,8 +966,8 @@ later. Pull items back into active phases when/if they become relevant.
 | VFX sprites | 5 |
 | UI art | 2 |
 | Surface textures (albedo + normal) | 12 |
-| Weapon textures | 1 |
-| **Total image assets** | **60** |
+| ~~Weapon textures~~ | ~~1~~ (removed) |
+| **Total image assets** | **59** |
 
 </details>
 
@@ -988,7 +990,7 @@ later. Pull items back into active phases when/if they become relevant.
 - [ ] Scope glint shimmer VFX (deferred from Phase 3)
 
 ### Per-Run Variation Extras
-- [ ] Color palette variation per run
+- [x] ~~Color palette variation per run~~ → Palette unlocks system (player chooses palette)
 - [ ] Variable sniper positions (some nests blocked/revealed per run)
 
 ### Phase-Gated Rewards
@@ -1004,10 +1006,12 @@ later. Pull items back into active phases when/if they become relevant.
 - [ ] Scope: 4x, 8x, Variable (adjustable zoom + scope overlays)
 - [ ] Visual model per mod on rifle
 
-### Cosmetics System
-- [ ] Rifle skins (visual overlays on top of upgrade parts)
-- [ ] Cosmetics UI in hub (preview, equip)
-- [ ] Cosmetics screen (needs cosmetics backend)
+### ~~Cosmetics System~~ → Replaced by Palette Unlocks ✅
+- [x] Achievement-gated palette unlocks (Tactical free, Midnight = 5 extractions, Noir = 50 kills)
+- [x] Palette selection panel in hub (PaletteStation interactable + PalettePanel UI)
+- [x] Palette HUD indicator (name + accent swatches, visible in hub and in-run)
+- [x] Weapon uses accent_hostile palette color with PBR shading
+- [ ] Add more palettes with varied unlock conditions (headshot streaks, speed runs, etc.)
 
 ### Contracts — Content & Expansion
 - [ ] Contract templates per level (eliminate HVT, destroy target, accuracy challenge)

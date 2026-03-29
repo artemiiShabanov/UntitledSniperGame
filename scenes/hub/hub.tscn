@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://bwh5bc43q01ws"]
+[gd_scene load_steps=20 format=3 uid="uid://bwh5bc43q01ws"]
 
 [ext_resource type="Script" uid="uid://s52rkyeu1kxe" path="res://scripts/hub/hub.gd" id="1_hub"]
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="2_player"]
@@ -14,6 +14,8 @@
 [ext_resource type="Script" uid="uid://6gtch1tmr82" path="res://scripts/hub/contract_panel.gd" id="12_contract"]
 [ext_resource type="Script" uid="uid://d3grg5bfugprn" path="res://scripts/hub/stats_panel.gd" id="13_stats_panel"]
 [ext_resource type="Script" uid="uid://wqdmtojsm1x" path="res://scripts/hub/stats_terminal.gd" id="14_stats_terminal"]
+[ext_resource type="Script" uid="uid://b8wr37oyicjrx" path="res://scripts/hub/palette_station.gd" id="15_palette_station"]
+[ext_resource type="Script" uid="uid://bgtx08a13qrut" path="res://scripts/hub/palette_panel.gd" id="16_palette_panel"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station1"]
 size = Vector3(1.5, 2, 0.3)
@@ -70,15 +72,6 @@ size = Vector3(12, 0.2, 12)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-move_speed = null
-sprint_speed = null
-jump_velocity = null
-crouch_speed = null
-gravity = null
-slide_min_speed = null
-slide_friction = null
-slide_duration = null
-interact_range = null
 
 [node name="DeployBoard" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -5.85)
@@ -493,5 +486,49 @@ theme_override_constants/separation = 4
 [node name="CloseButton" type="Button" parent="StationUI/StatsPanel/VBox"]
 layout_mode = 2
 text = "Close"
+
+[node name="PalettePanel" type="PanelContainer" parent="StationUI"]
+visible = false
+anchors_preset = -1
+anchor_left = 0.15
+anchor_top = 0.1
+anchor_right = 0.85
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("16_palette_panel")
+
+[node name="VBox" type="VBoxContainer" parent="StationUI/PalettePanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/PalettePanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ItemList" type="VBoxContainer" parent="StationUI/PalettePanel/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="CloseButton" type="Button" parent="StationUI/PalettePanel/VBox"]
+layout_mode = 2
+text = "Close"
+
+[node name="PaletteStation" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.5, -5.85)
+script = ExtResource("15_palette_station")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PaletteStation"]
+shape = SubResource("BoxShape3D_station1")
+
+[node name="MeshInstance3D" type="CSGBox3D" parent="PaletteStation"]
+size = Vector3(1.5, 2, 0.3)
+
+[node name="Label3D" type="Label3D" parent="PaletteStation"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
+text = "PALETTES"
+font_size = 48
 
 [connection signal="pressed" from="StationUI/DeployPanel/VBox/CancelButton" to="." method="_close_active_panel"]

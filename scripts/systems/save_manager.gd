@@ -3,7 +3,7 @@ extends Node
 ## Handles save/load, multiple slots, and data structure.
 
 const SAVE_DIR := "user://saves/"
-const SAVE_VERSION := 3
+const SAVE_VERSION := 4
 const MAX_SLOTS := 3
 
 ## Currently loaded save data. Empty dict means no save loaded.
@@ -225,6 +225,45 @@ func get_skill_stat_bonus(stat_key: String, default: float = 0.0) -> float:
 	return total
 
 
+## ── Palette Unlocks ────────────────────────────────────────────────────────
+
+func get_unlocked_palettes() -> Array:
+	return data.get("unlocked_palettes", ["tactical"])
+
+
+func has_palette(palette_name: String) -> bool:
+	return palette_name in get_unlocked_palettes()
+
+
+func unlock_palette(palette_name: String) -> void:
+	var unlocked: Array = data.get("unlocked_palettes", ["tactical"])
+	if palette_name not in unlocked:
+		unlocked.append(palette_name)
+		data["unlocked_palettes"] = unlocked
+		save()
+
+
+func check_and_unlock_palettes() -> Array[String]:
+	## Checks all achievement conditions and unlocks any earned palettes.
+	## Returns array of newly unlocked palette names (for UI notification).
+	var newly_unlocked: Array[String] = []
+	var stats: Dictionary = data.get("stats", {})
+
+	# Midnight — complete 5 extractions
+	if not has_palette("midnight"):
+		if stats.get("total_extractions", 0) >= 5:
+			unlock_palette("midnight")
+			newly_unlocked.append("midnight")
+
+	# Noir — get 50 total kills
+	if not has_palette("noir"):
+		if stats.get("total_kills", 0) >= 50:
+			unlock_palette("noir")
+			newly_unlocked.append("noir")
+
+	return newly_unlocked
+
+
 ## ── Run stats aggregation ───────────────────────────────────────────────────
 
 func commit_run_stats(run_stats: Dictionary, level_path: String, success: bool) -> void:
@@ -329,7 +368,7 @@ func _default_data(slot: int) -> Dictionary:
 			},
 		},
 		"skills": [],
-		"cosmetics": [],
+		"unlocked_palettes": ["tactical"],  ## Default palette always unlocked
 		"stats": {
 			"total_runs": 0,
 			"total_kills": 0,
@@ -383,6 +422,12 @@ func _migrate(save_data: Dictionary) -> Dictionary:
 					spent_xp += skill.cost
 			stats["total_xp_earned"] = current_xp + spent_xp
 			save_data["stats"] = stats
+
+	if ver < 4:
+		# v3 → v4: replace "cosmetics" with "unlocked_palettes"
+		save_data.erase("cosmetics")
+		if not save_data.has("unlocked_palettes"):
+			save_data["unlocked_palettes"] = ["tactical"]
 
 	save_data["version"] = SAVE_VERSION
 	return save_data

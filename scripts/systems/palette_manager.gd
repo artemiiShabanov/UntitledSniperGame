@@ -30,6 +30,10 @@ const PREFS_PATH := "user://palette_prefs.json"
 ## Tracks bound nodes: { node_id: { meshes: [...], slot: StringName } }
 var _bound: Dictionary = {}
 
+## Shared materials for bulk-colored meshes (one per slot).
+## Updating the shared material recolors ALL meshes using it in one go.
+var _shared_materials: Dictionary = {}  ## { StringName slot: StandardMaterial3D }
+
 
 func _ready() -> void:
 	_load_palettes()
@@ -47,9 +51,9 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("cycle_palette"):
-		cycle_next()
+		cycle_next_unlocked()
 	elif event.is_action_pressed("cycle_palette_prev"):
-		cycle_prev()
+		cycle_prev_unlocked()
 
 
 ## ── Public API: Cycling ─────────────────────────────────────────────────────
@@ -70,6 +74,63 @@ func cycle_prev() -> void:
 	current = palettes[_index]
 	_save_pref()
 	AudioManager.play_sfx_2d(&"palette_switch")
+
+
+func cycle_next_unlocked() -> void:
+	## Cycles to the next palette that the player has unlocked.
+	var unlocked := _get_unlocked_indices()
+	if unlocked.size() <= 1:
+		return
+	var cur_pos := unlocked.find(_index)
+	if cur_pos < 0:
+		cur_pos = 0
+	var next_pos := (cur_pos + 1) % unlocked.size()
+	_index = unlocked[next_pos]
+	current = palettes[_index]
+	_save_pref()
+	AudioManager.play_sfx_2d(&"palette_switch")
+
+
+func cycle_prev_unlocked() -> void:
+	## Cycles to the previous palette that the player has unlocked.
+	var unlocked := _get_unlocked_indices()
+	if unlocked.size() <= 1:
+		return
+	var cur_pos := unlocked.find(_index)
+	if cur_pos < 0:
+		cur_pos = 0
+	var prev_pos := (cur_pos - 1 + unlocked.size()) % unlocked.size()
+	_index = unlocked[prev_pos]
+	current = palettes[_index]
+	_save_pref()
+	AudioManager.play_sfx_2d(&"palette_switch")
+
+
+func get_unlocked_palette_resources() -> Array[PaletteResource]:
+	## Returns all palettes the player has unlocked.
+	var result: Array[PaletteResource] = []
+	var unlocked_names: Array = SaveManager.get_unlocked_palettes() if SaveManager else [] as Array
+	for p in palettes:
+		if String(p.palette_name).to_lower() in unlocked_names:
+			result.append(p)
+	return result
+
+
+func is_palette_unlocked(palette_name: StringName) -> bool:
+	if not SaveManager:
+		return true  # No save system = all unlocked
+	return SaveManager.has_palette(String(palette_name).to_lower())
+
+
+func _get_unlocked_indices() -> Array[int]:
+	var result: Array[int] = []
+	var unlocked_names: Array = SaveManager.get_unlocked_palettes() if SaveManager else [] as Array
+	for i in palettes.size():
+		if String(palettes[i].palette_name).to_lower() in unlocked_names:
+			result.append(i)
+	if result.is_empty() and not palettes.is_empty():
+		result.append(0)  # Fallback: always have at least one
+	return result
 
 
 func set_palette_by_name(palette_name: StringName) -> void:
@@ -145,7 +206,9 @@ func bind_mesh_single(mesh_node: MeshInstance3D, slot: StringName) -> void:
 func color_unscripted_meshes(root: Node) -> void:
 	## Colors all MeshInstance3D descendants that are NOT already bound
 	## or managed by PaletteMesh. Uses bg_mid as the default world color.
+	## Uses a SHARED material so palette swaps update all meshes instantly.
 	## Call once in _ready — bound nodes handle their own updates.
+	var shared_mat := _get_shared_material(&"bg_mid")
 	for node in _find_all_recursive(root):
 		if not (node is MeshInstance3D):
 			continue
@@ -154,20 +217,35 @@ func color_unscripted_meshes(root: Node) -> void:
 		# Skip if already bound (child of an entity that called bind_meshes)
 		if _is_bound_or_child_of_bound(node):
 			continue
-		var mat := _ensure_unique_material(node)
-		if mat:
-			mat.albedo_color = get_color(&"bg_mid")
-			# Track as bg_mid so it updates on palette swap
-			var node_id := node.get_instance_id()
-			_bound[node_id] = {"entries": [{"mesh": node, "material": mat}], "slot": &"bg_mid"}
-			if not node.tree_exiting.is_connected(_on_bound_node_exiting):
-				node.tree_exiting.connect(_on_bound_node_exiting.bind(node_id))
+		# All unscripted meshes share one material — no per-node tracking needed
+		node.material_override = shared_mat
+
+
+## ── Internal: shared materials ───────────────────────────────────────────────
+
+func _get_shared_material(slot: StringName) -> StandardMaterial3D:
+	## Returns a shared material for the given slot, creating it if needed.
+	## All meshes using the same shared material update in one assignment.
+	if _shared_materials.has(slot):
+		return _shared_materials[slot]
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = get_color(slot)
+	_shared_materials[slot] = mat
+	return mat
 
 
 ## ── Internal: palette change propagation ────────────────────────────────────
 
 func _on_palette_changed_update_bound(_palette: PaletteResource) -> void:
-	## Called internally when palette changes — recolors all bound meshes.
+	## Called internally when palette changes — recolors all bound meshes
+	## and all shared materials.
+
+	# Update shared materials first (covers hundreds of unscripted meshes instantly)
+	for slot: StringName in _shared_materials:
+		var mat: StandardMaterial3D = _shared_materials[slot]
+		mat.albedo_color = get_color(slot)
+
+	# Update individually-bound meshes
 	var stale_ids: Array[int] = []
 	for node_id: int in _bound:
 		var binding: Dictionary = _bound[node_id]

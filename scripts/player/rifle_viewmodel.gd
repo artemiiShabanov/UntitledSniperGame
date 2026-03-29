@@ -2,7 +2,7 @@ class_name RifleViewmodel
 extends Node3D
 ## First-person rifle viewmodel built from CSG primitives.
 ## Swappable mod attachments update geometry based on equipped loadout.
-## Colors itself via PaletteManager (fg_dark).
+## Colors itself via PaletteManager (accent_hostile).
 
 ## ── Constants ───────────────────────────────────────────────────────────────
 
@@ -23,7 +23,10 @@ var _material: StandardMaterial3D
 
 func _ready() -> void:
 	_material = StandardMaterial3D.new()
-	_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_material.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+	_material.metallic = 0.6
+	_material.roughness = 0.35
+	_material.metallic_specular = 0.5
 	_material.albedo_color = Color(0.15, 0.15, 0.15)
 
 	position = HIPFIRE_POS
@@ -268,7 +271,7 @@ func _make_cylinder(part_name: String, radius: float, height: float, pos: Vector
 func _apply_palette() -> void:
 	if not PaletteManager:
 		return
-	_material.albedo_color = PaletteManager.get_color("fg_dark")
+	_material.albedo_color = PaletteManager.get_color(&"accent_hostile")
 
 
 ## ── Public API ──────────────────────────────────────────────────────────────
