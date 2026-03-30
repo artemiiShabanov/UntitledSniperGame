@@ -71,8 +71,8 @@ The sniper rifle is the player's only weapon. There is no secondary — every en
 - Multiple ammo types with different damage and penetration values
 - Ammo is selected and loaded at the hub before deploying — no pickups in the field
 - Upgradeable parts: barrel, stock, bolt, magazine, scope (all visually distinct)
-- Cosmetic skins available as progression rewards
-- Weapon inspect animation (dedicated key) — shows off current rifle and equipped skin
+- Palette-colored via accent_hostile with PBR shading (metallic/roughness)
+- Weapon inspect animation (dedicated key) — shows off current rifle and equipped mods
 
 ### 3.3 Shooting Model
 Shooting is the core skill expression of the game. It should feel weighty and rewarding.
@@ -187,10 +187,12 @@ Purchased with experience at the hub. Permanent passive abilities:
 - **Faster reload** — stacks with weapon upgrade
 - **Extra life** — start runs with an additional life
 
-### 5.4 Cosmetics
-- Rifle skins (unlocked via currency or XP milestones)
-- Skins are visual overlays on top of the current upgrade parts
-- Preview and equip from a dedicated hub screen
+### 5.4 Color Palettes
+- Achievement-gated palette unlocks (Tactical free, Midnight = 5 extractions, Noir = 50 kills)
+- Palette selection panel in hub (browse, preview colors, equip unlocked palettes)
+- Palette HUD indicator showing current palette name + accent swatches
+- Entire game world recolors instantly on palette swap via global shader uniforms
+- Future: more palettes with varied unlock conditions (headshot streaks, speed runs, etc.)
 
 ### 5.5 Ammo Economy
 - Ammo is purchased with credits at the hub and stored in the player's inventory
@@ -365,7 +367,7 @@ The hub is the player's base of operations between runs. It serves as the centra
 - **Contract Board** — browse and accept bounties
 - **Weapon Upgrades** — spend extraction currency on weapon improvements
 - **Skill Tree** — spend XP on passive ability unlocks
-- **Cosmetics** — preview and equip rifle skins
+- **Palettes** — browse, preview, and equip unlocked color palettes
 - **Level Select** — choose deployment level (locked/unlocked, difficulty, best stats)
 - **Stats** — lifetime statistics, records, per-level performance
 - **Deploy** — start a run

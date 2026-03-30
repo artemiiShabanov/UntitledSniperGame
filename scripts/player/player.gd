@@ -142,7 +142,7 @@ func _physics_process(delta: float) -> void:
 ## ── Input ────────────────────────────────────────────────────────────────────
 
 func _handle_mouse_look(event: InputEventMouseMotion) -> void:
-	var sens := SettingsManager.mouse_sensitivity * weapon.get_sensitivity_multiplier()
+	var sens: float = SettingsManager.mouse_sensitivity * weapon.get_sensitivity_multiplier()
 	rotate_y(-event.relative.x * sens)
 	head.rotate_x(-event.relative.y * sens)
 	head.rotation.x = clampf(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
@@ -214,8 +214,8 @@ func _process_jump() -> void:
 ## ── Movement ─────────────────────────────────────────────────────────────────
 
 func _process_movement() -> void:
-	var is_sprinting := Input.is_action_pressed("sprint") and is_on_floor() and not is_crouching and not weapon.is_scoped
-	var current_speed := crouch_speed if is_crouching else (sprint_speed if is_sprinting else move_speed)
+	var is_sprinting: bool = Input.is_action_pressed("sprint") and is_on_floor() and not is_crouching and not weapon.is_scoped
+	var current_speed: float = crouch_speed if is_crouching else (sprint_speed if is_sprinting else move_speed)
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()

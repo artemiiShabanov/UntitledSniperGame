@@ -108,11 +108,11 @@ func _get_unlock_condition(palette_name: String) -> String:
 	## Returns a human-readable description of how to unlock this palette.
 	match palette_name:
 		"midnight":
-			var current: int = SaveManager.get_stat("total_extractions", 0)
-			return "Extract 5 times (%d/5)" % current
+			var extractions: int = int(SaveManager.get_stat("total_extractions", 0))
+			return "Extract 5 times (%d/5)" % extractions
 		"noir":
-			var current: int = SaveManager.get_stat("total_kills", 0)
-			return "Get 50 kills (%d/50)" % current
+			var kills: int = int(SaveManager.get_stat("total_kills", 0))
+			return "Get 50 kills (%d/50)" % kills
 		_:
 			return "???"
 

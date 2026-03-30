@@ -280,7 +280,7 @@ func _on_equip(mod: RifleMod) -> void:
 func _format_stats(mod: RifleMod) -> String:
 	var parts: Array[String] = []
 	for key: String in mod.stat_overrides:
-		var val = mod.stat_overrides[key]
+		var val: Variant = mod.stat_overrides[key]
 		var display_name := key.replace("_", " ").capitalize()
 		if val is float:
 			parts.append("%s: %s" % [display_name, "%.2f" % val])

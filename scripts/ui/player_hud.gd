@@ -72,16 +72,16 @@ func update_scope_visuals(scoped: bool) -> void:
 		scope_overlay.queue_redraw()
 
 
-func update_weapon_display(weapon: Weapon) -> void:
+func update_weapon_display(wpn: Node3D) -> void:
 	const STATE_NAMES := ["IDLE", "AIMING", "BOLT_CYCLING", "RELOADING", "INSPECTING"]
-	var ammo := weapon.get_current_ammo_type()
+	var ammo: AmmoType = wpn.get_current_ammo_type()
 	var ammo_name := ammo.ammo_name if ammo else "???"
-	var state_idx := clampi(weapon.state, 0, STATE_NAMES.size() - 1)
+	var state_idx: int = clampi(wpn.state, 0, STATE_NAMES.size() - 1)
 	weapon_state_label.text = "%s | %s %d/%d | $%d" % [
 		STATE_NAMES[state_idx],
 		ammo_name,
-		weapon.ammo_in_magazine,
-		weapon.ammo_reserve,
+		wpn.ammo_in_magazine,
+		wpn.ammo_reserve,
 		RunManager.get_run_credits(),
 	]
 	# Color the label to match ammo type
