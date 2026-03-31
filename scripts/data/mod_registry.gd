@@ -37,9 +37,23 @@ func _register_all() -> void:
 		{"muzzle_velocity": 300.0, "bullet_gravity": 9.8}
 	))
 	_add(RifleMod.create(
-		"barrel_long", "Long Barrel", "barrel", 300,
-		"Extended barrel for higher muzzle velocity. Less bullet drop at range.",
+		"barrel_extended", "Extended Barrel", "barrel", 300,
+		"Longer barrel for higher muzzle velocity. Less bullet drop at range.",
 		{"muzzle_velocity": 420.0, "bullet_gravity": 9.8}
+	))
+	_add(RifleMod.create(
+		"barrel_improvised_suppressor", "Improvised Suppressor", "barrel", 150,
+		"A bottle jammed on the muzzle. Quieter shots, but velocity suffers.",
+		{"muzzle_velocity": 240.0, "bullet_gravity": 9.8,
+		 "gunshot_loudness": 15.0, "impact_loudness": 8.0},
+		"suppressed"
+	))
+	_add(RifleMod.create(
+		"barrel_tactical", "Tactical Barrel", "barrel", 500,
+		"Integrated suppressor. Silent and precise — no velocity penalty.",
+		{"muzzle_velocity": 300.0, "bullet_gravity": 9.8,
+		 "gunshot_loudness": 20.0, "impact_loudness": 10.0},
+		"suppressed"
 	))
 
 	# ── Stock ─────────────────────────────────────────────────────────────

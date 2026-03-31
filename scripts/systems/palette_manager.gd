@@ -227,6 +227,9 @@ func color_unscripted_meshes(root: Node) -> void:
 		# Skip if already bound (child of an entity that called bind_meshes)
 		if _is_bound_or_child_of_bound(node):
 			continue
+		# Skip if something else already manages this mesh's material
+		if node.material_override:
+			continue
 		# All unscripted meshes share one material — no per-node tracking needed
 		node.material_override = shared_mat
 

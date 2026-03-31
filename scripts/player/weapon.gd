@@ -45,11 +45,18 @@ enum State { IDLE, AIMING, BOLT_CYCLING, RELOADING, INSPECTING }
 @export var muzzle_velocity: float = 300.0
 @export var bullet_gravity: float = 9.8
 
+## Sound
+@export var gunshot_loudness: float = 50.0
+@export var impact_loudness: float = 20.0
+
 ## ── State ────────────────────────────────────────────────────────────────────
 
 var state: State = State.IDLE
 var is_scoped: bool = false
 var state_timer: float = 0.0
+
+## Barrel special
+var _suppressed: bool = false
 
 ## Sway & breath
 var sway_time: float = 0.0
@@ -115,6 +122,8 @@ func apply_modifications() -> void:
 		for prop: String in mod.stat_overrides:
 			if prop in self:
 				set(prop, mod.stat_overrides[prop])
+		if mod.special == "suppressed":
+			_suppressed = true
 
 	# Apply skill bonuses (after mods so they stack)
 	var breath_bonus: float = SaveManager.get_skill_stat_bonus("breath_max")
@@ -131,7 +140,9 @@ func _process(delta: float) -> void:
 	_process_scope(delta)
 	_process_sway(delta)
 	_process_breath(delta)
-	_process_input()
+	# Only process weapon input when mouse is captured (not in UI panels)
+	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		_process_input()
 
 
 ## ── State machine ────────────────────────────────────────────────────────────
@@ -361,13 +372,15 @@ func _spawn_bullet() -> void:
 
 	# Delegate ammo property application to AmmoManager
 	ammo.configure_bullet(bullet, muzzle_velocity, bullet_gravity)
+	bullet.impact_loudness = impact_loudness
 
 	get_tree().root.add_child(bullet)
 	bullet.global_position = spawn_pos
 
 	# Muzzle flash VFX + audio
 	VFXFactory.spawn_muzzle_flash(spawn_pos + spawn_dir * 0.3, spawn_dir, false)
-	AudioManager.play_sfx(&"rifle_fire", spawn_pos)
+	var fire_sound: StringName = &"rifle_fire_suppressed" if _suppressed else &"rifle_fire"
+	AudioManager.play_sfx(fire_sound, spawn_pos)
 
 	_propagate_gunshot_sound(spawn_pos)
 
@@ -396,14 +409,12 @@ func _start_inspect() -> void:
 
 ## ── Sound propagation ────────────────────────────────────────────────────────
 
-const GUNSHOT_LOUDNESS: float = 50.0
-
 func _propagate_gunshot_sound(origin: Vector3) -> void:
 	var enemies := get_tree().get_nodes_in_group("enemy")
 	for enemy in enemies:
 		if enemy.has_method("hear_sound"):
-			enemy.hear_sound(origin, GUNSHOT_LOUDNESS)
+			enemy.hear_sound(origin, gunshot_loudness)
 	var npcs := get_tree().get_nodes_in_group("npc")
 	for npc in npcs:
 		if npc.has_method("hear_sound"):
-			npc.hear_sound(origin, GUNSHOT_LOUDNESS)
+			npc.hear_sound(origin, gunshot_loudness)

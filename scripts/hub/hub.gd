@@ -71,6 +71,7 @@ func _ready() -> void:
 	save_terminal.save_completed.connect(_on_save_completed)
 	mod_bench.mod_requested.connect(_on_mod_requested)
 	mod_shop.shop_closed.connect(_on_mod_shop_closed)
+	mod_shop.mod_equipped.connect(_on_mod_equipped)
 	skill_board.skill_requested.connect(_on_skill_requested)
 	skill_shop.shop_closed.connect(_on_skill_shop_closed)
 	contract_panel.contract_selected.connect(_on_contract_selected)
@@ -268,6 +269,13 @@ func _on_shop_closed() -> void:
 func _on_mod_requested() -> void:
 	mod_shop.open()
 	_open_panel(mod_shop)
+
+
+func _on_mod_equipped() -> void:
+	if _player:
+		var viewmodel: RifleViewmodel = _player.get_node_or_null("Head/Camera3D/RifleViewmodel")
+		if viewmodel:
+			viewmodel.refresh_loadout()
 
 
 func _on_mod_shop_closed() -> void:

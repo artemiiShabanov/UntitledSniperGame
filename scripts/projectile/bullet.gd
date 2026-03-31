@@ -117,17 +117,17 @@ func _check_whizz() -> void:
 		_whizz_played = true
 
 
-const IMPACT_LOUDNESS: float = 20.0
+var impact_loudness: float = 20.0
 
 func _propagate_impact_sound(impact_pos: Vector3) -> void:
 	var enemies := get_tree().get_nodes_in_group("enemy")
 	for enemy in enemies:
 		if enemy.has_method("hear_sound"):
-			enemy.hear_sound(impact_pos, IMPACT_LOUDNESS)
+			enemy.hear_sound(impact_pos, impact_loudness)
 	var npcs := get_tree().get_nodes_in_group("npc")
 	for npc in npcs:
 		if npc.has_method("hear_sound"):
-			npc.hear_sound(impact_pos, IMPACT_LOUDNESS)
+			npc.hear_sound(impact_pos, impact_loudness)
 
 
 func _apply_tracer_material(color: Color, emission: float, mesh_scale: Vector3) -> void:

@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="AudioBank" load_steps=71 format=3 uid="uid://cvo07nawx1r04"]
+[gd_resource type="Resource" script_class="AudioBank" load_steps=73 format=3 uid="uid://cvo07nawx1r04"]
 
 [ext_resource type="Script" uid="uid://cp8ye6sssyfa1" path="res://scripts/systems/audio_bank.gd" id="1"]
 [ext_resource type="Script" uid="uid://capyglx2gl8of" path="res://scripts/systems/audio_bank_entry.gd" id="2"]
 [ext_resource type="AudioStream" uid="uid://dcxo1nihpjl06" path="res://data/audio/Weapon/fire.mp3" id="2_omlv1"]
 [ext_resource type="AudioStream" uid="uid://ctgml41ybi2lw" path="res://data/audio/generated/menu_confirm.wav" id="3_12p6r"]
 [ext_resource type="AudioStream" uid="uid://dg8t62c63wikd" path="res://data/audio/Weapon/dry.mp3" id="3_85agu"]
+[ext_resource type="AudioStream" uid="uid://c7gsvgn3hbmb7" path="res://data/audio/Weapon/rifle_fire_suppressed.wav" id="3_avsm5"]
 [ext_resource type="AudioStream" uid="uid://c6harhlfh0b6a" path="res://data/audio/Player/hitHurt-2.wav" id="3_j8scr"]
 [ext_resource type="AudioStream" uid="uid://dlqw1wffl6ooc" path="res://data/audio/Player/breath_in.mp3" id="3_s4h8c"]
 [ext_resource type="AudioStream" uid="uid://drmus5de885g0" path="res://data/audio/Weapon/rifle_reload.mp3" id="4_avsm5"]
@@ -41,6 +42,14 @@ id = &"rifle_fire"
 stream = ExtResource("2_omlv1")
 volume_db = 0.0
 pitch_variance = 0.05
+bus = &"SFX"
+
+[sub_resource type="Resource" id="rifle_fire_suppressed"]
+script = ExtResource("2")
+id = &"rifle_fire_suppressed"
+stream = ExtResource("3_avsm5")
+volume_db = -12.0
+pitch_variance = 0.03
 bus = &"SFX"
 
 [sub_resource type="Resource" id="rifle_dry"]
@@ -322,4 +331,4 @@ bus = &"Music"
 
 [resource]
 script = ExtResource("1")
-entries = Array[ExtResource("2")]([SubResource("rifle_fire"), SubResource("rifle_dry"), SubResource("rifle_reload"), SubResource("rifle_bolt"), SubResource("scope_in"), SubResource("scope_out"), SubResource("impact_body"), SubResource("impact_head"), SubResource("impact_world"), SubResource("impact_destructible"), SubResource("bullet_whizz"), SubResource("bullet_penetrate"), SubResource("breath_hold"), SubResource("hit_taken"), SubResource("death"), SubResource("alert_spotted"), SubResource("npc_panic"), SubResource("extraction_start"), SubResource("extraction_complete"), SubResource("menu_click"), SubResource("menu_confirm"), SubResource("menu_cancel"), SubResource("menu_hover"), SubResource("ammo_switch"), SubResource("palette_switch"), SubResource("credits_gain"), SubResource("xp_gain"), SubResource("hub_theme"), SubResource("combat_tension"), SubResource("level_ambient"), SubResource("footstep"), SubResource("slide"), SubResource("heartbeat"), SubResource("breath_exhale"), SubResource("scope_zoom"), SubResource("level_theme")])
+entries = Array[ExtResource("2")]([SubResource("rifle_fire"), SubResource("rifle_fire_suppressed"), SubResource("rifle_dry"), SubResource("rifle_reload"), SubResource("rifle_bolt"), SubResource("scope_in"), SubResource("scope_out"), SubResource("impact_body"), SubResource("impact_head"), SubResource("impact_world"), SubResource("impact_destructible"), SubResource("bullet_whizz"), SubResource("bullet_penetrate"), SubResource("breath_hold"), SubResource("hit_taken"), SubResource("death"), SubResource("alert_spotted"), SubResource("npc_panic"), SubResource("extraction_start"), SubResource("extraction_complete"), SubResource("menu_click"), SubResource("menu_confirm"), SubResource("menu_cancel"), SubResource("menu_hover"), SubResource("ammo_switch"), SubResource("palette_switch"), SubResource("credits_gain"), SubResource("xp_gain"), SubResource("hub_theme"), SubResource("combat_tension"), SubResource("level_ambient"), SubResource("footstep"), SubResource("slide"), SubResource("heartbeat"), SubResource("breath_exhale"), SubResource("scope_zoom"), SubResource("level_theme")])

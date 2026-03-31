@@ -17,6 +17,7 @@ const MIX_RATE: int = 22050
 static var PLACEHOLDER_MAP: Dictionary = {
 	# Weapon
 	&"rifle_fire": "noise_burst",
+	&"rifle_fire_suppressed": "suppressed_shot",
 	&"rifle_dry": "click",
 	&"rifle_reload": "tone_short",
 	&"rifle_bolt": "click_low",
@@ -70,6 +71,8 @@ static var PLACEHOLDER_MAP: Dictionary = {
 static func make_placeholder(kind: String) -> AudioStreamWAV:
 	## Creates a placeholder AudioStreamWAV for the given kind string.
 	match kind:
+		"suppressed_shot":
+			return noise_burst(0.08, 0.3)
 		"noise_burst":
 			return noise_burst(0.12, 0.7)
 		"noise_short":

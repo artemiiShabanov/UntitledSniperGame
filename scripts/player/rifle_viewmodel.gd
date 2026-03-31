@@ -128,18 +128,40 @@ func _build_barrel(mod_id: String) -> void:
 	add_child(parent)
 	_mod_parts["barrel"] = parent
 
-	var is_long := mod_id == "barrel_long"
-	var length: float = 0.35 if is_long else 0.22
-	var radius: float = 0.012 if is_long else 0.014
+	match mod_id:
+		"barrel_extended":
+			# Long barrel with muzzle brake
+			var barrel := _make_cylinder("barrel_tube", 0.012, 0.35, Vector3(0, 0, -0.09 - 0.175), Vector3(90, 0, 0))
+			parent.add_child(barrel)
+			var brake := _make_box("muzzle_brake", Vector3(0.022, 0.022, 0.025), Vector3(0, 0, -0.09 - 0.35 + 0.012))
+			parent.add_child(brake)
 
-	# Barrel tube
-	var barrel := _make_cylinder("barrel_tube", radius, length, Vector3(0, 0, -0.09 - length / 2.0), Vector3(90, 0, 0))
-	parent.add_child(barrel)
+		"barrel_improvised_suppressor":
+			# Standard-length barrel with a crude bottle silencer on the end
+			var barrel := _make_cylinder("barrel_tube", 0.014, 0.22, Vector3(0, 0, -0.09 - 0.11), Vector3(90, 0, 0))
+			parent.add_child(barrel)
+			# Bottle body — wider cylinder, slightly off-center for janky look
+			var bottle := _make_cylinder("bottle_body", 0.025, 0.08, Vector3(0.002, 0.001, -0.09 - 0.22 - 0.03), Vector3(90, 0, 0))
+			parent.add_child(bottle)
+			# Bottle neck — narrower, wraps around barrel end
+			var neck := _make_cylinder("bottle_neck", 0.016, 0.025, Vector3(0.002, 0.001, -0.09 - 0.20), Vector3(90, 0, 0))
+			parent.add_child(neck)
 
-	# Muzzle brake (slightly wider end)
-	if is_long:
-		var brake := _make_box("muzzle_brake", Vector3(0.022, 0.022, 0.025), Vector3(0, 0, -0.09 - length + 0.012))
-		parent.add_child(brake)
+		"barrel_tactical":
+			# Barrel with integrated suppressor shroud
+			var barrel := _make_cylinder("barrel_tube", 0.012, 0.28, Vector3(0, 0, -0.09 - 0.14), Vector3(90, 0, 0))
+			parent.add_child(barrel)
+			# Suppressor shroud — clean cylinder over the front half
+			var shroud := _make_cylinder("suppressor_shroud", 0.02, 0.14, Vector3(0, 0, -0.09 - 0.28 + 0.04), Vector3(90, 0, 0))
+			parent.add_child(shroud)
+			# Suppressor cap
+			var cap := _make_cylinder("suppressor_cap", 0.022, 0.008, Vector3(0, 0, -0.09 - 0.28 - 0.03 + 0.004), Vector3(90, 0, 0))
+			parent.add_child(cap)
+
+		_:
+			# Standard barrel
+			var barrel := _make_cylinder("barrel_tube", 0.014, 0.22, Vector3(0, 0, -0.09 - 0.11), Vector3(90, 0, 0))
+			parent.add_child(barrel)
 
 
 func _build_stock(mod_id: String) -> void:

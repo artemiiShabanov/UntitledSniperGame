@@ -4,6 +4,7 @@ extends Control
 ## Buying requires confirmation.
 
 signal shop_closed
+signal mod_equipped
 
 @onready var credits_label: Label = $VBox/CreditsLabel
 @onready var tab_bar: HBoxContainer = $VBox/TabBar
@@ -274,6 +275,7 @@ func _on_equip(mod: RifleMod) -> void:
 	SaveManager.equip_mod(mod.id)
 	AudioManager.play_sfx_2d(&"menu_confirm")
 	_refresh()
+	mod_equipped.emit()
 
 
 func _format_stats(mod: RifleMod) -> String:
