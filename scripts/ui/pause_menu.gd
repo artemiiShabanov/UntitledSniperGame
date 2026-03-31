@@ -95,7 +95,7 @@ func _abandon_run() -> void:
 	RunManager.run_credits = 0
 	RunManager.is_dead = true
 	SaveManager.increment_stat("total_deaths")
-	SaveManager.commit_run_stats(RunManager.run_stats, RunManager.current_level_path, false)
+	SaveManager.commit_run_stats(RunManager.run_stats.to_dict(), RunManager.current_level_path, false)
 	SaveManager.save()
 	RunManager.go_to_hub()
 
@@ -123,7 +123,7 @@ func _build_quit_confirm() -> void:
 	var sub_label := Label.new()
 	sub_label.text = "Unsaved progress will be lost."
 	sub_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+	sub_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	vbox.add_child(sub_label)
 
 	var btn_row := HBoxContainer.new()
@@ -142,7 +142,7 @@ func _build_quit_confirm() -> void:
 	confirm_btn.text = "Quit"
 	confirm_btn.custom_minimum_size = Vector2(180, 56)
 	confirm_btn.pressed.connect(func(): get_tree().quit())
-	confirm_btn.add_theme_color_override("font_color", PaletteManager.get_color(&"danger"))
+	confirm_btn.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 	AudioManager.wire_button(confirm_btn, &"menu_confirm")
 	btn_row.add_child(confirm_btn)
 

@@ -110,7 +110,7 @@ func _pick_environment() -> void:
 
 
 func _fill_level_slots() -> void:
-	for node in _find_all_recursive(self):
+	for node in UIUtils.find_all_recursive(self):
 		if node is LevelSlot and node.slot_data and not node.slot_data.variants.is_empty():
 			var variant: PackedScene = node.slot_data.variants[rng.randi() % node.slot_data.variants.size()]
 			var chunk := variant.instantiate()
@@ -220,7 +220,7 @@ func _pick_npc_start_point(npc: NpcBase, points: Array[ActivityPoint]) -> Activi
 
 func get_activity_points() -> Array[ActivityPoint]:
 	var result: Array[ActivityPoint] = []
-	for child in _find_all_recursive(self):
+	for child in UIUtils.find_all_recursive(self):
 		if child is ActivityPoint:
 			result.append(child)
 	return result
@@ -228,7 +228,7 @@ func get_activity_points() -> Array[ActivityPoint]:
 
 func _pick_extraction_zone() -> void:
 	var zones: Array[ExtractionZone] = []
-	for node in _find_all_recursive(self):
+	for node in UIUtils.find_all_recursive(self):
 		if node is ExtractionZone:
 			zones.append(node)
 
@@ -322,7 +322,7 @@ func _setup_enemy_spawner() -> void:
 
 func get_spawn_points(type: SpawnPoint.Type) -> Array[SpawnPoint]:
 	var result: Array[SpawnPoint] = []
-	for child in _find_all_recursive(self):
+	for child in UIUtils.find_all_recursive(self):
 		if child is SpawnPoint and child.spawn_type == type:
 			result.append(child)
 	return result
@@ -355,11 +355,3 @@ func _place_player_at_spawn() -> void:
 	var spawn := get_player_spawn()
 	if spawn:
 		player.global_position = spawn.global_position
-
-
-func _find_all_recursive(node: Node) -> Array[Node]:
-	var nodes: Array[Node] = []
-	for child in node.get_children():
-		nodes.append(child)
-		nodes.append_array(_find_all_recursive(child))
-	return nodes

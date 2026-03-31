@@ -17,8 +17,8 @@ func _ready() -> void:
 
 
 func _on_palette_changed(_palette: PaletteResource) -> void:
-	ring_color = Color(PaletteManager.get_color(&"fg_dark"), 0.9)
-	crosshair_color = Color(PaletteManager.get_color(&"accent_friendly"), 0.5)
+	ring_color = Color(PaletteManager.get_color(PaletteManager.SLOT_FG_DARK), 0.9)
+	crosshair_color = Color(PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY), 0.5)
 	if visible:
 		queue_redraw()
 

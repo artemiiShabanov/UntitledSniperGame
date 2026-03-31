@@ -271,7 +271,7 @@ func _make_cylinder(part_name: String, radius: float, height: float, pos: Vector
 func _apply_palette() -> void:
 	if not PaletteManager:
 		return
-	_material.albedo_color = PaletteManager.get_color(&"accent_hostile")
+	_material.albedo_color = PaletteManager.get_color(PaletteManager.SLOT_ACCENT_HOSTILE)
 
 
 ## ── Public API ──────────────────────────────────────────────────────────────

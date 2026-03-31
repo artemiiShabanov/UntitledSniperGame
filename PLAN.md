@@ -13,15 +13,16 @@ save system, audio/VFX systems, 1 greybox level (Industrial Yard).
 
 | Section | Progress | Summary |
 |---------|----------|---------|
-| Technical Development | ██░░░ 35% | Enemy types, contracts, mods, events, objectives |
-| Content | █░░░░ 20% | 1/4 levels done, placeholder art/models/audio |
+| Run Lifecycle | ██░░░ 30% | Enemy types, phase rewards, objectives, events, variation |
+| Global Progression | ██░░░ 40% | Mods, contracts, palettes |
+| Content | █░░░░ 20% | 1/4 levels done, placeholder art/models/audio, UI polish |
 | Polish & Release | ░░░░░ 0% | Steam, controller, balancing, marketing |
 
 ---
 
-## 1 · Technical Development & Systems
+## 1A · Run Lifecycle
 
-Game systems, mechanics, and features that need code work.
+Systems and mechanics active during a run.
 
 ### 1.1 Enemy Types [ ]
 
@@ -45,33 +46,7 @@ Threat phases exist (EARLY/MID/LATE) but rewards don't scale with them yet.
 
 > Depends on: run_manager.gd threat phases (ready), enemy_spawner.gd (ready)
 
-### 1.3 Rifle Modifications — Full Catalog [ ]
-
-Two foundation mods exist (Long Barrel, Extended Mag). Need the rest:
-
-- [ ] Barrel: Light Barrel, Heavy Barrel
-- [ ] Stock: Padded, Breath, Competition
-- [ ] Bolt: Quick, Smooth Action, Match
-- [ ] Magazine: Drum Mag
-- [ ] Scope: 4x, 8x, Variable (adjustable zoom + scope overlays)
-- [ ] Visual model per mod on rifle viewmodel
-
-> Depends on: RifleMod resource (ready), mod_registry (ready), mod_shop (ready), rifle_viewmodel (ready)
-
-### 1.4 Contract Expansion [ ]
-
-5 contract types work. Two more designed but returning false:
-
-- [ ] KILL_TARGET — eliminate a named high-value target (target_id field exists)
-- [ ] DESTROY_TARGET — destroy a specific object
-- [ ] Contract templates per level
-- [ ] Contract reward balancing
-- [ ] Level-specific contracts (level_restriction field ready)
-- [ ] Higher-risk/higher-reward contracts for harder levels
-
-> Depends on: contract.gd (ready), contract_registry (ready), contract_panel (ready)
-
-### 1.5 In-Run Objectives [ ]
+### 1.3 In-Run Objectives [ ]
 
 Dynamic challenges that appear during a run with bonus rewards:
 
@@ -85,22 +60,61 @@ Dynamic challenges that appear during a run with bonus rewards:
 
 > New system — needs objective_manager + HUD integration
 
-### 1.6 Events System [ ]
+### 1.4 Events System [ ]
 
 Infrastructure exists but no events are defined:
 
 - [ ] Event types TBD — designed in detail when needed
 - [ ] LevelEventData, LevelEventRunner, level_events_pool already exist
 
-### 1.7 Per-Run Variation Extras [ ]
+### 1.5 Per-Run Variation [ ]
 
 - [ ] Variable sniper positions (some nests blocked/revealed per run)
+- [ ] Level layout variation (randomized props, cover, routes per run)
+
+---
+
+## 1B · Global Progression
+
+Hub systems and between-run upgrades.
+
+### 1.6 Rifle Modifications — Full Catalog [ ]
+
+Two foundation mods exist (Long Barrel, Extended Mag). Need the rest:
+
+- [ ] Barrel: Light Barrel, Heavy Barrel
+- [ ] Stock: Padded, Breath, Competition
+- [ ] Bolt: Quick, Smooth Action, Match
+- [ ] Magazine: Drum Mag
+- [ ] Scope: 4x, 8x, Variable (adjustable zoom + scope overlays)
+- [ ] Visual model per mod on rifle viewmodel
+
+> Depends on: RifleMod resource (ready), mod_registry (ready), mod_shop (ready), rifle_viewmodel (ready)
+
+### 1.7 Contract Expansion [ ]
+
+5 contract types work. Two more designed but returning false:
+
+- [ ] KILL_TARGET — eliminate a named high-value target (target_id field exists)
+- [ ] DESTROY_TARGET — destroy a specific object
+- [ ] Contract templates per level
+- [ ] Contract reward balancing
+- [ ] Level-specific contracts (level_restriction field ready)
+- [ ] Higher-risk/higher-reward contracts for harder levels
+
+> Depends on: contract.gd (ready), contract_registry (ready), contract_panel (ready)
 
 ### 1.8 Palette Expansion [ ]
 
 - [ ] Add more palettes with varied unlock conditions (headshot streaks, speed runs, etc.)
 
-### 1.9 UI Polish [ ]
+---
+
+## 2 · Content
+
+Levels, 3D models, animations, textures, audio, and UI — everything that fills the game world.
+
+### 2.1 UI Polish [ ]
 
 - [ ] Main menu visual polish (background pattern, version text, subtle animation)
 - [ ] Hub layout — spatial navigation cues between stations
@@ -108,13 +122,7 @@ Infrastructure exists but no events are defined:
 - [ ] Result/death screens — styled layout with animations
 - [ ] Settings screen — section headers, better slider visuals
 
----
-
-## 2 · Content
-
-Levels, 3D models, animations, textures, audio — everything that fills the game world.
-
-### 2.1 Levels
+### 2.2 Levels
 
 > Each level needs: theme, 200m+ map, 2-3 wind corridors, sniper nests, repositioning
 > routes, 15-20 enemy spawns, 2-3 extraction zones, NPC activity points, destructibles.
@@ -145,7 +153,7 @@ Levels, 3D models, animations, textures, audio — everything that fills the gam
 #### Level 4+ [ ]
 - [ ] As needed for progression gates
 
-### 2.2 3D Models & Animations
+### 2.3 3D Models & Animations
 
 > **Pipeline:** Low-poly asset packs (Kenney/Quaternius) → Mixamo auto-rig → Godot AnimationTree.
 > Props: Blender box-modeling or asset packs. Strip textures, apply palette colors.
@@ -207,7 +215,7 @@ rock formations, wooden fence, ruins, cart, hay bale, campfire, wooden bridge, w
 
 </details>
 
-### 2.3 Image Assets
+### 2.4 Image Assets
 
 > **Status:** 59 placeholder PNGs created, folders structured, all wired into code.
 > **Sources:** game-icons.net (CC BY 3.0), Kenney Particle Pack (CC0), ambientCG (CC0)
@@ -220,7 +228,7 @@ rock formations, wooden fence, ruins, cart, hay bale, campfire, wooden bridge, w
 | Surface textures (6 materials × albedo + normal) | 12 | Placeholder |
 | **Total** | **59** | |
 
-### 2.4 Audio
+### 2.5 Audio
 
 > **Status:** 48 audio files loaded. Mix of sourced (Freesound/Pixabay) and generated (jsfxr).
 > Many are placeholder quality — need final mixing and replacement.

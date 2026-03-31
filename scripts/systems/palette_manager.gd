@@ -10,6 +10,16 @@ extends Node
 ##     PaletteManager.get_color(&"accent_friendly")           # read once
 ##     PaletteManager.palette_changed.connect(_refresh_colors) # stay reactive
 
+## ── Slot name constants (use these instead of raw StringNames) ────────────
+const SLOT_BG_LIGHT := &"bg_light"
+const SLOT_BG_MID := &"bg_mid"
+const SLOT_FG_DARK := &"fg_dark"
+const SLOT_ACCENT_HOSTILE := &"accent_hostile"
+const SLOT_ACCENT_LOOT := &"accent_loot"
+const SLOT_ACCENT_FRIENDLY := &"accent_friendly"
+const SLOT_DANGER := &"danger"
+const SLOT_REWARD := &"reward"
+
 ## Emitted whenever the palette changes (on cycle or explicit set).
 signal palette_changed(palette: PaletteResource)
 
@@ -208,8 +218,8 @@ func color_unscripted_meshes(root: Node) -> void:
 	## or managed by PaletteMesh. Uses bg_mid as the default world color.
 	## Uses a SHARED material so palette swaps update all meshes instantly.
 	## Call once in _ready — bound nodes handle their own updates.
-	var shared_mat := _get_shared_material(&"bg_mid")
-	for node in _find_all_recursive(root):
+	var shared_mat := _get_shared_material(SLOT_BG_MID)
+	for node in UIUtils.find_all_recursive(root):
 		if not (node is MeshInstance3D):
 			continue
 		if node is PaletteMesh:
@@ -272,7 +282,7 @@ func _on_bound_node_exiting(node_id: int) -> void:
 func _collect_meshes(node: Node) -> Array[MeshInstance3D]:
 	## Finds all MeshInstance3D descendants, skipping PaletteMesh nodes.
 	var result: Array[MeshInstance3D] = []
-	for child in _find_all_recursive(node):
+	for child in UIUtils.find_all_recursive(node):
 		if child is PaletteMesh:
 			continue
 		if child is MeshInstance3D:
@@ -306,17 +316,6 @@ func _is_bound_or_child_of_bound(node: Node) -> bool:
 			return true
 		check = check.get_parent()
 	return false
-
-
-static func _find_all_recursive(root: Node) -> Array[Node]:
-	var result: Array[Node] = []
-	var stack: Array[Node] = [root]
-	while not stack.is_empty():
-		var n: Node = stack.pop_back()
-		result.append(n)
-		for child in n.get_children():
-			stack.append(child)
-	return result
 
 
 ## ── Internal: palette loading & persistence ─────────────────────────────────

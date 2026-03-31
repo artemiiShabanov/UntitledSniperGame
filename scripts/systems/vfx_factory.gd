@@ -27,17 +27,13 @@ func _ready() -> void:
 
 
 func _load_vfx_textures() -> void:
-	_muzzle_flash_tex = _try_load_tex("res://assets/sprites/vfx/muzzle_flash.png")
-	_impact_dust_tex = _try_load_tex("res://assets/sprites/vfx/impact_dust.png")
-	_impact_blood_tex = _try_load_tex("res://assets/sprites/vfx/impact_blood.png")
-	_smoke_puff_tex = _try_load_tex("res://assets/sprites/vfx/smoke_puff.png")
-	_shell_casing_tex = _try_load_tex("res://assets/sprites/vfx/shell_casing.png")
+	_muzzle_flash_tex = UIUtils.try_load_tex("res://assets/sprites/vfx/muzzle_flash.png")
+	_impact_dust_tex = UIUtils.try_load_tex("res://assets/sprites/vfx/impact_dust.png")
+	_impact_blood_tex = UIUtils.try_load_tex("res://assets/sprites/vfx/impact_blood.png")
+	_smoke_puff_tex = UIUtils.try_load_tex("res://assets/sprites/vfx/smoke_puff.png")
+	_shell_casing_tex = UIUtils.try_load_tex("res://assets/sprites/vfx/shell_casing.png")
 
 
-func _try_load_tex(path: String) -> Texture2D:
-	if ResourceLoader.exists(path):
-		return load(path)
-	return null
 
 
 func _create_shared_resources() -> void:
@@ -51,7 +47,7 @@ func _create_shared_resources() -> void:
 		_muzzle_mat.albedo_texture = _muzzle_flash_tex
 
 	# Impact material
-	_impact_mat = _make_unshaded_billboard_mat(PaletteManager.get_color(&"danger"), 2.0)
+	_impact_mat = _make_unshaded_billboard_mat(PaletteManager.get_color(PaletteManager.SLOT_DANGER), 2.0)
 	if _impact_dust_tex:
 		_impact_mat.albedo_texture = _impact_dust_tex
 
@@ -61,7 +57,7 @@ func _create_shared_resources() -> void:
 		_headshot_mat.albedo_texture = _impact_blood_tex
 
 	# Extraction material
-	var ext_color: Color = PaletteManager.get_color(&"accent_friendly")
+	var ext_color: Color = PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
 	ext_color.a = 0.7
 	_extraction_mat = _make_unshaded_billboard_mat(ext_color, 1.5)
 
@@ -112,11 +108,11 @@ func _prewarm_shaders() -> void:
 
 func _on_palette_changed(_p: PaletteResource) -> void:
 	# Update cached materials with new palette colors
-	var danger: Color = PaletteManager.get_color(&"danger")
+	var danger: Color = PaletteManager.get_color(PaletteManager.SLOT_DANGER)
 	_impact_mat.albedo_color = danger
 	_impact_mat.emission = Color(danger, 1.0)
 
-	var friendly: Color = PaletteManager.get_color(&"accent_friendly")
+	var friendly: Color = PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
 	friendly.a = 0.7
 	_extraction_mat.albedo_color = friendly
 	_extraction_mat.emission = Color(friendly, 1.0)
@@ -144,7 +140,7 @@ func spawn_muzzle_flash(pos: Vector3, forward: Vector3, is_enemy: bool = false) 
 	mat.damping_min = 8.0
 	mat.damping_max = 12.0
 
-	var color: Color = PaletteManager.get_color(&"danger") if is_enemy else Color(1.0, 0.9, 0.6)
+	var color: Color = PaletteManager.get_color(PaletteManager.SLOT_DANGER) if is_enemy else Color(1.0, 0.9, 0.6)
 	mat.color = color
 	particles.process_material = mat
 
@@ -183,7 +179,7 @@ func spawn_hit_impact(pos: Vector3, normal: Vector3, is_headshot: bool = false) 
 	if is_headshot:
 		color = Color.WHITE
 	else:
-		color = PaletteManager.get_color(&"danger")
+		color = PaletteManager.get_color(PaletteManager.SLOT_DANGER)
 	mat.color = color
 	particles.process_material = mat
 
@@ -244,7 +240,7 @@ func spawn_death_effect(enemy: Node3D, is_headshot: bool) -> void:
 		var death_mat := StandardMaterial3D.new()
 		death_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		death_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		death_mat.albedo_color = PaletteManager.get_color(&"fg_dark")
+		death_mat.albedo_color = PaletteManager.get_color(PaletteManager.SLOT_FG_DARK)
 		for child in mesh_node.get_children():
 			if child is MeshInstance3D:
 				child.material_override = death_mat
@@ -306,7 +302,7 @@ func create_extraction_particles(zone: Node3D, zone_size: Vector3) -> GPUParticl
 	mat.scale_min = 0.6
 	mat.scale_max = 1.2
 
-	var color: Color = PaletteManager.get_color(&"accent_friendly")
+	var color: Color = PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
 	color.a = 0.7
 	mat.color = color
 	particles.process_material = mat
@@ -319,7 +315,7 @@ func create_extraction_particles(zone: Node3D, zone_size: Vector3) -> GPUParticl
 	# Palette swap updates are handled by _on_palette_changed via cached material
 	# Also update process material color
 	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void:
-		var new_color: Color = PaletteManager.get_color(&"accent_friendly")
+		var new_color: Color = PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
 		new_color.a = 0.7
 		mat.color = new_color
 	)

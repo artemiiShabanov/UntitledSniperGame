@@ -14,7 +14,7 @@ var _current_selection: StringName = &""
 func _ready() -> void:
 	close_btn.pressed.connect(func(): panel_closed.emit())
 	AudioManager.wire_button(close_btn, &"menu_cancel")
-	_bold_font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	_bold_font = PaletteTheme.bold_font
 
 
 func open() -> void:
@@ -24,8 +24,7 @@ func open() -> void:
 
 
 func _rebuild() -> void:
-	for child in item_list.get_children():
-		child.queue_free()
+	UIUtils.clear_children(item_list)
 
 	var title := Label.new()
 	title.text = "COLOR PALETTES"
@@ -33,7 +32,7 @@ func _rebuild() -> void:
 	title.add_theme_font_size_override("font_size", 36)
 	if _bold_font:
 		title.add_theme_font_override("font", _bold_font)
-	title.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
+	title.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY))
 	item_list.add_child(title)
 
 	var sep := HSeparator.new()
@@ -74,7 +73,7 @@ func _rebuild() -> void:
 		if is_active:
 			btn.text = "  ● %s    [ACTIVE]" % palette.palette_name
 			btn.disabled = true
-			btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(&"reward"))
+			btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 		elif is_unlocked:
 			btn.text = "  ○ %s    ▸ EQUIP" % palette.palette_name
 			btn.pressed.connect(_on_palette_selected.bind(palette))
@@ -83,14 +82,14 @@ func _rebuild() -> void:
 			var condition := _get_unlock_condition(name_lower)
 			btn.text = "  🔒 %s    %s" % [palette.palette_name, condition]
 			btn.disabled = true
-			btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(&"bg_mid"))
+			btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(PaletteManager.SLOT_BG_MID))
 
 		cell.add_child(btn)
 		item_list.add_child(cell)
 		buttons.append(btn)
 
 	buttons.append(close_btn)
-	_chain_focus(buttons)
+	UIUtils.chain_focus(buttons)
 	# Focus first non-disabled button
 	for btn in buttons:
 		if not btn.disabled:
@@ -115,11 +114,3 @@ func _get_unlock_condition(palette_name: String) -> String:
 			return "Get 50 kills (%d/50)" % kills
 		_:
 			return "???"
-
-
-func _chain_focus(buttons: Array[Button]) -> void:
-	if buttons.size() < 2:
-		return
-	for i in range(buttons.size()):
-		buttons[i].focus_neighbor_top = buttons[(i - 1) % buttons.size()].get_path()
-		buttons[i].focus_neighbor_bottom = buttons[(i + 1) % buttons.size()].get_path()

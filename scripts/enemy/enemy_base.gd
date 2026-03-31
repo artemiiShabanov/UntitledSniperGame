@@ -137,7 +137,7 @@ func _ready() -> void:
 	_visuals.setup(self)
 
 	# Palette: color all meshes as hostile
-	PaletteManager.bind_meshes(self, &"accent_hostile")
+	PaletteManager.bind_meshes(self, PaletteManager.SLOT_ACCENT_HOSTILE)
 
 
 func _physics_process(delta: float) -> void:

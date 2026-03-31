@@ -34,7 +34,7 @@ var _prompt_pulse_time: float = 0.0
 
 func _ready() -> void:
 	visible = false
-	_bold_font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	_bold_font = PaletteTheme.bold_font
 	for r in ["S", "A", "B", "C", "D"]:
 		var path := "res://assets/icons/ratings/rating_%s.png" % r
 		if ResourceLoader.exists(path):
@@ -113,7 +113,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _populate(success: bool) -> void:
-	var stats: Dictionary = RunManager.run_stats
+	var stats: Dictionary = RunManager.run_stats.to_dict()
 
 	# Reset animation state
 	_reveal_queue.clear()
@@ -131,14 +131,13 @@ func _populate(success: bool) -> void:
 	title_label.add_theme_font_size_override("font_size", 48)
 	if success:
 		title_label.text = "EXTRACTION SUCCESSFUL"
-		title_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
+		title_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 	else:
 		title_label.text = "MISSION FAILED"
-		title_label.add_theme_color_override("font_color", PaletteManager.get_color(&"danger"))
+		title_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 
 	# Clear previous stat rows
-	for child in stats_grid.get_children():
-		child.queue_free()
+	UIUtils.clear_children(stats_grid)
 
 	# Build stat rows (hidden — revealed by animation)
 	var kills: int = stats.get("kills", 0)
@@ -158,7 +157,7 @@ func _populate(success: bool) -> void:
 	_add_stat_row("Accuracy", "%.0f%%" % accuracy, _accuracy_color(accuracy))
 	_add_stat_row("Time Survived", FormatUtils.format_time(time_survived))
 	if longest_kill > 0.0:
-		_add_stat_row("Longest Kill", "%.0fm" % longest_kill, PaletteManager.get_color(&"accent_loot"))
+		_add_stat_row("Longest Kill", "%.0fm" % longest_kill, PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 
 	var targets_destroyed: int = stats.get("targets_destroyed", 0)
 	if targets_destroyed > 0:
@@ -166,24 +165,24 @@ func _populate(success: bool) -> void:
 
 	var npc_kills: int = stats.get("npc_kills", 0)
 	if npc_kills > 0:
-		_add_stat_row("Civilians Killed", str(npc_kills), PaletteManager.get_color(&"danger"))
+		_add_stat_row("Civilians Killed", str(npc_kills), PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 
 	# Contract result
 	if RunManager.active_contract:
 		var contract: Contract = RunManager.active_contract
 		if success and RunManager.contract_completed:
-			_add_stat_row("Contract: " + contract.contract_name, "COMPLETED", PaletteManager.get_color(&"reward"))
+			_add_stat_row("Contract: " + contract.contract_name, "COMPLETED", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 			var bonus_parts: Array[String] = []
 			if stats.get("contract_bonus_credits", 0) > 0:
 				bonus_parts.append("+$%d" % stats.get("contract_bonus_credits", 0))
 			if stats.get("contract_bonus_xp", 0) > 0:
 				bonus_parts.append("+%d XP" % stats.get("contract_bonus_xp", 0))
 			if bonus_parts.size() > 0:
-				_add_stat_row("Contract Bonus", " ".join(bonus_parts), PaletteManager.get_color(&"accent_loot"))
+				_add_stat_row("Contract Bonus", " ".join(bonus_parts), PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 		elif success:
-			_add_stat_row("Contract: " + contract.contract_name, "FAILED", PaletteManager.get_color(&"danger"))
+			_add_stat_row("Contract: " + contract.contract_name, "FAILED", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 		else:
-			_add_stat_row("Contract: " + contract.contract_name, "LOST", PaletteManager.get_color(&"danger"))
+			_add_stat_row("Contract: " + contract.contract_name, "LOST", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 
 	# Rating
 	var rating := _calculate_rating(stats, success)
@@ -195,19 +194,19 @@ func _populate(success: bool) -> void:
 	if success:
 		_credits_target = credits_earned
 		credits_label.text = "+$0"
-		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
+		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 		if _bold_font:
 			credits_label.add_theme_font_override("font", _bold_font)
 	else:
 		_credits_target = 0
 		credits_label.text = "$0 (lost)"
-		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"danger"))
+		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 
 	# XP — start at 0 for count-up animation
 	var xp_earned: int = stats.get("xp_earned", 0)
 	_xp_target = xp_earned
 	xp_label.text = "+0 XP"
-	xp_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
+	xp_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY))
 	if _bold_font:
 		xp_label.add_theme_font_override("font", _bold_font)
 
@@ -218,7 +217,7 @@ func _populate(success: bool) -> void:
 func _add_stat_row(label_text: String, value_text: String, value_color: Color = Color.TRANSPARENT) -> void:
 	var name_label := Label.new()
 	name_label.text = label_text
-	name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+	name_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	name_label.visible = false
 	stats_grid.add_child(name_label)
 
@@ -228,7 +227,7 @@ func _add_stat_row(label_text: String, value_text: String, value_color: Color = 
 	if value_color != Color.TRANSPARENT:
 		value_label.add_theme_color_override("font_color", value_color)
 	else:
-		value_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
+		value_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY))
 	if _bold_font:
 		value_label.add_theme_font_override("font", _bold_font)
 	value_label.visible = false
@@ -241,7 +240,7 @@ func _add_rating_row(rating: String) -> void:
 	var spacer := Label.new()
 	spacer.text = "RATING"
 	spacer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	spacer.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+	spacer.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	spacer.visible = false
 	stats_grid.add_child(spacer)
 
@@ -324,31 +323,31 @@ func _calculate_rating(stats: Dictionary, success: bool) -> String:
 
 func _rating_color(rating: String) -> Color:
 	match rating:
-		"S": return PaletteManager.get_color(&"reward")
-		"A": return PaletteManager.get_color(&"accent_loot")
-		"B": return PaletteManager.get_color(&"accent_friendly")
-		"C": return PaletteManager.get_color(&"bg_light")
-		_: return PaletteManager.get_color(&"danger")
+		"S": return PaletteManager.get_color(PaletteManager.SLOT_REWARD)
+		"A": return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT)
+		"B": return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
+		"C": return PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT)
+		_: return PaletteManager.get_color(PaletteManager.SLOT_DANGER)
 
 
 func _accuracy_color(accuracy: float) -> Color:
 	if accuracy >= 80.0:
-		return PaletteManager.get_color(&"reward")
+		return PaletteManager.get_color(PaletteManager.SLOT_REWARD)
 	elif accuracy >= 50.0:
-		return PaletteManager.get_color(&"accent_loot")
+		return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT)
 	elif accuracy >= 25.0:
-		return PaletteManager.get_color(&"accent_friendly")
+		return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
 	else:
-		return PaletteManager.get_color(&"bg_light")
+		return PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT)
 
 
 func _headshot_color(headshots: int, kills: int) -> Color:
 	if kills == 0:
-		return PaletteManager.get_color(&"accent_friendly")
+		return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
 	var ratio := float(headshots) / float(kills)
 	if ratio >= 0.5:
-		return PaletteManager.get_color(&"reward")
+		return PaletteManager.get_color(PaletteManager.SLOT_REWARD)
 	elif headshots >= 3:
-		return PaletteManager.get_color(&"accent_loot")
+		return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT)
 	else:
-		return PaletteManager.get_color(&"accent_friendly")
+		return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)

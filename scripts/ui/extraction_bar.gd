@@ -16,7 +16,7 @@ func _ready() -> void:
 
 
 func _refresh_color() -> void:
-	label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
+	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY))
 
 
 func _on_extraction_started() -> void:

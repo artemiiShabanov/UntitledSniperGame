@@ -31,8 +31,7 @@ func open() -> void:
 
 
 func _rebuild_ui() -> void:
-	for child in item_list.get_children():
-		child.queue_free()
+	UIUtils.clear_children(item_list)
 	_sliders.clear()
 	_count_labels.clear()
 

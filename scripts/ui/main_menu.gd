@@ -23,8 +23,8 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 	# Load menu art assets
-	_logo_texture = _try_load("res://assets/ui/game_logo.png")
-	_bg_texture = _try_load("res://assets/ui/menu_background.png")
+	_logo_texture = UIUtils.try_load_tex("res://assets/ui/game_logo.png")
+	_bg_texture = UIUtils.try_load_tex("res://assets/ui/menu_background.png")
 
 	# Wire logo above title if available
 	if _logo_texture:
@@ -82,10 +82,10 @@ func _ready() -> void:
 
 
 func _apply_palette() -> void:
-	background.color = Color(PaletteManager.get_color(&"fg_dark"), 0.98)
-	title.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
+	background.color = Color(PaletteManager.get_color(PaletteManager.SLOT_FG_DARK), 0.98)
+	title.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY))
 	title.add_theme_font_size_override("font_size", 96)
-	title.add_theme_color_override("font_shadow_color", Color(PaletteManager.get_color(&"accent_friendly"), 0.15))
+	title.add_theme_color_override("font_shadow_color", Color(PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY), 0.15))
 	title.add_theme_constant_override("shadow_offset_x", 3)
 	title.add_theme_constant_override("shadow_offset_y", 4)
 
@@ -124,27 +124,14 @@ func _on_continue() -> void:
 func _focus_slot_panel() -> void:
 	## Chain focus neighbors across all buttons in the slot panel, then focus first.
 	var buttons: Array[Button] = []
-	_collect_buttons(slot_panel, buttons)
-	_chain_focus(buttons)
+	UIUtils.collect_buttons(slot_panel, buttons)
+	UIUtils.chain_focus(buttons)
 	for btn in buttons:
 		if btn.visible and not btn.disabled:
 			btn.grab_focus()
 			return
 
 
-func _collect_buttons(node: Node, out: Array[Button]) -> void:
-	if node is Button and node.visible:
-		out.append(node)
-	for child in node.get_children():
-		_collect_buttons(child, out)
-
-
-func _chain_focus(buttons: Array[Button]) -> void:
-	if buttons.size() < 2:
-		return
-	for i in range(buttons.size()):
-		buttons[i].focus_neighbor_top = buttons[(i - 1) % buttons.size()].get_path()
-		buttons[i].focus_neighbor_bottom = buttons[(i + 1) % buttons.size()].get_path()
 
 
 func _on_settings() -> void:
@@ -162,8 +149,7 @@ func _on_quit() -> void:
 ## ── Slot Selection ──────────────────────────────────────────────────────────
 
 func _populate_slots() -> void:
-	for child in slot_list.get_children():
-		child.queue_free()
+	UIUtils.clear_children(slot_list)
 
 	for i in SaveManager.MAX_SLOTS:
 		var row := HBoxContainer.new()
@@ -242,10 +228,6 @@ func _on_window_focus() -> void:
 		new_game_btn.grab_focus()
 
 
-static func _try_load(path: String) -> Texture2D:
-	if ResourceLoader.exists(path):
-		return load(path)
-	return null
 
 
 func _close_slot_panel() -> void:

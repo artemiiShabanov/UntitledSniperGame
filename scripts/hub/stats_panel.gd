@@ -24,8 +24,7 @@ func open(levels: Array[String] = []) -> void:
 
 
 func _rebuild() -> void:
-	for child in content.get_children():
-		child.queue_free()
+	UIUtils.clear_children(content)
 
 	_add_section("LIFETIME STATS")
 	_add_row("Total Runs", str(SaveManager.get_stat("total_runs")))
@@ -71,8 +70,8 @@ func _add_section(title: String) -> void:
 	var label := Label.new()
 	label.text = title
 	label.add_theme_font_size_override("font_size", 36)
-	label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
-	var bold_font: Font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
+	var bold_font: Font = PaletteTheme.bold_font
 	if bold_font:
 		label.add_theme_font_override("font", bold_font)
 	content.add_child(label)
@@ -84,14 +83,14 @@ func _add_row(label_text: String, value_text: String) -> void:
 
 	var name_label := Label.new()
 	name_label.text = label_text
-	name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+	name_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	hbox.add_child(name_label)
 
 	# Dot fill — stretches between name and value
 	var dots := Label.new()
 	dots.text = "·" # Single dot; clip handles the rest visually
 	dots.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	dots.add_theme_color_override("font_color", Color(PaletteManager.get_color(&"bg_mid"), 0.3))
+	dots.add_theme_color_override("font_color", Color(PaletteManager.get_color(PaletteManager.SLOT_BG_MID), 0.3))
 	dots.clip_text = true
 	# Fill with dots
 	dots.text = "· " .repeat(80)
@@ -100,7 +99,7 @@ func _add_row(label_text: String, value_text: String) -> void:
 	var value_label := Label.new()
 	value_label.text = value_text
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	var bold_font: Font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	var bold_font: Font = PaletteTheme.bold_font
 	if bold_font:
 		value_label.add_theme_font_override("font", bold_font)
 	hbox.add_child(value_label)

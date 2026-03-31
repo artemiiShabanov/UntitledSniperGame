@@ -29,7 +29,7 @@ func _ready() -> void:
 func _apply_zone_color() -> void:
 	if mesh:
 		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(PaletteManager.get_color(&"accent_friendly"), 0.3)
+		mat.albedo_color = Color(PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY), 0.3)
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mesh.material_override = mat

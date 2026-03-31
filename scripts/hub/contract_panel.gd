@@ -24,8 +24,7 @@ func open(level_path: String = "") -> void:
 
 
 func _rebuild() -> void:
-	for child in item_list.get_children():
-		child.queue_free()
+	UIUtils.clear_children(item_list)
 
 	_offered = ContractRegistry.get_random_selection(_level_path)
 
@@ -57,12 +56,12 @@ func _build_contract_row(contract: Contract) -> PanelContainer:
 
 	var name_label := Label.new()
 	name_label.text = contract.contract_name
-	name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	name_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 	info.add_child(name_label)
 
 	var desc_label := Label.new()
 	desc_label.text = contract.description
-	desc_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+	desc_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	desc_label.add_theme_font_size_override("font_size", 22)
 	info.add_child(desc_label)
 
@@ -74,7 +73,7 @@ func _build_contract_row(contract: Contract) -> PanelContainer:
 		reward_parts.append("+%d XP" % contract.bonus_xp)
 	var reward_label := Label.new()
 	reward_label.text = "Reward: " + " ".join(reward_parts)
-	reward_label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
+	reward_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 	reward_label.add_theme_font_size_override("font_size", 22)
 	info.add_child(reward_label)
 

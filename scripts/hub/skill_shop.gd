@@ -16,7 +16,7 @@ var _confirm_popup: PanelContainer = null
 func _ready() -> void:
 	close_btn.pressed.connect(func(): shop_closed.emit())
 	AudioManager.wire_button(close_btn, &"menu_cancel")
-	_bold_font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	_bold_font = PaletteTheme.bold_font
 
 
 func _input(event: InputEvent) -> void:
@@ -40,12 +40,11 @@ func _refresh() -> void:
 
 func _update_xp_label() -> void:
 	xp_label.text = "XP: %d" % SaveManager.get_xp()
-	xp_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	xp_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 
 
 func _rebuild_skill_list() -> void:
-	for child in item_list.get_children():
-		child.queue_free()
+	UIUtils.clear_children(item_list)
 
 	var skills := SkillRegistry.get_all_skills()
 	var buttons: Array[Button] = []
@@ -63,7 +62,7 @@ func _rebuild_skill_list() -> void:
 			icon_row.add_child(icon)
 			var skill_title := Label.new()
 			skill_title.text = skill.skill_name.to_upper()
-			skill_title.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+			skill_title.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 			if _bold_font:
 				skill_title.add_theme_font_override("font", _bold_font)
 			icon_row.add_child(skill_title)
@@ -78,7 +77,7 @@ func _rebuild_skill_list() -> void:
 		item_list.add_child(detail)
 
 	buttons.append(close_btn)
-	_chain_focus(buttons)
+	UIUtils.chain_focus(buttons)
 	if buttons.size() > 0:
 		buttons[0].grab_focus()
 
@@ -96,7 +95,7 @@ func _build_skill_button(skill: PlayerSkill) -> Button:
 	if owned:
 		btn.text = "  ✓  %s    UNLOCKED" % skill.skill_name.to_upper()
 		btn.disabled = true
-		btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(&"reward"))
+		btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 	elif can_afford:
 		btn.text = "  ◆  %s    %d XP" % [skill.skill_name.to_upper(), skill.cost]
 		btn.pressed.connect(_on_skill_pressed.bind(skill))
@@ -117,7 +116,7 @@ func _build_detail_label(skill: PlayerSkill) -> Label:
 		parts.append(bonus)
 	label.text = "     " + " · ".join(parts)
 	label.add_theme_font_size_override("font_size", 22)
-	label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_mid"))
+	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_MID))
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return label
 
@@ -143,7 +142,7 @@ func _on_skill_pressed(skill: PlayerSkill) -> void:
 	var desc := Label.new()
 	desc.text = skill.description
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	desc.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+	desc.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(desc)
 
@@ -152,13 +151,13 @@ func _on_skill_pressed(skill: PlayerSkill) -> void:
 		var bonus := Label.new()
 		bonus.text = bonus_text
 		bonus.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		bonus.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+		bonus.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 		vbox.add_child(bonus)
 
 	var cost_label := Label.new()
 	cost_label.text = "Cost: %d XP" % skill.cost
 	cost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	cost_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	cost_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 	if _bold_font:
 		cost_label.add_theme_font_override("font", _bold_font)
 	vbox.add_child(cost_label)
@@ -221,10 +220,3 @@ func _format_stat_bonus(skill: PlayerSkill) -> String:
 			parts.append("%s +%d" % [display, val])
 	return " · ".join(parts)
 
-
-func _chain_focus(buttons: Array[Button]) -> void:
-	if buttons.size() < 2:
-		return
-	for i in range(buttons.size()):
-		buttons[i].focus_neighbor_top = buttons[(i - 1) % buttons.size()].get_path()
-		buttons[i].focus_neighbor_bottom = buttons[(i + 1) % buttons.size()].get_path()

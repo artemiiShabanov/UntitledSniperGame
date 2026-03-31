@@ -151,31 +151,14 @@ func _open_panel(panel: Control) -> void:
 func _focus_first_button(node: Control) -> void:
 	## Collect all buttons, chain focus neighbors, focus the first one.
 	var buttons: Array[Button] = []
-	_collect_buttons(node, buttons)
-	_chain_focus_neighbors(buttons)
+	UIUtils.collect_buttons(node, buttons)
+	UIUtils.chain_focus(buttons)
 	for btn in buttons:
 		if btn.visible and not btn.disabled:
 			btn.grab_focus()
 			return
 
 
-func _collect_buttons(node: Node, out: Array[Button]) -> void:
-	## Recursively gather all visible Buttons in tree order.
-	if node is Button and node.visible:
-		out.append(node)
-	for child in node.get_children():
-		_collect_buttons(child, out)
-
-
-func _chain_focus_neighbors(buttons: Array[Button]) -> void:
-	## Link buttons so Up/Down arrows traverse the full list, wrapping around.
-	if buttons.size() < 2:
-		return
-	for i in range(buttons.size()):
-		var prev_idx := (i - 1) % buttons.size()
-		var next_idx := (i + 1) % buttons.size()
-		buttons[i].focus_neighbor_top = buttons[prev_idx].get_path()
-		buttons[i].focus_neighbor_bottom = buttons[next_idx].get_path()
 
 
 func _close_active_panel() -> void:
@@ -202,8 +185,7 @@ func _load_level_list() -> void:
 
 
 func _populate_mission_buttons() -> void:
-	for child in mission_list.get_children():
-		child.queue_free()
+	UIUtils.clear_children(mission_list)
 
 	var credits: int = SaveManager.get_credits()
 	for data in _level_data_cache:
@@ -345,4 +327,4 @@ func _on_window_focus() -> void:
 
 func _update_credits_display() -> void:
 	credits_label.text = "Credits: $%d | XP: %d" % [SaveManager.get_credits(), SaveManager.get_xp()]
-	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))

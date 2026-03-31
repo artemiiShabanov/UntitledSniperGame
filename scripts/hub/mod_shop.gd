@@ -20,7 +20,7 @@ var _slot_icons: Dictionary = {}  ## { slot: Texture2D }
 func _ready() -> void:
 	close_btn.pressed.connect(func(): shop_closed.emit())
 	AudioManager.wire_button(close_btn, &"menu_cancel")
-	_bold_font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	_bold_font = PaletteTheme.bold_font
 	for slot in ModRegistry.SLOTS:
 		var icon_path := "res://assets/icons/mods/slot_%s.png" % slot
 		if ResourceLoader.exists(icon_path):
@@ -72,7 +72,7 @@ func _refresh() -> void:
 
 func _update_credits_label() -> void:
 	credits_label.text = "Credits: $%d" % SaveManager.get_credits()
-	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 
 
 func _update_tab_highlight() -> void:
@@ -81,14 +81,13 @@ func _update_tab_highlight() -> void:
 		var btn: Button = tabs[i]
 		var slot: String = ModRegistry.SLOTS[i]
 		if slot == _current_slot:
-			btn.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+			btn.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 		else:
 			btn.remove_theme_color_override("font_color")
 
 
 func _rebuild_mod_list() -> void:
-	for child in item_list.get_children():
-		child.queue_free()
+	UIUtils.clear_children(item_list)
 	_mod_buttons.clear()
 
 	var mods := ModRegistry.get_mods_for_slot(_current_slot)
@@ -104,7 +103,7 @@ func _rebuild_mod_list() -> void:
 		all_buttons.append(_mod_buttons[mod.id])
 
 	all_buttons.append(close_btn)
-	_chain_focus(all_buttons)
+	UIUtils.chain_focus(all_buttons)
 
 	# Focus first mod card
 	for mod in mods:
@@ -145,7 +144,7 @@ func _build_mod_cell(mod: RifleMod, equipped_id: String) -> VBoxContainer:
 	if is_equipped:
 		status = "[EQUIPPED]"
 		btn.disabled = true
-		btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(&"reward"))
+		btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 	elif is_owned:
 		status = "▸ EQUIP"
 		btn.pressed.connect(_on_equip.bind(mod))
@@ -170,7 +169,7 @@ func _build_mod_cell(mod: RifleMod, equipped_id: String) -> VBoxContainer:
 	var desc := Label.new()
 	desc.text = "%s%s" % [indent, mod.description]
 	desc.add_theme_font_size_override("font_size", 22)
-	desc.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_mid"))
+	desc.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_MID))
 	cell.add_child(desc)
 
 	# Stats label
@@ -179,7 +178,7 @@ func _build_mod_cell(mod: RifleMod, equipped_id: String) -> VBoxContainer:
 		var stats := Label.new()
 		stats.text = "%s%s" % [indent, stats_text]
 		stats.add_theme_font_size_override("font_size", 22)
-		stats.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+		stats.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 		cell.add_child(stats)
 
 	return cell
@@ -206,7 +205,7 @@ func _on_buy_requested(mod: RifleMod) -> void:
 	var desc := Label.new()
 	desc.text = mod.description
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	desc.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+	desc.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(desc)
 
@@ -215,14 +214,14 @@ func _on_buy_requested(mod: RifleMod) -> void:
 		var stats := Label.new()
 		stats.text = stats_text
 		stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		stats.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+		stats.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 		stats.add_theme_font_size_override("font_size", 22)
 		vbox.add_child(stats)
 
 	var cost_label := Label.new()
 	cost_label.text = "Cost: $%d" % mod.cost if mod.cost > 0 else "Cost: FREE"
 	cost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	cost_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	cost_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 	if _bold_font:
 		cost_label.add_theme_font_override("font", _bold_font)
 	vbox.add_child(cost_label)
@@ -288,10 +287,3 @@ func _format_stats(mod: RifleMod) -> String:
 			parts.append("%s: %s" % [display_name, str(val)])
 	return " | ".join(parts)
 
-
-func _chain_focus(buttons: Array[Button]) -> void:
-	if buttons.size() < 2:
-		return
-	for i in range(buttons.size()):
-		buttons[i].focus_neighbor_top = buttons[(i - 1) % buttons.size()].get_path()
-		buttons[i].focus_neighbor_bottom = buttons[(i + 1) % buttons.size()].get_path()

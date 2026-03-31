@@ -4,8 +4,8 @@ extends HBoxContainer
 
 const SWATCH_SIZE := Vector2(12, 12)
 const SLOTS: Array[StringName] = [
-	&"accent_hostile", &"accent_loot", &"accent_friendly",
-	&"danger", &"reward",
+	PaletteManager.SLOT_ACCENT_HOSTILE, PaletteManager.SLOT_ACCENT_LOOT, PaletteManager.SLOT_ACCENT_FRIENDLY,
+	PaletteManager.SLOT_DANGER, PaletteManager.SLOT_REWARD,
 ]
 
 var _swatches: Array[ColorRect] = []
@@ -18,7 +18,7 @@ func _ready() -> void:
 	# Palette name label
 	_name_label = Label.new()
 	_name_label.add_theme_font_size_override("font_size", 16)
-	_name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+	_name_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	add_child(_name_label)
 
 	# Color swatches
@@ -40,6 +40,6 @@ func _on_palette_changed(_palette: PaletteResource) -> void:
 func _update_display() -> void:
 	if PaletteManager.current:
 		_name_label.text = String(PaletteManager.current.palette_name)
-		_name_label.add_theme_color_override("font_color", PaletteManager.get_color(&"bg_light"))
+		_name_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	for i in range(mini(_swatches.size(), SLOTS.size())):
 		_swatches[i].color = PaletteManager.get_color(SLOTS[i])

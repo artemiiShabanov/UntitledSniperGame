@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=3 format=3 uid="uid://rjgmoxk5ijy5"]
 
-[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_mainmenu"]
-[ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="2_settings"]
+[ext_resource type="Script" uid="uid://cjldatlspjjo" path="res://scripts/ui/main_menu.gd" id="1_mainmenu"]
+[ext_resource type="PackedScene" uid="uid://cju5qanj2lqgh" path="res://scenes/ui/settings_screen.tscn" id="2_settings"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -23,6 +23,7 @@ color = Color(0.12, 0.12, 0.12, 1)
 
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.05
 anchor_top = 0.15
 anchor_right = 0.4
@@ -38,32 +39,33 @@ text = "SNIPER"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
 
 [node name="NewGameButton" type="Button" parent="VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
 text = "New Game"
 
 [node name="ContinueButton" type="Button" parent="VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
 text = "Continue"
 
 [node name="SettingsButton" type="Button" parent="VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
 text = "Settings"
 
 [node name="QuitButton" type="Button" parent="VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
 text = "Quit"
 
 [node name="SlotPanel" type="PanelContainer" parent="."]
 visible = false
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.15
 anchor_top = 0.1
 anchor_right = 0.85

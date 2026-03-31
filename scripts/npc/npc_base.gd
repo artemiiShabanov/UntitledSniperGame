@@ -64,7 +64,7 @@ func _ready() -> void:
 	_visuals.setup(self)
 
 	# Palette: color all meshes as friendly
-	PaletteManager.bind_meshes(self, &"accent_friendly")
+	PaletteManager.bind_meshes(self, PaletteManager.SLOT_ACCENT_FRIENDLY)
 
 	# Start first activity
 	_start_current_activity()

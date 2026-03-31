@@ -65,7 +65,7 @@ func _create_rain() -> void:
 	mat.scale_max = 1.5
 
 	# Color with alpha
-	var rain_color := PaletteManager.get_color(&"bg_light")
+	var rain_color := PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT)
 	mat.color = Color(rain_color.r, rain_color.g, rain_color.b, 0.6)
 
 	_rain_particles.process_material = mat
@@ -86,7 +86,7 @@ func _create_rain() -> void:
 
 	# Connect palette changes
 	PaletteManager.palette_changed.connect(func(_p: Resource) -> void:
-		var c := PaletteManager.get_color(&"bg_light")
+		var c := PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT)
 		mat.color = Color(c.r, c.g, c.b, 0.6)
 		draw_mat.albedo_color = Color(c.r, c.g, c.b, 0.6)
 	)
@@ -125,7 +125,7 @@ func _create_snow() -> void:
 	mat.angular_velocity_max = 30.0
 
 	# Palette-driven color
-	var snow_color := PaletteManager.get_color(&"bg_light")
+	var snow_color := PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT)
 	snow_color.a = 0.7
 	mat.color = snow_color
 
@@ -148,7 +148,7 @@ func _create_snow() -> void:
 
 	# Connect palette changes
 	PaletteManager.palette_changed.connect(func(_p: Resource) -> void:
-		var c := PaletteManager.get_color(&"bg_light")
+		var c := PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT)
 		c.a = 0.7
 		mat.color = c
 		draw_mat.albedo_color = Color(c.r, c.g, c.b, 0.7)

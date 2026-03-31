@@ -5,9 +5,11 @@ extends Node
 
 var theme: Theme
 
-## Font resources (loaded once)
+## Font resources (loaded once, bold_font is public for shared access)
 var _font_regular: Font
 var _font_bold: Font
+var bold_font: Font:  ## Public accessor — avoids 10+ files loading the same font
+	get: return _font_bold
 
 ## Default sizes — large and readable
 const FONT_SIZE_DEFAULT := 28

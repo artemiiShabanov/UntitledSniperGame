@@ -18,7 +18,7 @@ func _ready() -> void:
 	close_btn.pressed.connect(func(): shop_closed.emit())
 	AudioManager.wire_button(close_btn, &"menu_cancel")
 	_ammo_types = AmmoRegistry.get_all_types()
-	_bold_font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	_bold_font = PaletteTheme.bold_font
 
 
 func open() -> void:
@@ -27,8 +27,7 @@ func open() -> void:
 
 
 func _rebuild_ui() -> void:
-	for child in item_list.get_children():
-		child.queue_free()
+	UIUtils.clear_children(item_list)
 	_row_controls.clear()
 
 	_update_credits_label()
@@ -88,7 +87,7 @@ func _rebuild_ui() -> void:
 		_row_controls[ammo.ammo_id] = { "owned": header, "buttons": row_buttons, "ammo": ammo }
 
 	all_buttons.append(close_btn)
-	_chain_focus(all_buttons)
+	UIUtils.chain_focus(all_buttons)
 	if all_buttons.size() > 0:
 		all_buttons[0].grab_focus()
 
@@ -120,7 +119,7 @@ func _on_buy(ammo: AmmoType, amount: int) -> void:
 
 func _update_credits_label() -> void:
 	credits_label.text = "Credits: $%d" % SaveManager.get_credits()
-	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 
 
 func _update_affordability() -> void:
@@ -133,10 +132,3 @@ func _update_affordability() -> void:
 		for i in range(buttons.size()):
 			buttons[i].disabled = credits < ammo.cost_per_round * amounts[i]
 
-
-func _chain_focus(buttons: Array[Button]) -> void:
-	if buttons.size() < 2:
-		return
-	for i in range(buttons.size()):
-		buttons[i].focus_neighbor_top = buttons[(i - 1) % buttons.size()].get_path()
-		buttons[i].focus_neighbor_bottom = buttons[(i + 1) % buttons.size()].get_path()

@@ -65,17 +65,8 @@ var current_level_path: String = ""
 var active_contract: Contract = null
 var contract_completed: bool = false
 
-## Run stats (for result screen)
-var run_stats: Dictionary = {
-	"kills": 0,
-	"headshots": 0,
-	"shots_fired": 0,
-	"shots_hit": 0,
-	"credits_earned": 0,
-	"xp_earned": 0,
-	"time_survived": 0.0,
-	"longest_kill_distance": 0.0,
-}
+## Run stats (typed container — use .to_dict() for save/result screen)
+var run_stats: RunStats = RunStats.new()
 
 ## Hit cooldown to prevent multiple hits in one frame
 var hit_cooldown: float = 0.0
@@ -132,20 +123,7 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 	run_start_time = default_run_time
 	threat_phase = ThreatPhase.EARLY
 	contract_completed = false
-	run_stats = {
-		"kills": 0,
-		"headshots": 0,
-		"shots_fired": 0,
-		"shots_hit": 0,
-		"credits_earned": 0,
-		"xp_earned": 0,
-		"time_survived": 0.0,
-		"longest_kill_distance": 0.0,
-		"contract_bonus_credits": 0,
-		"contract_bonus_xp": 0,
-		"npc_kills": 0,
-		"targets_destroyed": 0,
-	}
+	run_stats.reset()
 
 	# Load the level
 	get_tree().change_scene_to_file(level_path)
@@ -167,6 +145,7 @@ func begin_run() -> void:
 func _tick_run_timer(delta: float) -> void:
 	run_timer -= delta
 	run_stats.time_survived = run_start_time - run_timer
+
 	run_timer_updated.emit(run_timer)
 	_update_threat_phase()
 
@@ -227,7 +206,7 @@ func _end_run_success() -> void:
 
 	# Check contract completion
 	if active_contract:
-		contract_completed = active_contract.check_completed(run_stats, lives, max_lives)
+		contract_completed = active_contract.check_completed(run_stats.to_dict(), lives, max_lives)
 		if contract_completed:
 			run_credits += active_contract.bonus_credits
 			run_xp += active_contract.bonus_xp
@@ -242,7 +221,7 @@ func _end_run_success() -> void:
 	SaveManager.increment_stat("total_extractions")
 
 	# Aggregate run stats into lifetime totals, records, and per-level stats
-	SaveManager.commit_run_stats(run_stats, current_level_path, true)
+	SaveManager.commit_run_stats(run_stats.to_dict(), current_level_path, true)
 
 	# Return unused ammo to inventory
 	if not SaveManager.data.has("ammo_inventory"):
@@ -270,7 +249,7 @@ func _end_run_failure() -> void:
 	SaveManager.increment_stat("total_deaths")
 
 	# Aggregate run stats into lifetime totals, records, and per-level stats
-	SaveManager.commit_run_stats(run_stats, current_level_path, false)
+	SaveManager.commit_run_stats(run_stats.to_dict(), current_level_path, false)
 
 	SaveManager.save()
 
@@ -335,17 +314,15 @@ func consume_ammo(ammo_type: String, amount: int = 1) -> bool:
 ## ── Stats ────────────────────────────────────────────────────────────────────
 
 func record_shot_fired() -> void:
-	run_stats.shots_fired += 1
+	run_stats.record_shot_fired()
 
 
 func record_shot_hit() -> void:
-	run_stats.shots_hit += 1
+	run_stats.record_shot_hit()
 
 
 func record_kill(headshot: bool = false) -> void:
-	run_stats.kills += 1
-	if headshot:
-		run_stats.headshots += 1
+	run_stats.record_kill(headshot)
 
 
 ## ── NPC Kill Penalty ────────────────────────────────────────────────────────
@@ -354,7 +331,7 @@ func record_npc_kill(penalty: int) -> void:
 	## Deducts credits for killing a neutral NPC.
 	run_credits = maxi(run_credits - penalty, 0)
 	run_stats.credits_earned = run_credits
-	run_stats.npc_kills = run_stats.get("npc_kills", 0) + 1
+	run_stats.npc_kills += 1
 
 	var info := {
 		"penalty": penalty,
@@ -367,7 +344,7 @@ func record_npc_kill(penalty: int) -> void:
 
 func record_target_destroyed(credits: int, xp: int) -> void:
 	## Records a destructible target being destroyed. Awards credits and XP.
-	run_stats.targets_destroyed = run_stats.get("targets_destroyed", 0) + 1
+	run_stats.targets_destroyed += 1
 	add_run_credits(credits)
 	add_run_xp(xp)
 

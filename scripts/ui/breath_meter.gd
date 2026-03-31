@@ -23,9 +23,9 @@ func _ready() -> void:
 
 
 func _on_palette_changed(_palette: PaletteResource) -> void:
-	bar_color = Color(PaletteManager.get_color(&"accent_friendly"), 0.8)
-	bar_bg_color = Color(PaletteManager.get_color(&"fg_dark"), 0.5)
-	exhausted_color = Color(PaletteManager.get_color(&"danger"), 0.8)
+	bar_color = Color(PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY), 0.8)
+	bar_bg_color = Color(PaletteManager.get_color(PaletteManager.SLOT_FG_DARK), 0.5)
+	exhausted_color = Color(PaletteManager.get_color(PaletteManager.SLOT_DANGER), 0.8)
 	if show_meter:
 		queue_redraw()
 

@@ -19,8 +19,8 @@ func _ready() -> void:
 
 
 func _on_palette_changed(_palette: PaletteResource) -> void:
-	color = PaletteManager.get_color(&"accent_friendly")
-	outline_color = Color(PaletteManager.get_color(&"fg_dark"), 0.6)
+	color = PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
+	outline_color = Color(PaletteManager.get_color(PaletteManager.SLOT_FG_DARK), 0.6)
 	queue_redraw()
 
 

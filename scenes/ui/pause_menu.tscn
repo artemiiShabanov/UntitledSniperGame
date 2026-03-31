@@ -1,11 +1,11 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=3 format=3 uid="uid://do6alf3v7cwi1"]
 
-[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_pause"]
-[ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="2_settings"]
+[ext_resource type="Script" uid="uid://bnddl7ee377us" path="res://scripts/ui/pause_menu.gd" id="1_pause"]
+[ext_resource type="PackedScene" uid="uid://cju5qanj2lqgh" path="res://scenes/ui/settings_screen.tscn" id="2_settings"]
 
 [node name="PauseMenu" type="CanvasLayer"]
-layer = 100
 process_mode = 3
+layer = 100
 script = ExtResource("1_pause")
 
 [node name="Dimmer" type="ColorRect" parent="."]
@@ -15,7 +15,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 color = Color(0, 0, 0, 0.75)
 
 [node name="Panel" type="PanelContainer" parent="."]
@@ -46,23 +45,23 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="ResumeButton" type="Button" parent="Panel/VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
 text = "Resume"
 
 [node name="SettingsButton" type="Button" parent="Panel/VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
 text = "Settings"
 
 [node name="AbandonButton" type="Button" parent="Panel/VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
 text = "Abandon Run"
 
 [node name="QuitButton" type="Button" parent="Panel/VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
 text = "Quit Game"
 
 [node name="SettingsScreen" parent="." instance=ExtResource("2_settings")]

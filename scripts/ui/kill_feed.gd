@@ -16,7 +16,7 @@ var _target_icon: Texture2D
 
 
 func _ready() -> void:
-	_bold_font = load("res://assets/fonts/JetBrainsMono-Bold.ttf")
+	_bold_font = PaletteTheme.bold_font
 	_kill_icon = _load_icon("kill")
 	_headshot_icon = _load_icon("headshot")
 	_long_range_icon = _load_icon("long_range")
@@ -106,13 +106,13 @@ func _on_enemy_killed(info: Dictionary) -> void:
 
 	# Color based on multiplier
 	if info.total_multiplier >= 3.0:
-		label.add_theme_color_override("font_color", PaletteManager.get_color(&"reward"))
+		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 	elif info.total_multiplier >= 2.0:
-		label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 	elif info.headshot:
-		label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_hostile"))
+		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_HOSTILE))
 	else:
-		label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_friendly"))
+		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY))
 
 	row.add_child(label)
 	add_child(row)
@@ -123,7 +123,7 @@ func _on_npc_killed(info: Dictionary) -> void:
 	var row := _make_feed_row(_kill_icon)
 	var label := _make_feed_label()
 	label.text = "CIVILIAN KILLED | -$%d" % info.penalty
-	label.add_theme_color_override("font_color", PaletteManager.get_color(&"danger"))
+	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 	row.add_child(label)
 	add_child(row)
 	_entries.append({"label": row, "timer": DISPLAY_DURATION})
@@ -133,7 +133,7 @@ func _on_target_destroyed(info: Dictionary) -> void:
 	var row := _make_feed_row(_target_icon)
 	var label := _make_feed_label()
 	label.text = "TARGET DESTROYED | +$%d" % info.credits
-	label.add_theme_color_override("font_color", PaletteManager.get_color(&"accent_loot"))
+	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 	row.add_child(label)
 	add_child(row)
 	_entries.append({"label": row, "timer": DISPLAY_DURATION})
