@@ -44,6 +44,7 @@ var _anchor_positions: Array[Vector2i] = []
 var _placement_counts: Dictionary = {}  ## { block_id: int }
 var _budget_counts: Dictionary = {}  ## { budget_index: int }
 var _relaxed_constraints: Dictionary = {}  ## { constraint_name: true }
+var _block_registry: BlockBuilderRegistry
 
 
 ## ── Public API ───────────────────────────────────────────────────────────────
@@ -55,6 +56,7 @@ func build(level_data: GridLevelData, parent: Node3D) -> GridBuildResult:
 	_rng = RandomNumberGenerator.new()
 	_rng.randomize()
 	_relaxed_constraints.clear()
+	_block_registry = BlockBuilderRegistry.new()
 
 	var attempt := 0
 	var solved := false
@@ -555,8 +557,6 @@ func _instantiate_scenes(
 				continue
 
 			var block := cell.block_def
-			if not block.block_scene:
-				continue
 
 			# For multi-cell blocks, only instantiate at the origin cell
 			if block.grid_size.x > 1 or block.grid_size.y > 1:
@@ -566,7 +566,17 @@ func _instantiate_scenes(
 					continue
 				instantiated_origins[key] = true
 
-			var instance: Node3D = block.block_scene.instantiate()
+			# Create the block instance — either from scene or code builder
+			var instance: Node3D
+			if block.block_scene:
+				instance = block.block_scene.instantiate()
+			elif _block_registry.has_builder(block.id):
+				instance = Node3D.new()
+				blocks_root.add_child(instance)  # Must be in tree before building
+				_block_registry.build_block(block.id, instance, _rng)
+			else:
+				continue  # No scene and no builder — skip
+
 			instance.name = "%s_%d_%d" % [block.id, x, z]
 			instance.position = Vector3(
 				x * _rules.cell_size,
@@ -574,7 +584,8 @@ func _instantiate_scenes(
 				z * _rules.cell_size,
 			)
 
-			blocks_root.add_child(instance)
+			if not instance.is_inside_tree():
+				blocks_root.add_child(instance)
 			result.instances.append(instance)
 			result.grid[x][z] = { "block_def": block, "instance": instance }
 
