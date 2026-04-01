@@ -67,10 +67,70 @@ Infrastructure exists but no events are defined:
 - [ ] Event types TBD — designed in detail when needed
 - [ ] LevelEventData, LevelEventRunner, level_events_pool already exist
 
-### 1.5 Per-Run Variation [ ]
+### 1.5 Grid-Based Level Generation [~]
 
-- [ ] Variable sniper positions (some nests blocked/revealed per run)
-- [ ] Level layout variation (randomized props, cover, routes per run)
+Procedural level layout system — each run assembles the map from reusable blocks on a grid.
+
+**Architecture:**
+- Grid: `width × depth` cells (e.g. 15×15), each cell 15m×15m
+- Blocks: PackedScene `.tscn` files with geometry, spawn markers, cover positions
+- Rules: per-level Resource defining all constraints as data, not code
+- Solver: anchor-first placement → sightline lanes → constraint-based fill
+
+**Resources:**
+
+| Resource | Purpose |
+|----------|---------|
+| `BlockDef` | Block descriptor: scene, grid_size, height_type, block_type, tags, weight |
+| `BlockCatalog` | Collection of BlockDefs per theme, weighted selection helpers |
+| `GridLevelRules` | All per-level constraints: anchors, zones, height neighbors, budgets |
+| `GridLevelData` | Extends LevelData — adds block_catalog + level_rules |
+| `AnchorPlacement` | Randomized anchor zone + min_distance + facing mode |
+| `ZoneRule` | Region constraint: shape (RING/RECT/ROW/COL), allowed heights/types |
+| `HeightNeighborRule` | Adjacency constraint: source height → forbidden neighbor heights |
+| `BlockBudget` | Min/max count per height_type, block_type, or tag |
+
+**Solver steps:**
+1. Initialize empty grid, stamp zone constraints onto cells
+2. Place anchors — each picks random cell within its allowed_zone, respecting min_distance_to_anchors
+3. Auto-generate sightline lanes from sniper nest anchors (row + column → height-capped)
+4. Fill remaining cells most-constrained-first, weighted random selection
+5. Budget check — swap blocks if minimums unmet
+6. Retry with relaxed soft constraints if stuck
+7. Instantiate block scenes, position at grid coordinates
+
+**Block scene convention:**
+```
+BlockRoot (Node3D)
+  ├── Geometry/       # StaticBody3D + meshes + colliders
+  ├── SpawnPoints/    # Marker3D — enemy/NPC positions
+  ├── ActivityPoints/ # Marker3D — NPC activities
+  ├── CoverPositions/ # Marker3D — AI cover
+  └── Props/          # Optional randomizable sub-objects
+```
+
+**Integration:** BaseLevel discovers SpawnPoints/ActivityPoints recursively — blocks just
+need markers inside them. RunManager, entity spawning, extraction zones all unchanged.
+
+**File structure:**
+```
+scripts/world/grid/
+	block_def.gd, block_catalog.gd, block_instance.gd
+	grid_level_data.gd, grid_level_rules.gd
+	grid_level_builder.gd, grid_build_result.gd
+	rules/ — anchor_placement.gd, zone_rule.gd,
+			 height_neighbor_rule.gd, block_budget.gd
+scenes/blocks/ — industrial/, city/, shared/
+data/levels/   — <level>_rules.tres, <level>_catalog.tres
+```
+
+**Tasks:**
+- [~] Core resources (BlockDef, BlockCatalog, GridLevelRules, sub-rules)
+- [ ] GridLevelBuilder solver
+- [ ] GridLevelData integration with BaseLevel
+- [ ] Block scenes — industrial theme (10-15 greybox blocks)
+- [ ] Convert Industrial Yard to grid system as test
+- [ ] Second level (City) using grid system
 
 ---
 
@@ -127,31 +187,32 @@ Levels, 3D models, animations, textures, audio, and UI — everything that fills
 
 ### 2.2 Levels
 
-> Each level needs: theme, 200m+ map, 2-3 wind corridors, sniper nests, repositioning
-> routes, 15-20 enemy spawns, 2-3 extraction zones, NPC activity points, destructibles.
+> All levels use the grid-based generation system (§1.5). Each level needs: theme,
+> GridLevelRules + BlockCatalog (.tres), 10-15 block scenes, enemy/NPC pools,
+> extraction zones, sightline lanes via sniper nest anchors.
 
-#### Industrial Yard ✅ (greybox)
-- [x] Greybox geometry (IndustrialYardBuilder)
+#### Industrial Yard ✅ (greybox) → grid migration [ ]
+- [x] Greybox geometry (IndustrialYardBuilder — legacy)
 - [x] 17 enemy spawns, 3 extraction zones, 3 ziplines
 - [x] 24 NPC activity points, NPC pool (3-5 NPCs)
 - [x] 8 destructible boxes
+- [ ] Convert to grid blocks (10-15 block scenes)
+- [ ] GridLevelRules + BlockCatalog .tres files
 - [ ] Art pass (needs models, textures, props)
 
 #### Level 2 — City [ ]
-- [ ] Theme and layout design (rooftops, streets, alleys, long sight lines between buildings)
-- [ ] Builder script with greybox geometry
-- [ ] Spawn points, extraction zones, ziplines
-- [ ] NPC activity points and pool (bench sitting, phone calls, sweeping)
-- [ ] Destructible targets
-- [ ] Level data (.tres) with unlock gates
+- [ ] Block scenes (building facades, rooftops, streets, alleys)
+- [ ] GridLevelRules (sightline lanes between buildings, height zoning)
+- [ ] BlockCatalog + GridLevelData .tres files
+- [ ] NPC activity points in blocks (bench sitting, phone calls, sweeping)
+- [ ] Level data with unlock gates
 
 #### Level 3 — Nature / Castle [ ]
-- [ ] Theme and layout design (castle ruins, forest clearings, stone walls, watchtowers)
-- [ ] Builder script with greybox geometry
-- [ ] Spawn points, extraction zones, ziplines
-- [ ] NPC activity points and pool (chopping wood, tending fire, patrolling)
-- [ ] Destructible targets
-- [ ] Level data (.tres) with unlock gates
+- [ ] Block scenes (castle ruins, forest clearings, watchtowers)
+- [ ] GridLevelRules (open clearings, scattered tall blocks)
+- [ ] BlockCatalog + GridLevelData .tres files
+- [ ] NPC activity points in blocks (chopping wood, tending fire, patrolling)
+- [ ] Level data with unlock gates
 
 #### Level 4+ [ ]
 - [ ] As needed for progression gates

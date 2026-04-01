@@ -200,11 +200,11 @@ func _build_walls_and_fences() -> void:
 	# West wall
 	_add_box(Vector3(-148, 1.5, -30), Vector3(0.5, 3, 260), mat_concrete, "Wall_West")
 
-	# Internal dividing walls — create wind corridors
+	# Internal dividing walls — create sightline lanes
 	# Low wall splitting the yard east-west (forces engagement through gaps)
 	_add_box(Vector3(-40, 1.5, -10), Vector3(40, 3, 0.5), mat_concrete, "DivWall_W")
 	_add_box(Vector3(40, 1.5, -10), Vector3(40, 3, 0.5), mat_concrete, "DivWall_E")
-	# Gap in the middle (20m wide) — wind corridor!
+	# Gap in the middle (20m wide) — sightline lane
 
 	# Low barriers near loading dock
 	_add_box(Vector3(-20, 0.5, -15), Vector3(8, 1, 0.4), mat_concrete, "Barrier_1")

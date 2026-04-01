@@ -241,7 +241,7 @@ Every level should provide:
 - **Level scale:** Maps should be at least 200m x 200m to support proper sightlines.
 - **Elevation matters:** Player nests should overlook large areas at 10-30m elevation advantage. This creates natural long-range angles.
 - **Sight blockers, not walls:** Use terrain, foliage, scaffolding, and breakable cover to create partial occlusion at range — not solid walls that force CQB.
-- **Wind corridors:** Open lanes 150m+ long where the player can see deep into the map. Every level needs at least 2-3 of these.
+- **Sightline lanes:** Open lanes 150m+ long where the player can see deep into the map. Every level needs at least 2-3 of these.
 - **Scope-mandatory zones:** Some targets/enemies should be visible only through scope zoom, reinforcing the sniper identity.
 
 ### 6.2 Environment Types
@@ -450,7 +450,7 @@ Audio should reinforce the tension and precision of the sniper fantasy. Silence 
 - **Snappy fast transitions** — instant palette-aware theming, no sluggish animations
 
 ### 12.5 Audio Pairing
-- Minimal ambient soundscape — wind, distant sounds
+- Minimal ambient soundscape — distant sounds, environmental hum
 - Sharp, punchy weapon sounds that contrast the quiet
 - Synth or electronic tension music that builds with threat phase
 
