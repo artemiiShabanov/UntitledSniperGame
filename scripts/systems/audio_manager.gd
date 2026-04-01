@@ -144,6 +144,23 @@ func play_sfx_2d(id: StringName) -> void:
 	player.play()
 
 
+func play_sfx_2d_pitched(id: StringName, pitch_scale: float = 1.0) -> void:
+	## Play a 2D sound with a specific pitch scale (e.g. 1.33 = faster/higher).
+	var entry: AudioBankEntry = _bank_map.get(id) as AudioBankEntry
+	if not entry or not entry.stream:
+		return
+	var player: AudioStreamPlayer = _get_free_2d_player()
+	if not player:
+		return
+	player.stream = entry.stream
+	player.volume_db = entry.volume_db
+	player.bus = entry.bus
+	player.pitch_scale = pitch_scale
+	if entry.pitch_variance > 0.0:
+		player.pitch_scale += randf_range(-entry.pitch_variance, entry.pitch_variance)
+	player.play()
+
+
 func play_sfx_2d_varied(id: StringName, pitch_range: float = 0.15, volume_offset: float = 0.0) -> void:
 	## Play a 2D sound with random pitch variation and optional volume offset.
 	## Used for footsteps, heartbeats, etc. to prevent repetitive feel.

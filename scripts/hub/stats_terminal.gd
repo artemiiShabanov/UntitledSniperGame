@@ -4,7 +4,7 @@ extends Interactable
 signal stats_requested
 
 
-func interact(player: CharacterBody3D) -> void:
+func interact(_player: CharacterBody3D) -> void:
 	stats_requested.emit()
 
 

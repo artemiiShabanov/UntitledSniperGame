@@ -36,6 +36,10 @@ func update_scope_visuals(scoped: bool) -> void:
 		scope_overlay.queue_redraw()
 
 
+func set_scope_style(style_id: int) -> void:
+	scope_overlay.set_style(style_id)
+
+
 func update_weapon_display(wpn: Node3D) -> void:
 	weapon_state.update(wpn)
 

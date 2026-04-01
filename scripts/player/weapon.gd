@@ -14,9 +14,11 @@ enum State { IDLE, AIMING, BOLT_CYCLING, RELOADING, INSPECTING }
 @export var default_fov: float = 70.0
 @export var scoped_fov: float = 15.0
 @export var scope_lerp_speed: float = 12.0
-@export var scoped_sensitivity_mult: float = 0.3
+const SWAY_REFERENCE_FOV: float = 30.0  ## FOV at which sway_zoom_mult = 1.0
 
 ## Bolt action
+const DEFAULT_BOLT_CYCLE_TIME: float = 1.2
+const DEFAULT_RELOAD_TIME: float = 2.5
 @export var bolt_cycle_time: float = 1.2  ## Seconds to cycle bolt after a shot
 
 ## Reload
@@ -55,8 +57,14 @@ var state: State = State.IDLE
 var is_scoped: bool = false
 var state_timer: float = 0.0
 
-## Barrel special
+## Mod specials
 var _suppressed: bool = false
+var _continuous_bolt: bool = false  ## Stay scoped during bolt cycling
+var _variable_zoom: bool = false  ## Scroll wheel adjusts zoom while scoped
+var _variable_zoom_min: float = 6.0
+var _variable_zoom_max: float = 30.0
+var scope_style: int = 0  ## ScopeOverlay.Style enum value — set by mod
+var _was_scoped_before_shot: bool = false  ## Track scope state for non-continuous bolt
 
 ## Sway & breath
 var sway_time: float = 0.0
@@ -110,20 +118,46 @@ func _ready() -> void:
 	state_changed.emit(state)
 
 
+## Scope style mapping (mod_id -> ScopeOverlay.Style)
+const _SCOPE_STYLES := {
+	"scope_standard": 0,   # DEFAULT
+	"scope_red_dot": 1,    # RED_DOT
+	"scope_grandma": 2,    # GRANDMA
+	"scope_cheap": 3,      # CHEAP
+	"scope_tactical": 4,   # TACTICAL
+}
+
 ## ── Modifications ────────────────────────────────────────────────────────────
 
 func apply_modifications() -> void:
-	# Apply equipped mods
+	# Pass 1: Apply direct overrides, collect multipliers
+	var multipliers: Dictionary = {}  ## { "reload_time": 2.0, ... }
 	var loadout: Dictionary = SaveManager.get_equipped_loadout()
 	for slot: String in loadout:
 		var mod: RifleMod = ModRegistry.get_mod(loadout[slot])
 		if not mod:
 			continue
 		for prop: String in mod.stat_overrides:
-			if prop in self:
+			if prop.ends_with("_mult"):
+				var base_prop := prop.trim_suffix("_mult")
+				multipliers[base_prop] = multipliers.get(base_prop, 1.0) * mod.stat_overrides[prop]
+			elif prop in self:
 				set(prop, mod.stat_overrides[prop])
-		if mod.special == "suppressed":
-			_suppressed = true
+		match mod.special:
+			"suppressed":
+				_suppressed = true
+			"continuous_bolt":
+				_continuous_bolt = true
+			"variable_zoom":
+				_variable_zoom = true
+		# Scope style from scope slot
+		if mod.slot == "scope":
+			scope_style = _SCOPE_STYLES.get(mod.id, 0)
+
+	# Pass 2: Apply collected multipliers
+	for prop: String in multipliers:
+		if prop in self:
+			set(prop, get(prop) * multipliers[prop])
 
 	# Apply skill bonuses (after mods so they stack)
 	var breath_bonus: float = SaveManager.get_skill_stat_bonus("breath_max")
@@ -160,13 +194,19 @@ func _process_state_timer(delta: float) -> void:
 	if state_timer <= 0.0:
 		match state:
 			State.BOLT_CYCLING:
-				AudioManager.play_sfx_2d(&"rifle_bolt")
+				var bolt_pitch: float = DEFAULT_BOLT_CYCLE_TIME / bolt_cycle_time
+				AudioManager.play_sfx_2d_pitched(&"rifle_bolt", bolt_pitch)
 				bolt_cycled.emit()
 				# Auto-reload if magazine is empty
 				if not ammo.has_ammo() and ammo.can_reload():
 					state_timer = reload_time
+					var reload_pitch: float = DEFAULT_RELOAD_TIME / reload_time
+					AudioManager.play_sfx_2d_pitched(&"rifle_reload", reload_pitch)
 					_set_state(State.RELOADING)
 				else:
+					# Re-scope if player was aiming before shot and still holding zoom
+					if not _continuous_bolt and _was_scoped_before_shot and Input.is_action_pressed("zoom"):
+						is_scoped = true
 					_set_state(State.AIMING if is_scoped else State.IDLE)
 			State.RELOADING:
 				_finish_reload()
@@ -196,6 +236,8 @@ func _cancel_inspect() -> void:
 
 func _process_scope(delta: float) -> void:
 	var scope_blocked := state in [State.RELOADING, State.INSPECTING]
+	if not _continuous_bolt:
+		scope_blocked = scope_blocked or state == State.BOLT_CYCLING
 	var wants_scope := Input.is_action_pressed("zoom") and not scope_blocked
 
 	if wants_scope and not is_scoped:
@@ -204,21 +246,33 @@ func _process_scope(delta: float) -> void:
 		AudioManager.play_sfx_2d_varied(&"scope_zoom", 0.1)
 		if state == State.IDLE:
 			_set_state(State.AIMING)
+		else:
+			state_changed.emit(state)
 	elif not wants_scope and is_scoped:
 		is_scoped = false
 		AudioManager.play_sfx_2d(&"scope_out")
 		AudioManager.play_sfx_2d_varied(&"scope_zoom", 0.1)
 		if state == State.AIMING:
 			_set_state(State.IDLE)
+		else:
+			state_changed.emit(state)
+
+	# Variable zoom: scroll wheel adjusts scoped_fov while aiming
+	if _variable_zoom and is_scoped:
+		if Input.is_action_just_pressed("ammo_next"):
+			scoped_fov = clampf(scoped_fov - 2.0, _variable_zoom_min, _variable_zoom_max)
+		elif Input.is_action_just_pressed("ammo_prev"):
+			scoped_fov = clampf(scoped_fov + 2.0, _variable_zoom_min, _variable_zoom_max)
 
 	var target_fov := scoped_fov if is_scoped else default_fov
 	camera.fov = lerp(camera.fov, target_fov, scope_lerp_speed * delta)
 
 
 func get_sensitivity_multiplier() -> float:
-	if is_scoped:
-		return scoped_sensitivity_mult
-	return 1.0
+	## Sensitivity scales proportionally with FOV — more zoom = slower aim.
+	if not camera:
+		return 1.0
+	return camera.fov / default_fov
 
 
 ## ── Ammo Type (forwarded to AmmoManager) ───────────────────────────────────
@@ -258,11 +312,13 @@ func _process_input() -> void:
 	if Input.is_action_just_pressed("inspect") and state == State.IDLE:
 		_start_inspect()
 
-	# Cycle ammo type — mouse wheel
-	if Input.is_action_just_pressed("ammo_next"):
-		cycle_ammo_type(1)
-	elif Input.is_action_just_pressed("ammo_prev"):
-		cycle_ammo_type(-1)
+	# Cycle ammo type — mouse wheel (blocked when variable zoom is active and scoped)
+	var zoom_scroll := _variable_zoom and is_scoped
+	if not zoom_scroll:
+		if Input.is_action_just_pressed("ammo_next"):
+			cycle_ammo_type(1)
+		elif Input.is_action_just_pressed("ammo_prev"):
+			cycle_ammo_type(-1)
 
 	# Direct ammo selection — number keys 1-5
 	if Input.is_action_just_pressed("ammo_1"):
@@ -296,8 +352,10 @@ func _process_sway(delta: float) -> void:
 	elif breath_exhausted_timer > 0.0:
 		sway_mult = sway_penalty_mult
 
-	sway_offset.x = sin(sway_time * 1.1) * sway_amplitude * sway_mult
-	sway_offset.y = sin(sway_time * 0.7) * sway_amplitude * 0.6 * sway_mult
+	# Zoom amplifies sway — more magnification = harder to hold steady
+	var zoom_sway := sqrt(SWAY_REFERENCE_FOV / maxf(camera.fov, 1.0))
+	sway_offset.x = sin(sway_time * 1.1) * sway_amplitude * sway_mult * zoom_sway
+	sway_offset.y = sin(sway_time * 0.7) * sway_amplitude * 0.6 * sway_mult * zoom_sway
 
 	camera.rotation.x += sway_offset.x
 	camera.rotation.y += sway_offset.y
@@ -355,6 +413,11 @@ func try_shoot() -> void:
 	shot_fired.emit()
 	RunManager.record_shot_fired()
 
+	# Non-continuous bolt: force out of scope during cycling
+	_was_scoped_before_shot = is_scoped
+	if not _continuous_bolt and is_scoped:
+		is_scoped = false
+
 	state_timer = bolt_cycle_time
 	_set_state(State.BOLT_CYCLING)
 
@@ -392,7 +455,8 @@ func try_reload() -> void:
 	is_scoped = false
 	state_timer = reload_time
 	_set_state(State.RELOADING)
-	AudioManager.play_sfx_2d(&"rifle_reload")
+	var reload_pitch: float = DEFAULT_RELOAD_TIME / reload_time
+	AudioManager.play_sfx_2d_pitched(&"rifle_reload", reload_pitch)
 
 
 func _finish_reload() -> void:

@@ -78,16 +78,19 @@ Infrastructure exists but no events are defined:
 
 Hub systems and between-run upgrades.
 
-### 1.6 Rifle Modifications — Full Catalog [ ]
+### 1.6 Rifle Modifications — Full Catalog [x]
 
-Two foundation mods exist (Long Barrel, Extended Mag). Need the rest:
+Full mod catalog implemented across all slots:
 
-- [ ] Barrel: Light Barrel, Heavy Barrel
-- [ ] Stock: Padded, Breath, Competition
-- [ ] Bolt: Quick, Smooth Action, Match
-- [ ] Magazine: Drum Mag
-- [ ] Scope: 4x, 8x, Variable (adjustable zoom + scope overlays)
-- [ ] Visual model per mod on rifle viewmodel
+- [x] Barrel: Extended, Improvised Suppressor, Tactical (+ 2 more)
+- [x] Stock: Standard, Light, Padded, Heavy, Competition (sway/speed trade-offs)
+- [x] Bolt: Standard, Quick, Smooth Action, Light, Match (cycle time + specials)
+- [x] Magazine: Standard, Extended, Speed Loader, Drum Mag, Match
+- [x] Scope: Standard, Red Dot, Grandma, Cheap, Tactical (unique overlays + variable zoom)
+- [x] Visual model per mod on rifle viewmodel
+- [x] 5 unique scope overlay styles with distinct reticles
+- [x] Mod shop stat comparison (before/after display)
+- [x] Scope overlay hidden during bolt cycling (non-continuous bolt)
 
 > Depends on: RifleMod resource (ready), mod_registry (ready), mod_shop (ready), rifle_viewmodel (ready)
 
@@ -118,7 +121,7 @@ Levels, 3D models, animations, textures, audio, and UI — everything that fills
 
 - [ ] Main menu visual polish (background pattern, version text, subtle animation)
 - [ ] Hub layout — spatial navigation cues between stations
-- [ ] Scope overlay — advanced reticle (mil-dots, rangefinder markings)
+- [x] Scope overlay — 5 distinct reticle styles (standard, red dot, grandma, cheap, tactical)
 - [ ] Result/death screens — styled layout with animations
 - [ ] Settings screen — section headers, better slider visuals
 

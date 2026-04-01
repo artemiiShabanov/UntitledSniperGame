@@ -60,14 +60,56 @@ func _register_all() -> void:
 	_add(RifleMod.create(
 		"stock_standard", "Standard Stock", "stock", 0,
 		"Basic stock. Gets the job done.",
-		{"sway_amplitude": 0.003, "breath_max": 3.0}
+		{"sway_amplitude": 0.003, "move_speed": 5.0, "sprint_speed": 8.0}
+	))
+	_add(RifleMod.create(
+		"stock_light", "Light Stock", "stock", 200,
+		"Lightweight polymer. Run faster, same sway.",
+		{"sway_amplitude": 0.003, "move_speed": 5.5, "sprint_speed": 9.0}
+	))
+	_add(RifleMod.create(
+		"stock_padded", "Padded Stock", "stock", 300,
+		"Rubber-lined cheek rest. Steadier aim, standard mobility.",
+		{"sway_amplitude": 0.002, "move_speed": 5.0, "sprint_speed": 8.0}
+	))
+	_add(RifleMod.create(
+		"stock_heavy", "Heavy Stock", "stock", 400,
+		"Solid hardwood. Rock-steady aim, but it weighs you down.",
+		{"sway_amplitude": 0.0015, "move_speed": 4.5, "sprint_speed": 7.0}
+	))
+	_add(RifleMod.create(
+		"stock_competition", "Competition Stock", "stock", 500,
+		"Precision-tuned adjustable stock. Steadier aim with agile handling.",
+		{"sway_amplitude": 0.002, "move_speed": 5.5, "sprint_speed": 8.5}
 	))
 
 	# ── Bolt ──────────────────────────────────────────────────────────────
 	_add(RifleMod.create(
 		"bolt_standard", "Standard Bolt", "bolt", 0,
 		"Factory bolt action. Reliable.",
-		{"bolt_cycle_time": 1.2, "reload_time": 2.5}
+		{"bolt_cycle_time": 1.2}
+	))
+	_add(RifleMod.create(
+		"bolt_quick", "Quick Bolt", "bolt", 200,
+		"Polished action for faster cycling. Still kicks you out of scope.",
+		{"bolt_cycle_time": 0.9}
+	))
+	_add(RifleMod.create(
+		"bolt_smooth", "Smooth Action", "bolt", 400,
+		"Buttery-smooth cycling. Stay scoped between shots.",
+		{"bolt_cycle_time": 1.2},
+		"continuous_bolt"
+	))
+	_add(RifleMod.create(
+		"bolt_prototype", "Prototype Bolt", "bolt", 350,
+		"Experimental rapid-cycle mechanism. Blazing fast, but reloading is a nightmare.",
+		{"bolt_cycle_time": 0.6, "reload_time_mult": 2.0}
+	))
+	_add(RifleMod.create(
+		"bolt_light", "Light Bolt", "bolt", 600,
+		"Lightweight precision bolt. Fast cycling and stay scoped — the best of both worlds.",
+		{"bolt_cycle_time": 0.9},
+		"continuous_bolt"
 	))
 
 	# ── Magazine ──────────────────────────────────────────────────────────
@@ -77,16 +119,42 @@ func _register_all() -> void:
 		{"magazine_size": 5}
 	))
 	_add(RifleMod.create(
-		"magazine_extended", "Extended Mag", "magazine", 300,
-		"Detachable box magazine. Holds 8 rounds.",
-		{"magazine_size": 8}
+		"magazine_fast", "Fast Mag", "magazine", 250,
+		"Spring-assisted detachable magazine. Snappy reloads, but holds fewer rounds.",
+		{"magazine_size": 4, "reload_time_mult": 0.7}
+	))
+	_add(RifleMod.create(
+		"magazine_extended", "Extended Mag", "magazine", 350,
+		"Oversized box magazine. More rounds, but slower to swap.",
+		{"magazine_size": 8, "reload_time_mult": 1.3}
 	))
 
 	# ── Scope ─────────────────────────────────────────────────────────────
 	_add(RifleMod.create(
 		"scope_standard", "Iron Sights", "scope", 0,
 		"Open sights. Wide field of view, limited zoom.",
-		{"scoped_fov": 30.0}
+		{"scoped_fov": 30.0, "scope_lerp_speed": 12.0}
+	))
+	_add(RifleMod.create(
+		"scope_red_dot", "Red Dot", "scope", 150,
+		"Reflex sight. Barely any zoom, but lightning-fast target acquisition.",
+		{"scoped_fov": 40.0, "scope_lerp_speed": 18.0}
+	))
+	_add(RifleMod.create(
+		"scope_grandma", "Grandma's Scope", "scope", 300,
+		"Ancient hunting optic. Extreme magnification, but slow and foggy.",
+		{"scoped_fov": 8.0, "scope_lerp_speed": 6.0}
+	))
+	_add(RifleMod.create(
+		"scope_cheap", "Cheap Scope", "scope", 350,
+		"Budget optic from a flea market. Decent zoom, questionable alignment.",
+		{"scoped_fov": 18.0, "scope_lerp_speed": 12.0}
+	))
+	_add(RifleMod.create(
+		"scope_tactical", "Tactical Scope", "scope", 700,
+		"Military-grade variable optic. Scroll to adjust zoom. Remembers your setting.",
+		{"scoped_fov": 15.0, "scope_lerp_speed": 12.0},
+		"variable_zoom"
 	))
 
 

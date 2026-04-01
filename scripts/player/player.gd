@@ -64,13 +64,34 @@ var _was_mouse_captured: bool = false
 func _ready() -> void:
 	Input.use_accumulated_input = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	apply_modifications()
 	weapon.state_changed.connect(_on_weapon_state_changed)
 	weapon.shot_fired.connect(_on_shot_fired)
 	weapon.ammo_type_changed.connect(_on_ammo_type_changed)
 	RunManager.run_completed.connect(_on_run_completed)
 	# Force initial HUD update (weapon._ready() fires before player connects)
+	hud.set_scope_style(weapon.scope_style)
 	hud.update_scope_visuals(weapon.is_scoped)
 	hud.update_weapon_display(weapon)
+
+
+func apply_modifications() -> void:
+	## Apply mod stat overrides that affect the player (e.g. move_speed, sprint_speed).
+	var multipliers: Dictionary = {}
+	var loadout: Dictionary = SaveManager.get_equipped_loadout()
+	for slot: String in loadout:
+		var mod: RifleMod = ModRegistry.get_mod(loadout[slot])
+		if not mod:
+			continue
+		for prop: String in mod.stat_overrides:
+			if prop.ends_with("_mult"):
+				var base_prop := prop.trim_suffix("_mult")
+				multipliers[base_prop] = multipliers.get(base_prop, 1.0) * mod.stat_overrides[prop]
+			elif prop in self:
+				set(prop, mod.stat_overrides[prop])
+	for prop: String in multipliers:
+		if prop in self:
+			set(prop, get(prop) * multipliers[prop])
 
 
 func _notification(what: int) -> void:
@@ -101,6 +122,10 @@ func _input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Keep scope overlay in sync every frame (weapon runs in _process, so
+	# the authoritative is_scoped flag may change between state_changed signals)
+	hud.update_scope_visuals(weapon.is_scoped)
+
 	# Update breath meter
 	hud.update_breath(
 		weapon.get_breath_ratio(),

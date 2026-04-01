@@ -246,10 +246,10 @@ func _on_buy_requested(mod: RifleMod) -> void:
 	AudioManager.wire_button(cancel_btn, &"menu_cancel")
 	btn_row.add_child(cancel_btn)
 
+	item_list.add_child(_confirm_popup)
+
 	confirm_btn.focus_neighbor_right = cancel_btn.get_path()
 	cancel_btn.focus_neighbor_left = confirm_btn.get_path()
-
-	item_list.add_child(_confirm_popup)
 	confirm_btn.grab_focus()
 
 
@@ -282,10 +282,13 @@ func _format_stats(mod: RifleMod) -> String:
 	var parts: Array[String] = []
 	for key: String in mod.stat_overrides:
 		var val: Variant = mod.stat_overrides[key]
-		var display_name := key.replace("_", " ").capitalize()
-		if val is float:
-			parts.append("%s: %s" % [display_name, "%.2f" % val])
+		if key.ends_with("_mult"):
+			var display_name := key.trim_suffix("_mult").replace("_", " ").capitalize()
+			parts.append("%s: x%s" % [display_name, "%.1f" % val])
 		else:
-			parts.append("%s: %s" % [display_name, str(val)])
+			var display_name := key.replace("_", " ").capitalize()
+			if val is float:
+				parts.append("%s: %s" % [display_name, "%.2f" % val])
+			else:
+				parts.append("%s: %s" % [display_name, str(val)])
 	return " | ".join(parts)
-
