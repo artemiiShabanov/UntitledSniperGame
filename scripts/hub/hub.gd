@@ -5,6 +5,7 @@ extends Node3D
 var LEVEL_LIST: Array[String] = [
 	"res://data/levels/dev_test_data.tres",
 	"res://data/levels/industrial_yard_data.tres",
+	"res://data/levels/industrial_yard_grid_data.tres",
 ]
 
 @onready var deploy_board: Interactable = $DeployBoard
