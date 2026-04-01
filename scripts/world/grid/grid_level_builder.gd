@@ -686,7 +686,7 @@ func _collect_markers(instance: Node3D, result: GridBuildResult) -> void:
 	# Recursively find SpawnPoint and ActivityPoint markers
 	var stack: Array[Node] = [instance]
 	while not stack.is_empty():
-		var node := stack.pop_back()
+		var node: Node = stack.pop_back()
 		# Check by class name since we don't want to import the class here
 		if node.is_in_group("spawn_point") or node.get_class() == "Marker3D":
 			if node.has_meta("spawn_type"):

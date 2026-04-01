@@ -99,7 +99,9 @@ func _set_game_state(new_state: GameState) -> void:
 func go_to_hub() -> void:
 	_set_game_state(GameState.HUB)
 	is_dead = false
-	get_tree().change_scene_to_file.call_deferred(HUB_SCENE)
+	LoadingScreen.transition(func() -> void:
+		get_tree().change_scene_to_file(HUB_SCENE)
+	)
 
 
 ## ── Deploy ───────────────────────────────────────────────────────────────────
@@ -125,12 +127,10 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 	contract_completed = false
 	run_stats.reset()
 
-	# Load the level
-	get_tree().change_scene_to_file(level_path)
-
-	# After scene loads, _on_level_ready() should be called by the level scene
-	# or we transition to IN_RUN after a frame
-	await get_tree().tree_changed
+	# Load the level behind a loading screen
+	await LoadingScreen.transition(func() -> void:
+		get_tree().change_scene_to_file(level_path)
+	)
 	begin_run()
 
 

@@ -298,7 +298,7 @@ func _find_nodes_by_name_prefix(prefix: String) -> Array[Node3D]:
 	var found: Array[Node3D] = []
 	var stack: Array[Node] = [self]
 	while not stack.is_empty():
-		var node := stack.pop_back()
+		var node: Node = stack.pop_back()
 		if node is Node3D and node.name.begins_with(prefix):
 			found.append(node as Node3D)
 		for child in node.get_children():
