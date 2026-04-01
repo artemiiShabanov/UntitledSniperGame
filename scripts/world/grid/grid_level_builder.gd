@@ -79,6 +79,17 @@ func build(level_data: GridLevelData, parent: Node3D) -> GridBuildResult:
 			continue
 
 		_enforce_budgets()
+
+		# Validate: at least one player spawn block and one extraction block
+		if not _has_block_with_flag("is_player_spawn"):
+			result.warnings.append("Attempt %d: no player spawn block in grid" % attempt)
+			_relax_next_constraint()
+			continue
+		if not _has_block_with_flag("is_extraction_zone"):
+			result.warnings.append("Attempt %d: no extraction zone block in grid" % attempt)
+			_relax_next_constraint()
+			continue
+
 		solved = true
 
 	if not solved:
@@ -500,6 +511,59 @@ func _can_place_block(coord: Vector2i, block: BlockDef) -> bool:
 	return true
 
 
+## ── Spawn/extraction validation ───────────────────────────────────────────────
+
+func _has_block_with_flag(flag: String) -> bool:
+	for x in range(_rules.grid_width):
+		for z in range(_rules.grid_depth):
+			var cell := _get_cell(Vector2i(x, z))
+			if cell.block_def and cell.block_def.get(flag):
+				return true
+	return false
+
+
+func _pick_spawn_and_extraction(result: GridBuildResult) -> void:
+	var spawn_candidates: Array[Dictionary] = []  ## [{ "cell": Vector2i, "instance": Node3D }]
+	var extraction_candidates: Array[Dictionary] = []
+
+	# Collect all blocks with the flags
+	for x in range(_rules.grid_width):
+		for z in range(_rules.grid_depth):
+			var entry = result.grid[x][z]
+			if not entry:
+				continue
+			var block_def: BlockDef = entry["block_def"]
+			var instance: Node3D = entry["instance"]
+			if block_def.is_player_spawn:
+				spawn_candidates.append({ "cell": Vector2i(x, z), "instance": instance })
+			if block_def.is_extraction_zone:
+				extraction_candidates.append({ "cell": Vector2i(x, z), "instance": instance })
+
+	# Pick one random player spawn block
+	if not spawn_candidates.is_empty():
+		_shuffle_array(spawn_candidates)
+		result.player_spawn_block = spawn_candidates[0]["instance"]
+		result.player_spawn_cell = spawn_candidates[0]["cell"]
+
+	# Pick extraction blocks — spread them out by sorting by distance from player
+	if not extraction_candidates.is_empty() and result.player_spawn_cell.x >= 0:
+		# Sort by distance from player spawn (farthest first)
+		var pc: Vector2i = result.player_spawn_cell
+		extraction_candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			var da: int = absi(a["cell"].x - pc.x) + absi(a["cell"].y - pc.y)
+			var db: int = absi(b["cell"].x - pc.x) + absi(b["cell"].y - pc.y)
+			return da > db  # Farthest first
+		)
+		# Take up to 3, skip any too close to player (distance < 3 cells)
+		for entry in extraction_candidates:
+			var dist: int = absi(entry["cell"].x - pc.x) + absi(entry["cell"].y - pc.y)
+			if dist >= 3:
+				result.extraction_blocks.append(entry["instance"])
+				result.extraction_cells.append(entry["cell"])
+				if result.extraction_blocks.size() >= 3:
+					break
+
+
 ## ── Gap filler (fallback) ────────────────────────────────────────────────────
 
 func _fill_empty_gaps() -> void:
@@ -594,6 +658,9 @@ func _instantiate_scenes(
 
 	# Ground plane
 	_create_ground_plane(blocks_root, level_data)
+
+	# Pick player spawn and extraction zone blocks
+	_pick_spawn_and_extraction(result)
 
 
 func _find_block_origin(coord: Vector2i, block: BlockDef) -> Vector2i:

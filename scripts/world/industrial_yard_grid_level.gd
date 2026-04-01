@@ -17,8 +17,8 @@ func _build_grid_level() -> void:
 		for w in result.warnings:
 			push_warning("GridLevel: %s" % w)
 
-	_create_player_spawn()
-	_create_extraction_zones()
+	_create_player_spawn(result)
+	_create_extraction_zones(result)
 	_create_ziplines(result)
 
 
@@ -60,12 +60,13 @@ func _create_catalog() -> BlockCatalog:
 	cat.catalog_name = "industrial"
 	cat.blocks = [
 		# Ground fillers (high weight — most of the map)
+		# empty_ground and ground_cover can host extraction zones
 		BlockDef.create("empty_ground", "Empty Ground", null,
 			BlockDef.HeightType.GROUND, BlockDef.BlockType.EMPTY,
-			[], 3.0),
+			[], 3.0, Vector2i(1, 1), -1, false, false, true),
 		BlockDef.create("ground_cover", "Ground Cover", null,
 			BlockDef.HeightType.GROUND, BlockDef.BlockType.PROPS,
-			["cover"], 2.5, Vector2i(1, 1), -1, true),
+			["cover"], 2.5, Vector2i(1, 1), -1, true, false, true),
 
 		# Low structures
 		BlockDef.create("containers", "Container Stack", null,
@@ -102,10 +103,10 @@ func _create_catalog() -> BlockCatalog:
 			BlockDef.HeightType.TOWER, BlockDef.BlockType.PROPS,
 			["industrial"], 0.3, Vector2i(1, 1), 1),
 
-		# Sniper nests
+		# Sniper nests — player can spawn here
 		BlockDef.create("sniper_tower", "Sniper Tower", null,
 			BlockDef.HeightType.TOWER, BlockDef.BlockType.SNIPER_NEST,
-			["vantage"], 1.0, Vector2i(1, 1), 3),
+			["vantage"], 1.0, Vector2i(1, 1), 3, false, true),
 
 		# Enemy blocks
 		BlockDef.create("enemy_rooftop", "Enemy Rooftop", null,
@@ -224,40 +225,38 @@ func _create_rules() -> GridLevelRules:
 
 
 ## ── Player Spawn ─────────────────────────────────────────────────────────────
-## Player spawns on the first sniper tower anchor (discovered after grid build).
+## Placed on the block chosen by the solver (is_player_spawn = true).
 
-func _create_player_spawn() -> void:
-	# Find a sniper tower in the tree
-	var towers := _find_nodes_by_prefix("sniper_tower_")
-	if towers.is_empty():
+func _create_player_spawn(result: GridBuildResult) -> void:
+	if result.player_spawn_block:
+		# Sniper tower platform is at Y=15.25 — spawn slightly above
+		_add_spawn(
+			result.player_spawn_block.position + Vector3(0, 15.8, 0),
+			SpawnPoint.Type.PLAYER, 0.0)
+	else:
 		# Fallback: center of map at ground level
-		_add_spawn(Vector3(
-			7 * 15.0, 0.5, 7 * 15.0
-		), SpawnPoint.Type.PLAYER, 0.0)
-		return
-
-	# Place player spawn on top of the first tower's platform
-	var tower: Node3D = towers[0]
-	_add_spawn(tower.position + Vector3(0, 15.8, 0), SpawnPoint.Type.PLAYER, 0.0)
+		push_warning("GridLevel: no player spawn block found — using center fallback")
+		_add_spawn(Vector3(7 * 15.0, 0.5, 7 * 15.0), SpawnPoint.Type.PLAYER, 0.0)
 
 
 ## ── Extraction Zones ─────────────────────────────────────────────────────────
+## Placed on blocks chosen by the solver (is_extraction_zone = true).
 
-func _create_extraction_zones() -> void:
+func _create_extraction_zones(result: GridBuildResult) -> void:
 	var extraction_scene := preload("res://scenes/world/extraction_zone.tscn")
-	var grid_size: float = 15.0 * 15.0  # Total level size
 
-	# Place 3 extraction zones at corners/edges
-	var positions := [
-		Vector3(1 * 15.0, 0, 1 * 15.0),          # Near corner
-		Vector3(13 * 15.0, 0, 1 * 15.0),          # Far corner
-		Vector3(1 * 15.0, 0, 13 * 15.0),          # Opposite corner
-	]
+	if result.extraction_blocks.is_empty():
+		push_warning("GridLevel: no extraction blocks found — using corner fallback")
+		var ez := extraction_scene.instantiate()
+		ez.name = "ExtractionZone_Fallback"
+		ez.position = Vector3(15.0, 0, 15.0)
+		add_child(ez)
+		return
 
-	for i in range(positions.size()):
+	for i in range(result.extraction_blocks.size()):
 		var ez := extraction_scene.instantiate()
 		ez.name = "ExtractionZone_%d" % (i + 1)
-		ez.position = positions[i]
+		ez.position = result.extraction_blocks[i].position
 		add_child(ez)
 
 
@@ -266,18 +265,16 @@ func _create_extraction_zones() -> void:
 
 func _create_ziplines(result: GridBuildResult) -> void:
 	var zipline_scene := preload("res://scenes/world/zipline.tscn")
-	var towers := _find_nodes_by_prefix("sniper_tower_")
+	var towers := _find_nodes_by_name_prefix("sniper_tower_")
 
 	if towers.size() >= 2:
-		# Zipline between the two sniper towers
 		var z1 := zipline_scene.instantiate()
 		z1.name = "Zipline_Towers"
 		z1.point_a = towers[0].position + Vector3(0, 15.5, 0)
 		z1.point_b = towers[1].position + Vector3(0, 15.5, 0)
 		add_child(z1)
 
-	# If there's a crane, zipline from nearest tower to crane
-	var cranes := _find_nodes_by_prefix("crane_")
+	var cranes := _find_nodes_by_name_prefix("crane_")
 	if not cranes.is_empty() and not towers.is_empty():
 		var z2 := zipline_scene.instantiate()
 		z2.name = "Zipline_Tower_Crane"
@@ -297,13 +294,13 @@ func _add_spawn(pos: Vector3, type: SpawnPoint.Type, facing: float) -> void:
 	add_child(sp)
 
 
-func _find_nodes_by_prefix(prefix: String) -> Array[Node3D]:
-	var result: Array[Node3D] = []
+func _find_nodes_by_name_prefix(prefix: String) -> Array[Node3D]:
+	var found: Array[Node3D] = []
 	var stack: Array[Node] = [self]
 	while not stack.is_empty():
 		var node := stack.pop_back()
 		if node is Node3D and node.name.begins_with(prefix):
-			result.append(node as Node3D)
+			found.append(node as Node3D)
 		for child in node.get_children():
 			stack.append(child)
-	return result
+	return found

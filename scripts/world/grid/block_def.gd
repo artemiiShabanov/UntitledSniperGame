@@ -25,6 +25,10 @@ enum BlockType { EMPTY, PROPS, ENEMY, NPC, EVENT, SNIPER_NEST }
 @export var weight: float = 1.0  ## Higher = more likely to be picked during fill
 @export var max_per_level: int = -1  ## -1 = unlimited
 
+@export_group("Spawning")
+@export var is_player_spawn: bool = false  ## Player can spawn on this block
+@export var is_extraction_zone: bool = false  ## Extraction zone can be placed here
+
 @export_group("Behavior")
 @export var internal_randomization: bool = false  ## Scene randomizes its own props
 
@@ -42,6 +46,8 @@ static func create(
 	p_grid_size: Vector2i = Vector2i(1, 1),
 	p_max_per_level: int = -1,
 	p_randomize: bool = false,
+	p_player_spawn: bool = false,
+	p_extraction: bool = false,
 ) -> BlockDef:
 	var def := BlockDef.new()
 	def.id = p_id
@@ -54,4 +60,6 @@ static func create(
 	def.grid_size = p_grid_size
 	def.max_per_level = p_max_per_level
 	def.internal_randomization = p_randomize
+	def.is_player_spawn = p_player_spawn
+	def.is_extraction_zone = p_extraction
 	return def
