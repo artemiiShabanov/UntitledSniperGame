@@ -7,9 +7,12 @@ extends Resource
 func pick_random(rng: RandomNumberGenerator, used_counts: Dictionary = {}) -> PackedScene:
 	var available: Array[EnemyPoolEntry] = []
 	var weights: Array[float] = []
+	var current_phase := RunManager.threat_phase
 
 	for entry in entries:
 		if entry.enemy_scene == null:
+			continue
+		if current_phase < entry.min_phase:
 			continue
 		if entry.max_per_run >= 0:
 			var path := entry.enemy_scene.resource_path

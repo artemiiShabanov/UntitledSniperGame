@@ -5,15 +5,16 @@ extends Node
 
 ## ── Configuration ──────────────────────────────────────────────────────────
 
-## Spawn intervals per phase (seconds between spawns). 0 = no spawning.
-@export var early_spawn_interval: float = 0.0
-@export var mid_spawn_interval: float = 15.0
-@export var late_spawn_interval: float = 8.0
-
-## Max concurrent dynamically-spawned enemies per phase
-@export var early_max_enemies: int = 0
-@export var mid_max_enemies: int = 6
-@export var late_max_enemies: int = 12
+## Phase at which dynamic spawning begins (1-10). Below this = no spawning.
+@export var spawn_start_phase: int = 2
+## Spawn interval at spawn_start_phase (seconds between spawns)
+@export var spawn_interval_initial: float = 20.0
+## Spawn interval at phase 10
+@export var spawn_interval_final: float = 5.0
+## Max concurrent dynamically-spawned enemies at spawn_start_phase
+@export var max_enemies_initial: int = 3
+## Max concurrent dynamically-spawned enemies at phase 10
+@export var max_enemies_final: int = 12
 
 ## ── State ──────────────────────────────────────────────────────────────────
 
@@ -54,26 +55,29 @@ func _process(delta: float) -> void:
 		_try_spawn_enemy()
 
 
+func _get_phase_t() -> float:
+	## Returns 0.0-1.0 representing progress from spawn_start_phase to phase 10.
+	var phase := RunManager.threat_phase
+	if phase < spawn_start_phase:
+		return -1.0  # Not spawning yet
+	var range_size := RunManager.THREAT_PHASE_MAX - spawn_start_phase
+	if range_size <= 0:
+		return 1.0
+	return clampf(float(phase - spawn_start_phase) / float(range_size), 0.0, 1.0)
+
+
 func _get_spawn_interval() -> float:
-	match RunManager.threat_phase:
-		RunManager.ThreatPhase.EARLY:
-			return early_spawn_interval
-		RunManager.ThreatPhase.MID:
-			return mid_spawn_interval
-		RunManager.ThreatPhase.LATE:
-			return late_spawn_interval
-	return 0.0
+	var t := _get_phase_t()
+	if t < 0.0:
+		return 0.0  # No spawning
+	return lerpf(spawn_interval_initial, spawn_interval_final, t)
 
 
 func _get_max_enemies() -> int:
-	match RunManager.threat_phase:
-		RunManager.ThreatPhase.EARLY:
-			return early_max_enemies
-		RunManager.ThreatPhase.MID:
-			return mid_max_enemies
-		RunManager.ThreatPhase.LATE:
-			return late_max_enemies
-	return 0
+	var t := _get_phase_t()
+	if t < 0.0:
+		return 0
+	return int(lerpf(float(max_enemies_initial), float(max_enemies_final), t))
 
 
 func _try_spawn_enemy() -> void:
@@ -101,7 +105,7 @@ func _try_spawn_enemy() -> void:
 	enemy.rotation.y = deg_to_rad(spawn.facing_direction)
 
 	if spawn.behavior_tag != "default" and "initial_behavior" in enemy:
-		enemy.initial_behavior = spawn.behavior_tag
+		enemy.initial_behavior = EnemyBase.behavior_from_string(spawn.behavior_tag)
 	_spawned_enemies.append(enemy)
 
 	# Track for max_per_run

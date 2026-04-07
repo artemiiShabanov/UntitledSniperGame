@@ -272,19 +272,24 @@ All enemies are snipers. The battlefield is a network of sniper positions — th
 - Alert states: Unaware → Suspicious → Alert → Searching
 - Gunshots attract nearby enemies toward the shooter's position
 
-### 7.3 Enemy Sniper Types
-All enemies are ranged threats — no melee rushers.
-- **Lookout** — basic sniper, stationary, low awareness, slow reaction
-- **Marksman** — repositions between nests, medium awareness, decent accuracy
-- **Countersniper** — mid/late phase, scope glint visible, actively scans for player, accurate and fast
-- **Heavy Sniper** — armored, late phase, requires AP ammo or headshot, high damage
-- **Elite Sniper** — late phase, flanks to different nests, uses smoke/repositioning, hardest to deal with
+### 7.3 Enemy Types
+6 distinct enemy types, each requiring a different counter-strategy:
 
-### 7.4 Countersniper Behavior
-- Visible scope glint / laser sight warns the player
-- Scans sniper nests and high ground
-- Returns fire accurately — forces repositioning
-- Appears in mid phase, more frequent and dangerous in late phase
+| Type | Phases | Behavior | Counter-Strategy |
+|------|--------|----------|------------------|
+| **Lookout** | 1-10 | Stationary, scanning, slow reactions, poor accuracy. Tutorial-tier fodder. | Basic aiming — always present, scales via quantity |
+| **Spotter** | 3-8 | Binocular glint (blue). On detecting player, all enemies within 80m go ALERT instantly. Doesn't shoot. | Kill order — prioritize before they spot you |
+| **Marksman** | 4-10 | Competent sniper. Repositions to cover after being shot at or hearing gunfire. | Re-acquisition — target moves after you engage |
+| **Drone** | 5-10 | Flying quad-rotor, beelines toward player. Low HP (one shot). Deals 1 life damage on proximity, self-destructs. Audible buzz warning. | Position pressure — forces movement or quick reaction |
+| **Ghost** | 7-10 | Only visible through scope zoom. Fast, repositions constantly. Accurate shooter. | Scope discipline — forces careful scanning at range |
+| **Heavy** | 8-10 | Armored — body shots with standard ammo do 15% damage. Requires AP ammo or headshot. Slow, stationary, high damage (2 lives per hit). | Loadout check — punishes wrong ammo choice |
+
+### 7.4 Spotter Behavior
+- Visible binocular glint (blue tint) — distinguishable from sniper scope glint
+- Wide scan pattern, long sight range (200m)
+- On ALERT: broadcasts player position to all enemies within 80m radius
+- Doesn't shoot — purely a detection/alert threat
+- Creates "kill the spotter first" priority puzzle
 
 ### 7.5 Neutral NPCs
 Three NPC types, each with activity-based behavior cycles (not just patrol):
@@ -312,10 +317,16 @@ Three NPC types, each with activity-based behavior cycles (not just patrol):
 - Kill feed shows "TARGET DESTROYED | +$X" in warm yellow
 - Future expansion: vehicles, equipment, supply caches, moving targets, contract objectives
 
-### 7.7 Scaling with Threat Phase
-- **Early:** neutral NPCs, static/moving non-NPC targets, no enemies
-- **Mid:** lookouts, marksmen, countersnipers appear
-- **Late:** heavy snipers, elite snipers, aggressive searching, maximum density
+### 7.7 Scaling with Threat Phase (1-10)
+Threat phases are evenly distributed across the run duration. Enemy types unlock at specific phases via `min_phase` on pool entries.
+
+- **Phases 1-2:** NPCs, destructible targets, Lookouts only
+- **Phase 3:** Spotters appear — area detection threat begins
+- **Phase 4:** Marksmen appear — enemies that shoot back and reposition
+- **Phase 5:** Drones appear — anti-camping pressure, forces movement
+- **Phases 7+:** Ghosts appear — invisible without scope, high skill ceiling
+- **Phases 8+:** Heavies appear — armored, require AP ammo or headshots
+- **Phase 10:** Maximum spawn density, all types active, highest rewards
 
 ---
 

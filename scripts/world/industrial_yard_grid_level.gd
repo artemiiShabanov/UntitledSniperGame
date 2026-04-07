@@ -41,12 +41,11 @@ func _create_grid_level_data() -> GridLevelData:
 		data.level_theme = level_data.level_theme
 		data.available_times_of_day = level_data.available_times_of_day
 		data.available_weather = level_data.available_weather
-		data.early_phase_duration = level_data.early_phase_duration
-		data.mid_phase_duration = level_data.mid_phase_duration
-		data.mid_spawn_interval = level_data.mid_spawn_interval
-		data.late_spawn_interval = level_data.late_spawn_interval
-		data.mid_max_enemies = level_data.mid_max_enemies
-		data.late_max_enemies = level_data.late_max_enemies
+		data.spawn_start_phase = level_data.spawn_start_phase
+		data.spawn_interval_initial = level_data.spawn_interval_initial
+		data.spawn_interval_final = level_data.spawn_interval_final
+		data.max_enemies_initial = level_data.max_enemies_initial
+		data.max_enemies_final = level_data.max_enemies_final
 
 	data.block_catalog = _create_catalog()
 	data.level_rules = _create_rules()

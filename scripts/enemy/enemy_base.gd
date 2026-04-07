@@ -7,6 +7,7 @@ extends CharacterBody3D
 ## ── Enums ────────────────────────────────────────────────────────────────────
 
 enum AlertState { UNAWARE, SUSPICIOUS, ALERT, SEARCHING }
+enum Behavior { DEFAULT, SCANNING, PATROL }
 
 ## ── Signals ──────────────────────────────────────────────────────────────────
 
@@ -16,7 +17,7 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 ## ── Exports: Debug ───────────────────────────────────────────────────────────
 
 @export_group("Debug")
-@export var show_debug: bool = false  ## Toggle FOV cone and state indicator
+@export var show_debug: bool = true  ## Toggle FOV cone and state indicator
 
 ## ── Exports: Detection ───────────────────────────────────────────────────────
 
@@ -27,8 +28,6 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 @export var suspicion_decay: float = 0.2  ## Per second when player not visible
 @export var alert_threshold: float = 1.0  ## Suspicion level to become ALERT
 @export var search_duration: float = 8.0  ## How long to search before returning to UNAWARE
-@export var search_scan_speed: float = 0.8  ## Radians per second to scan left/right
-@export var search_scan_angle: float = 45.0  ## Degrees to scan each side of last known dir
 
 ## ── Exports: Combat ──────────────────────────────────────────────────────────
 
@@ -62,12 +61,20 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 ## ── Exports: Behavior ───────────────────────────────────────────────────────
 
 @export_group("Behavior")
-@export var initial_behavior: String = "default"
+@export var initial_behavior: Behavior = Behavior.DEFAULT
 @export var patrol_points: Array[Vector3] = []
 @export var patrol_speed: float = 1.5
 @export var patrol_wait_time: float = 3.0
 @export var scan_speed: float = 0.3
 @export var scan_angle: float = 60.0
+@export var turn_speed: float = 3.0  ## Radians per second for smooth rotation
+
+## ── Exports: Reposition ─────────────────────────────────────────────────────
+
+@export_group("Reposition")
+@export var can_reposition: bool = false  ## Enable reposition behavior
+@export var reposition_speed: float = 4.0
+@export var auto_reposition_interval: float = 0.0  ## 0 = no auto reposition
 
 ## ── Exports: Rewards ─────────────────────────────────────────────────────────
 
@@ -100,10 +107,9 @@ var fire_timer: float = 0.0
 var search_timer: float = 0.0
 var _last_hit_was_headshot: bool = false
 
-## Search scanning
-var _search_base_yaw: float = 0.0
-var _search_scan_progress: float = 0.0
-var _search_scan_dir: float = 1.0
+## Sound reaction
+var _sound_origin: Vector3 = Vector3.ZERO
+var _heard_sound: bool = false
 
 ## Behavior (UNAWARE state)
 var _behavior_base_yaw: float = 0.0
@@ -112,6 +118,13 @@ var _behavior_scan_dir: float = 1.0
 var _patrol_index: int = 0
 var _patrol_waiting: bool = false
 var _patrol_wait_timer: float = 0.0
+
+## Reposition
+var _repositioning: bool = false
+var _reposition_target: Vector3 = Vector3.ZERO
+var _auto_reposition_timer: float = 0.0
+var _pending_suspicious: bool = false
+var _pending_sound_origin: Vector3 = Vector3.ZERO
 
 ## ── Node references ──────────────────────────────────────────────────────────
 
@@ -122,6 +135,10 @@ var _patrol_wait_timer: float = 0.0
 ## Visuals (delegated)
 var _visuals: EnemyVisuals
 
+## Per-type body color (set in subclass _ready before super._ready)
+## Head stays palette-colored (accent_hostile), body gets this color for identification
+var body_color: Color = Color.TRANSPARENT  ## TRANSPARENT = don't override
+
 ## Stun material backup
 var _original_materials: Dictionary = {}
 
@@ -131,6 +148,9 @@ func _ready() -> void:
 	_find_player()
 	_behavior_base_yaw = rotation.y
 
+	if auto_reposition_interval > 0.0:
+		_auto_reposition_timer = auto_reposition_interval
+
 	# Create and setup visual systems
 	_visuals = EnemyVisuals.new()
 	add_child(_visuals)
@@ -138,6 +158,16 @@ func _ready() -> void:
 
 	# Palette: color all meshes as hostile
 	PaletteManager.bind_meshes(self, PaletteManager.SLOT_ACCENT_HOSTILE)
+
+	# Apply per-type body color if set (head stays palette-colored)
+	if body_color.a > 0.0 and mesh:
+		for child in mesh.get_children():
+			if child is MeshInstance3D and child.name == "Body":
+				var mat: Material = child.get_active_material(0)
+				if mat is StandardMaterial3D:
+					var body_mat: StandardMaterial3D = mat.duplicate()
+					body_mat.albedo_color = body_color
+					child.material_override = body_mat
 
 
 func _physics_process(delta: float) -> void:
@@ -233,8 +263,8 @@ func _update_alert_state(delta: float) -> void:
 					_set_alert_state(AlertState.ALERT)
 			else:
 				suspicion -= suspicion_decay * delta
-				if suspicion <= 0.0:
-					suspicion = 0.0
+				if suspicion < alert_threshold * 0.3:
+					suspicion = maxf(suspicion, 0.0)
 					_set_alert_state(AlertState.UNAWARE)
 
 		AlertState.ALERT:
@@ -250,8 +280,6 @@ func _update_alert_state(delta: float) -> void:
 			elif search_timer <= 0.0:
 				suspicion = 0.0
 				_set_alert_state(AlertState.UNAWARE)
-			else:
-				_update_search_scan(delta)
 
 
 func _set_alert_state(new_state: AlertState) -> void:
@@ -264,34 +292,57 @@ func _set_alert_state(new_state: AlertState) -> void:
 	match new_state:
 		AlertState.UNAWARE:
 			velocity = Vector3.ZERO
-			if initial_behavior == "patrol" and not patrol_points.is_empty():
+			_heard_sound = false
+			if initial_behavior == Behavior.PATROL and not patrol_points.is_empty():
 				_patrol_index = _find_closest_patrol_point()
 				_patrol_waiting = false
+			if auto_reposition_interval > 0.0:
+				_auto_reposition_timer = auto_reposition_interval
 		AlertState.ALERT:
 			reaction_timer = reaction_time
 			fire_timer = 0.0
 			velocity = Vector3.ZERO
-			_face_player()
+			_heard_sound = false
 			AudioManager.play_sfx(&"alert_spotted", global_position)
 		AlertState.SEARCHING:
 			search_timer = search_duration
 			velocity = Vector3.ZERO
-			_face_position(last_known_player_pos)
-			_search_base_yaw = rotation.y
-			_search_scan_progress = 0.0
-			_search_scan_dir = 1.0
 
 
 ## ── Behavior (UNAWARE idle actions) ──────────────────────────────────────────
 
 func _update_behavior(delta: float) -> void:
+	# Reposition takes priority over all other behavior
+	if _repositioning:
+		_update_reposition(delta)
+		return
+
+	if alert_state == AlertState.SUSPICIOUS:
+		if _heard_sound:
+			_face_position_smooth(_sound_origin, delta)
+		elif can_see_player:
+			_face_player_smooth(delta)
+		return
+
+	if alert_state == AlertState.SEARCHING:
+		_face_position_smooth(last_known_player_pos, delta)
+		return
+
 	if alert_state != AlertState.UNAWARE:
 		return
 
+	# Auto reposition timer (only ticks in UNAWARE)
+	if can_reposition and auto_reposition_interval > 0.0:
+		_auto_reposition_timer -= delta
+		if _auto_reposition_timer <= 0.0:
+			if _try_reposition():
+				return
+			_auto_reposition_timer = auto_reposition_interval
+
 	match initial_behavior:
-		"scanning":
+		Behavior.SCANNING:
 			_update_behavior_scan(delta)
-		"patrol":
+		Behavior.PATROL:
 			_update_behavior_patrol(delta)
 
 
@@ -304,7 +355,8 @@ func _update_behavior_scan(delta: float) -> void:
 	elif _behavior_scan_progress < -max_progress:
 		_behavior_scan_progress = -max_progress
 		_behavior_scan_dir = 1.0
-	rotation.y = _behavior_base_yaw + _behavior_scan_progress
+	var target_yaw := _behavior_base_yaw + _behavior_scan_progress
+	rotation.y = lerp_angle(rotation.y, target_yaw, clampf(turn_speed * delta, 0.0, 1.0))
 
 
 func _update_behavior_patrol(delta: float) -> void:
@@ -329,14 +381,83 @@ func _update_behavior_patrol(delta: float) -> void:
 		return
 
 	var dir := to_target.normalized()
-	_face_direction(dir)
-	velocity = dir * patrol_speed
+	_face_direction_smooth(dir, delta)
+	var facing := Vector3(-sin(rotation.y), 0, -cos(rotation.y))
+	velocity = facing * patrol_speed
 	move_and_slide()
 
 
-func _face_direction(dir: Vector3) -> void:
+## ── Reposition ──────────────────────────────────────────────────────────────
+
+func _try_reposition() -> bool:
+	if not can_reposition or _repositioning or patrol_points.is_empty():
+		return false
+
+	# Pick the farthest patrol point from current position
+	var best_idx := 0
+	var best_dist := 0.0
+	for i in patrol_points.size():
+		var d := global_position.distance_squared_to(patrol_points[i])
+		if d > best_dist:
+			best_dist = d
+			best_idx = i
+
+	_reposition_target = patrol_points[best_idx]
+	_repositioning = true
+	if auto_reposition_interval > 0.0:
+		_auto_reposition_timer = auto_reposition_interval
+	return true
+
+
+func _update_reposition(delta: float) -> void:
+	var to_target := _reposition_target - global_position
+	to_target.y = 0.0
+	var dist := to_target.length()
+
+	if dist < 1.0:
+		_repositioning = false
+		velocity = Vector3.ZERO
+		_behavior_base_yaw = rotation.y
+
+		# Apply deferred suspicious state (only if still UNAWARE)
+		if _pending_suspicious:
+			_pending_suspicious = false
+			if alert_state == AlertState.UNAWARE:
+				last_known_player_pos = _pending_sound_origin
+				if suspicion >= alert_threshold:
+					_set_alert_state(AlertState.ALERT)
+				elif suspicion >= alert_threshold * 0.3:
+					_set_alert_state(AlertState.SUSPICIOUS)
+		return
+
+	var dir := to_target.normalized()
+	_face_direction_smooth(dir, delta)
+	var facing := Vector3(-sin(rotation.y), 0, -cos(rotation.y))
+	velocity = facing * reposition_speed
+	move_and_slide()
+
+
+## ── Rotation helpers ────────────────────────────────────────────────────────
+
+func _face_direction_smooth(dir: Vector3, delta: float) -> void:
 	if dir.length_squared() > 0.001:
-		rotation.y = atan2(-dir.x, -dir.z)
+		var target_yaw := atan2(-dir.x, -dir.z)
+		rotation.y = lerp_angle(rotation.y, target_yaw, clampf(turn_speed * delta, 0.0, 1.0))
+
+
+func _face_position_smooth(target: Vector3, delta: float) -> void:
+	var dir := Vector3(target.x - global_position.x, 0, target.z - global_position.z)
+	if dir.length_squared() < 0.01:
+		return
+	var target_yaw := atan2(-dir.x, -dir.z)
+	rotation.y = lerp_angle(rotation.y, target_yaw, clampf(turn_speed * delta, 0.0, 1.0))
+
+
+func _face_player_smooth(delta: float) -> void:
+	if not player:
+		return
+	var target_pos := last_known_player_pos if not can_see_player else player.global_position
+	_face_position_smooth(target_pos, delta)
 
 
 func _find_closest_patrol_point() -> int:
@@ -356,7 +477,10 @@ func _update_combat(delta: float) -> void:
 	if alert_state != AlertState.ALERT:
 		return
 
-	_face_player()
+	if _repositioning:
+		return
+
+	_face_player_smooth(delta)
 
 	if reaction_timer > 0.0:
 		reaction_timer -= delta
@@ -388,36 +512,8 @@ func _fire_at_player() -> void:
 	get_tree().root.add_child(bullet)
 	bullet.global_position = eye_pos
 
-	# Muzzle flash + audio
 	VFXFactory.spawn_muzzle_flash(eye_pos, aim_dir, true)
 	AudioManager.play_sfx(&"rifle_fire", eye_pos)
-
-
-func _face_player() -> void:
-	if not player:
-		return
-	var target_pos := last_known_player_pos if not can_see_player else player.global_position
-	_face_position(target_pos)
-
-
-func _face_position(target: Vector3) -> void:
-	var look_pos := Vector3(target.x, global_position.y, target.z)
-	if look_pos.distance_to(global_position) > 0.1:
-		look_at(look_pos, Vector3.UP)
-
-
-func _update_search_scan(delta: float) -> void:
-	_search_scan_progress += _search_scan_dir * search_scan_speed * delta
-
-	var max_progress := deg_to_rad(search_scan_angle)
-	if _search_scan_progress > max_progress:
-		_search_scan_progress = max_progress
-		_search_scan_dir = -1.0
-	elif _search_scan_progress < -max_progress:
-		_search_scan_progress = -max_progress
-		_search_scan_dir = 1.0
-
-	rotation.y = _search_base_yaw + _search_scan_progress
 
 
 ## ── Sound Reaction ───────────────────────────────────────────────────────────
@@ -429,9 +525,19 @@ func hear_sound(origin: Vector3, loudness: float) -> void:
 	var distance := global_position.distance_to(origin)
 	var effect := loudness / maxf(distance, 1.0)
 
+	_sound_origin = origin
+	_heard_sound = true
+
 	if alert_state == AlertState.UNAWARE or alert_state == AlertState.SUSPICIOUS:
 		suspicion += effect
 		last_known_player_pos = origin
+
+		# Enemies that can reposition: move first, defer state change
+		if can_reposition and _try_reposition():
+			_pending_suspicious = true
+			_pending_sound_origin = origin
+			return
+
 		if suspicion >= alert_threshold:
 			_set_alert_state(AlertState.ALERT)
 		elif suspicion >= alert_threshold * 0.3 and alert_state == AlertState.UNAWARE:
@@ -458,7 +564,6 @@ func on_bullet_hit(bullet: Bullet, collision: KinematicCollision3D) -> void:
 	var is_headshot := _check_headshot(hit_point)
 	var dmg := bullet.damage
 
-	# Headshot-specific VFX (regular impact already spawned by bullet)
 	if is_headshot:
 		VFXFactory.spawn_hit_impact(hit_point, hit_normal, true)
 
@@ -474,10 +579,17 @@ func on_bullet_hit(bullet: Bullet, collision: KinematicCollision3D) -> void:
 	# Getting shot immediately alerts
 	if alert_state != AlertState.ALERT:
 		suspicion = alert_threshold
-		var players := get_tree().get_nodes_in_group("player")
-		if players.size() > 0:
-			last_known_player_pos = players[0].global_position
+		if player:
+			last_known_player_pos = player.global_position
+		else:
+			var players := get_tree().get_nodes_in_group("player")
+			if players.size() > 0:
+				last_known_player_pos = players[0].global_position
 		_set_alert_state(AlertState.ALERT)
+
+	# Repositioners move after being hit
+	if can_reposition:
+		_try_reposition()
 
 	_last_hit_was_headshot = is_headshot
 	if health <= 0.0:
@@ -502,9 +614,12 @@ func stun(duration: float) -> void:
 
 	if alert_state == AlertState.UNAWARE or alert_state == AlertState.SUSPICIOUS:
 		suspicion = alert_threshold
-		var players := get_tree().get_nodes_in_group("player")
-		if players.size() > 0:
-			last_known_player_pos = players[0].global_position
+		if player:
+			last_known_player_pos = player.global_position
+		else:
+			var players := get_tree().get_nodes_in_group("player")
+			if players.size() > 0:
+				last_known_player_pos = players[0].global_position
 
 
 func _update_stun_visual(stunned: bool) -> void:
@@ -541,14 +656,11 @@ func _die(headshot: bool) -> void:
 	is_dead = true
 	enemy_killed.emit(self, headshot)
 
-	# Hide visuals
 	_visuals.on_death()
 
-	# Report to RunManager with distance + headshot bonuses
 	RunManager.record_shot_hit()
 	RunManager.record_kill_with_bonus(self, headshot, credit_reward, xp_reward)
 
-	# Visual death — turn red and disable collision
 	_on_death()
 
 
@@ -557,11 +669,19 @@ func _on_death() -> void:
 	set_deferred("collision_layer", 0)
 	set_deferred("collision_mask", 0)
 
-	# VFX handles tilt, fade, and cleanup
 	VFXFactory.spawn_death_effect(self, _last_hit_was_headshot)
 
 
 ## ── Helpers ──────────────────────────────────────────────────────────────────
+
+static func behavior_from_string(tag: String) -> Behavior:
+	match tag.to_lower():
+		"scanning":
+			return Behavior.SCANNING
+		"patrol":
+			return Behavior.PATROL
+	return Behavior.DEFAULT
+
 
 func _find_player() -> void:
 	var players := get_tree().get_nodes_in_group("player")

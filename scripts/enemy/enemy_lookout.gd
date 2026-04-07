@@ -5,7 +5,7 @@ extends EnemyBase
 
 func _ready() -> void:
 	# Override base defaults for a weak, stationary lookout
-	fov_degrees = 60.0
+	fov_degrees = 30.0
 	max_sight_range = 150.0  ## Can spot player at long range (but slow to react)
 	suspicion_rate = 0.3
 	suspicion_decay = 0.15
@@ -20,5 +20,11 @@ func _ready() -> void:
 
 	credit_reward = 50
 	xp_reward = 25
+
+	initial_behavior = Behavior.SCANNING
+	scan_speed = 0.2
+	scan_angle = 45.0
+
+	body_color = Color(0.6, 0.2, 0.2)  # Dull red
 
 	super._ready()

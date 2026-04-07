@@ -34,13 +34,12 @@ func get_unlock_requirements_text() -> String:
 @export var enemy_count_range: Vector2i = Vector2i(3, 6)  ## Min/max enemies per run
 @export var extraction_count: int = 1  ## How many extraction zones stay active
 
-@export_group("Threat Phases")
-@export var early_phase_duration: float = -1.0  ## Negative = use RunManager default
-@export var mid_phase_duration: float = -1.0
-@export var mid_spawn_interval: float = 15.0  ## Seconds between spawns in MID phase
-@export var late_spawn_interval: float = 8.0
-@export var mid_max_enemies: int = 6  ## Max concurrent dynamically-spawned enemies
-@export var late_max_enemies: int = 12
+@export_group("Enemy Spawning")
+@export var spawn_start_phase: int = 2  ## Phase at which dynamic spawning begins (1-10)
+@export var spawn_interval_initial: float = 20.0  ## Seconds between spawns at start phase
+@export var spawn_interval_final: float = 5.0  ## Seconds between spawns at phase 10
+@export var max_enemies_initial: int = 3  ## Max concurrent enemies at start phase
+@export var max_enemies_final: int = 12  ## Max concurrent enemies at phase 10
 
 @export_group("NPC Population")
 @export var npc_pool: NpcPool

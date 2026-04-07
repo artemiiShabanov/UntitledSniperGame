@@ -39,7 +39,7 @@ The project follows a **scene + autoload** architecture typical of Godot 4 games
 | Autoload | Script | Purpose |
 |----------|--------|---------|
 | **SaveManager** | `scripts/systems/save_manager.gd` | Persistent save/load, credits, XP, stats, ammo inventory, mods, skills, palette unlocks. JSON file I/O. Multiple slots (max 3). Migration system (currently v4). |
-| **RunManager** | `scripts/systems/run_manager.gd` | Game state machine (HUB→DEPLOYING→IN_RUN→EXTRACTING→RESULT). Run timer, threat phases (EARLY/MID/LATE), lives, kill tracking, credit/XP accumulation, extraction flow. |
+| **RunManager** | `scripts/systems/run_manager.gd` | Game state machine (HUB→DEPLOYING→IN_RUN→EXTRACTING→RESULT). Run timer, threat phases (1-10), lives, kill tracking, credit/XP accumulation, extraction flow. |
 | **PaletteManager** | `scripts/systems/palette_manager.gd` | Color palette system. Auto-discovers palette .tres files, manages palette cycling (unlock-aware), pushes colors to global shader uniforms, tracks bound meshes for recoloring. |
 | **AudioManager** | `scripts/systems/audio_manager.gd` | Sound playback. Bank registry (key→stream), bus routing, 2D/3D playback, fade/crossfade. 36 sound banks. |
 | **VFXFactory** | `scripts/systems/vfx_factory.gd` | Visual effects creation. Muzzle flash, tracers, impacts (world/body/head), extraction zone particles, death effects. All palette-colored. |
@@ -78,7 +78,7 @@ HUB ──(deploy)──► DEPLOYING ──(level loaded)──► IN_RUN
 - `run_ended(success: bool)` — extraction complete or death
 - `lives_changed(current: int)` — life lost
 - `kill_recorded(info: Dictionary)` — enemy killed with metadata
-- `threat_phase_changed(phase: int)` — EARLY→MID→LATE transitions
+- `threat_phase_changed(phase: int)` — phase 1→10 transitions (evenly spaced across run duration)
 
 ---
 

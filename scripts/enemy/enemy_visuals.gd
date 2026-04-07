@@ -26,12 +26,9 @@ var show_debug: bool = false
 
 ## ── Internal state ──────────────────────────────────────────────────────────
 
-## Scope glint
+## Scope glint (flat billboard star)
 var _glint_sprite: Sprite3D
-var _glint_streak: Sprite3D
-var _glint_light: OmniLight3D
-var _glint_material: StandardMaterial3D
-var _glint_streak_material: StandardMaterial3D
+var _glint_material: ShaderMaterial
 var _glint_active: bool = false
 var _glint_time: float = 0.0
 
@@ -40,10 +37,13 @@ var _laser_mesh_instance: MeshInstance3D
 var _laser_immediate_mesh: ImmediateMesh
 var _laser_material: StandardMaterial3D
 
-## Debug visualization
-var _debug_mesh_instance: MeshInstance3D
-var _debug_immediate_mesh: ImmediateMesh
-var _debug_material: StandardMaterial3D
+## Sight cone visualization
+var _cone_mesh_instance: MeshInstance3D
+var _cone_material: ShaderMaterial
+var _cone_length: float = 20.0
+var _cone_half_angle: float = 0.5
+
+## State indicator
 var _state_indicator: MeshInstance3D
 var _state_mat: StandardMaterial3D
 
@@ -85,102 +85,73 @@ func update_visuals(delta: float) -> void:
 	_update_glint(delta)
 	_update_laser()
 	if show_debug:
-		_update_debug_visuals()
+		_update_cone_color()
 
 
 func on_death() -> void:
 	_set_glint_visible(false)
-	if _glint_streak:
-		_glint_streak.visible = false
 	if _laser_mesh_instance:
 		_laser_mesh_instance.visible = false
-	if _debug_mesh_instance:
-		_debug_mesh_instance.visible = false
+	if _cone_mesh_instance:
+		_cone_mesh_instance.visible = false
 	if _state_indicator:
 		_state_indicator.visible = false
 
 
-## ── Scope Glint ─────────────────────────────────────────────────────────────
+## ── Scope Glint (flat billboard 4-point star) ──────────────────────────────
+
+const GLINT_SHADER_CODE := "
+shader_type spatial;
+render_mode unshaded, cull_disabled, depth_draw_never;
+uniform vec4 tint : source_color = vec4(1.0, 0.95, 0.7, 1.0);
+uniform float intensity : hint_range(0.0, 1.0) = 1.0;
+void vertex() {
+	// Billboard
+	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(
+		vec4(normalize(cross(vec3(0,1,0), MAIN_CAM_INV_VIEW_MATRIX[2].xyz)), 0),
+		vec4(0, 1, 0, 0),
+		vec4(normalize(MAIN_CAM_INV_VIEW_MATRIX[2].xyz), 0),
+		MODEL_MATRIX[3]);
+}
+void fragment() {
+	// 4-point star shape from UV
+	vec2 uv = UV * 2.0 - 1.0;
+	float d_cross = min(abs(uv.x), abs(uv.y));
+	float d_diag = min(abs(uv.x - uv.y), abs(uv.x + uv.y)) * 0.707;
+	float star = exp(-d_cross * 6.0) * 0.9 + exp(-d_diag * 8.0) * 0.4;
+	float circle = 1.0 - length(uv);
+	star += smoothstep(0.0, 0.4, circle) * 0.5;
+	star = clamp(star, 0.0, 1.0);
+	ALBEDO = tint.rgb;
+	ALPHA = star * tint.a * intensity;
+}
+"
 
 func _setup_glint() -> void:
 	var glint_pos := Vector3(0, EnemyBase.EYE_HEIGHT, -0.2)
 
-	# Core glint — bright center point
 	_glint_sprite = Sprite3D.new()
-	_glint_sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_glint_sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_glint_sprite.position = glint_pos
-	_glint_sprite.pixel_size = 0.004
+	_glint_sprite.pixel_size = 0.012
 	_glint_sprite.visible = false
+	_glint_sprite.billboard = BaseMaterial3D.BILLBOARD_DISABLED  # Shader handles billboard
 
-	# Sharp radial gradient for core
-	var gradient := Gradient.new()
-	gradient.set_color(0, Color.WHITE)
-	gradient.add_point(0.3, Color(1, 1, 1, 0.8))
-	gradient.set_color(2, Color(1, 1, 1, 0))
-	var tex := GradientTexture2D.new()
-	tex.gradient = gradient
-	tex.fill = GradientTexture2D.FILL_RADIAL
-	tex.fill_from = Vector2(0.5, 0.5)
-	tex.fill_to = Vector2(0.5, 0.0)
-	tex.width = 64
-	tex.height = 64
+	# White square texture — shader draws the star shape
+	var img := Image.create(32, 32, false, Image.FORMAT_RGBA8)
+	img.fill(Color.WHITE)
+	var tex := ImageTexture.create_from_image(img)
 	_glint_sprite.texture = tex
 
-	# Additive unshaded material
-	_glint_material = StandardMaterial3D.new()
-	_glint_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_glint_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	_glint_material.albedo_color = glint_color
-	_glint_material.render_priority = 1
+	var shader := Shader.new()
+	shader.code = GLINT_SHADER_CODE
+	_glint_material = ShaderMaterial.new()
+	_glint_material.shader = shader
+	_glint_material.set_shader_parameter("tint", glint_color)
+	_glint_material.set_shader_parameter("intensity", 0.0)
 	_glint_sprite.material_override = _glint_material
 
 	enemy.add_child(_glint_sprite)
-
-	# Horizontal lens flare streak
-	_glint_streak = Sprite3D.new()
-	_glint_streak.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_glint_streak.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_glint_streak.position = glint_pos
-	_glint_streak.pixel_size = 0.003
-	_glint_streak.scale = Vector3(4.0, 0.3, 1.0)  # Wide and thin
-	_glint_streak.visible = false
-
-	# Horizontal gradient for streak
-	var streak_grad := Gradient.new()
-	streak_grad.set_color(0, Color(1, 1, 1, 0))
-	streak_grad.add_point(0.3, Color(1, 1, 1, 0.6))
-	streak_grad.add_point(0.5, Color.WHITE)
-	streak_grad.add_point(0.7, Color(1, 1, 1, 0.6))
-	streak_grad.set_color(4, Color(1, 1, 1, 0))
-	var streak_tex := GradientTexture2D.new()
-	streak_tex.gradient = streak_grad
-	streak_tex.fill = GradientTexture2D.FILL_LINEAR
-	streak_tex.fill_from = Vector2(0, 0.5)
-	streak_tex.fill_to = Vector2(1, 0.5)
-	streak_tex.width = 128
-	streak_tex.height = 16
-	_glint_streak.texture = streak_tex
-
-	var streak_mat := StandardMaterial3D.new()
-	streak_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	streak_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	streak_mat.albedo_color = glint_color
-	streak_mat.render_priority = 1
-	_glint_streak.material_override = streak_mat
-	_glint_streak_material = streak_mat
-
-	enemy.add_child(_glint_streak)
-
-	# OmniLight for ambient glow
-	_glint_light = OmniLight3D.new()
-	_glint_light.position = glint_pos
-	_glint_light.omni_range = 2.0
-	_glint_light.light_color = Color(glint_color.r, glint_color.g, glint_color.b)
-	_glint_light.light_energy = 0.0
-	_glint_light.visible = false
-
-	enemy.add_child(_glint_light)
 
 
 func _update_glint(delta: float) -> void:
@@ -188,43 +159,38 @@ func _update_glint(delta: float) -> void:
 		return
 
 	var should_show := false
+	var target_intensity := 0.0
 
 	if not enemy.is_dead:
 		match enemy.alert_state:
 			EnemyBase.AlertState.ALERT:
-				should_show = enemy.can_see_player
+				should_show = true
+				target_intensity = 1.0
 			EnemyBase.AlertState.SUSPICIOUS:
-				if glint_suspicious_flash and enemy.can_see_player:
-					var ratio := enemy.suspicion / enemy.alert_threshold
-					if ratio >= glint_suspicious_threshold:
-						should_show = fmod(_glint_time * 4.0, 1.0) > 0.5
+				should_show = true
+				# Flicker on/off based on suspicion ratio
+				var ratio := enemy.suspicion / enemy.alert_threshold
+				var flicker := fmod(_glint_time * 4.0, 1.0) > 0.5
+				target_intensity = ratio * (1.0 if flicker else 0.3)
+			EnemyBase.AlertState.SEARCHING:
+				should_show = true
+				target_intensity = 0.5
 
 	_set_glint_visible(should_show)
 
 	if should_show:
 		_glint_time += delta
 
-		# Core pulse — sharp flicker
-		var fast_pulse := 0.5 + 0.5 * sin(_glint_time * glint_pulse_speed * TAU)
-		var flicker := 1.0 if fmod(_glint_time * 12.0, 1.0) > 0.15 else 0.7
-		var intensity := fast_pulse * flicker
+		# Gentle pulse
+		var pulse := 0.85 + 0.15 * sin(_glint_time * glint_pulse_speed * TAU)
+		_glint_material.set_shader_parameter("intensity", target_intensity * pulse)
 
-		_glint_material.albedo_color = glint_color * (0.6 + intensity * 0.4)
-		_glint_light.light_energy = glint_max_energy * intensity
-
-		# Core scale breath
-		var scale_pulse := 1.0 + 0.2 * sin(_glint_time * 5.0)
-		_glint_sprite.scale = Vector3.ONE * scale_pulse
-
-		# Streak shimmer — slightly offset timing for visual interest
-		if _glint_streak:
-			var streak_pulse := 0.5 + 0.5 * sin(_glint_time * glint_pulse_speed * TAU + 0.5)
-			_glint_streak_material.albedo_color = glint_color * (0.3 + streak_pulse * 0.5)
-			# Streak width oscillates
-			var streak_width := 3.0 + sin(_glint_time * 3.0) * 1.5
-			_glint_streak.scale = Vector3(streak_width, 0.25, 1.0)
+		# Scale pulse for a bit of life
+		var s := 1.0 + 0.15 * sin(_glint_time * 3.0)
+		_glint_sprite.scale = Vector3.ONE * s
 	else:
 		_glint_time = 0.0
+		_glint_material.set_shader_parameter("intensity", 0.0)
 
 
 func _set_glint_visible(vis: bool) -> void:
@@ -233,10 +199,6 @@ func _set_glint_visible(vis: bool) -> void:
 	_glint_active = vis
 	if _glint_sprite:
 		_glint_sprite.visible = vis
-	if _glint_streak:
-		_glint_streak.visible = vis
-	if _glint_light:
-		_glint_light.visible = vis
 
 
 ## ── Laser Sight ─────────────────────────────────────────────────────────────
@@ -308,20 +270,26 @@ func _draw_laser_quad(a: Vector3, b: Vector3, c: Vector3, d: Vector3,
 
 ## ── Debug Visualization ─────────────────────────────────────────────────────
 
+## ── Sight Cone (flat ground-plane fan, built once via ArrayMesh) ────────────
+
+const CONE_SHADER_CODE := "
+shader_type spatial;
+render_mode unshaded, cull_disabled, depth_draw_never, blend_mix;
+uniform vec4 cone_color : source_color = vec4(0.2, 0.8, 0.2, 0.3);
+varying float fade;
+void vertex() {
+	fade = COLOR.r;
+}
+void fragment() {
+	ALBEDO = cone_color.rgb;
+	ALPHA = cone_color.a * (1.0 - fade);
+}
+"
+
 func _setup_debug_visuals() -> void:
-	_debug_immediate_mesh = ImmediateMesh.new()
-	_debug_mesh_instance = MeshInstance3D.new()
-	_debug_mesh_instance.mesh = _debug_immediate_mesh
-	_debug_mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-
-	_debug_material = StandardMaterial3D.new()
-	_debug_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_debug_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_debug_material.albedo_color = Color(0.2, 0.8, 0.2, 0.15)
-	_debug_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	_debug_material.no_depth_test = true
-
-	enemy.add_child(_debug_mesh_instance)
+	_cone_half_angle = deg_to_rad(enemy.fov_degrees)
+	_cone_length = minf(enemy.max_sight_range, 25.0)
+	_build_cone_mesh()
 
 	# State indicator sphere above head
 	_state_indicator = MeshInstance3D.new()
@@ -340,41 +308,69 @@ func _setup_debug_visuals() -> void:
 	enemy.add_child(_state_indicator)
 
 
-func _update_debug_visuals() -> void:
-	if not _debug_immediate_mesh:
+func _build_cone_mesh() -> void:
+	## Builds a flat fan on the XZ plane: tip at origin, spreading forward (-Z).
+	## Vertex color R channel stores 0 at tip, 1 at far edge (used for fade).
+	var segments := 24
+	var verts := PackedVector3Array()
+	var colors := PackedColorArray()
+
+	var origin := Vector3(0, 0.05, 0)  # Slightly above ground to avoid z-fight
+
+	for i in segments:
+		var frac_a := float(i) / float(segments)
+		var frac_b := float(i + 1) / float(segments)
+		# Angles spread from -half_angle to +half_angle around -Z
+		var a_angle := lerpf(-_cone_half_angle, _cone_half_angle, frac_a)
+		var b_angle := lerpf(-_cone_half_angle, _cone_half_angle, frac_b)
+
+		var far_a := Vector3(sin(a_angle) * _cone_length, 0.05, -cos(a_angle) * _cone_length)
+		var far_b := Vector3(sin(b_angle) * _cone_length, 0.05, -cos(b_angle) * _cone_length)
+
+		# Triangle: origin → far_a → far_b
+		verts.append(origin)
+		colors.append(Color(0, 0, 0, 1))  # fade = 0 at tip
+		verts.append(far_a)
+		colors.append(Color(1, 0, 0, 1))  # fade = 1 at edge
+		verts.append(far_b)
+		colors.append(Color(1, 0, 0, 1))
+
+	var arr_mesh := ArrayMesh.new()
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_COLOR] = colors
+	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+
+	# Shader material for fade
+	var shader := Shader.new()
+	shader.code = CONE_SHADER_CODE
+	_cone_material = ShaderMaterial.new()
+	_cone_material.shader = shader
+	_cone_material.set_shader_parameter("cone_color", Color(0.2, 0.8, 0.2, 0.3))
+
+	_cone_mesh_instance = MeshInstance3D.new()
+	_cone_mesh_instance.mesh = arr_mesh
+	_cone_mesh_instance.material_override = _cone_material
+	_cone_mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_cone_mesh_instance.position = Vector3.ZERO
+
+	enemy.add_child(_cone_mesh_instance)
+
+
+func _update_cone_color() -> void:
+	if not _cone_material:
 		return
 
 	_state_mat.albedo_color = STATE_COLORS.get(enemy.alert_state, Color.WHITE)
 
-	var cone_color: Color = STATE_COLORS.get(enemy.alert_state, Color.GREEN)
-	cone_color.a = 0.1 if enemy.alert_state == EnemyBase.AlertState.UNAWARE else 0.2
-	_debug_material.albedo_color = cone_color
-
-	_debug_immediate_mesh.clear_surfaces()
-	_debug_immediate_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _debug_material)
-
-	var eye_offset := Vector3(0, EnemyBase.EYE_HEIGHT, 0)
-	var cone_length: float = minf(enemy.max_sight_range, 20.0)
-	var half_angle := deg_to_rad(enemy.fov_degrees)
-	var segments := 16
-
-	for i in range(segments):
-		var angle_a := TAU * float(i) / float(segments)
-		var angle_b := TAU * float(i + 1) / float(segments)
-
-		var dir_a := Vector3(
-			sin(half_angle) * cos(angle_a),
-			sin(half_angle) * sin(angle_a),
-			-cos(half_angle)
-		) * cone_length
-		var dir_b := Vector3(
-			sin(half_angle) * cos(angle_b),
-			sin(half_angle) * sin(angle_b),
-			-cos(half_angle)
-		) * cone_length
-
-		_debug_immediate_mesh.surface_add_vertex(eye_offset)
-		_debug_immediate_mesh.surface_add_vertex(eye_offset + dir_a)
-		_debug_immediate_mesh.surface_add_vertex(eye_offset + dir_b)
-
-	_debug_immediate_mesh.surface_end()
+	var base: Color = STATE_COLORS.get(enemy.alert_state, Color.GREEN)
+	var alpha: float = 0.3
+	match enemy.alert_state:
+		EnemyBase.AlertState.SUSPICIOUS:
+			alpha = 0.35
+		EnemyBase.AlertState.ALERT:
+			alpha = 0.4
+		EnemyBase.AlertState.SEARCHING:
+			alpha = 0.35
+	_cone_material.set_shader_parameter("cone_color", Color(base.r, base.g, base.b, alpha))

@@ -13,7 +13,7 @@ save system, audio/VFX systems, 1 greybox level (Industrial Yard).
 
 | Section | Progress | Summary |
 |---------|----------|---------|
-| Run Lifecycle | ██░░░ 30% | Enemy types, phase rewards, objectives, events, variation |
+| Run Lifecycle | ███░░ 50% | Enemy types done, phase rewards, objectives, events, variation |
 | Global Progression | ██░░░ 40% | Mods, contracts, palettes |
 | Content | █░░░░ 20% | 1/4 levels done, placeholder art/models/audio, UI polish |
 | Polish & Release | ░░░░░ 0% | Steam, controller, balancing, marketing |
@@ -24,21 +24,23 @@ save system, audio/VFX systems, 1 greybox level (Industrial Yard).
 
 Systems and mechanics active during a run.
 
-### 1.1 Enemy Types [ ]
+### 1.1 Enemy Types [x]
 
-Only the Lookout is implemented. Four more types are designed in the GDD:
+6 enemy types implemented, each with distinct mechanics and phase-gated spawning:
 
-- [ ] **Marksman** — repositions between nests, medium awareness, decent accuracy
-- [ ] **Countersniper** — scope glint visible, actively scans for player, accurate and fast
-- [ ] **Heavy Sniper** — armored, requires AP ammo or headshot, high damage
-- [ ] **Elite Sniper** — flanks to different nests, uses smoke/repositioning
-- [ ] Scope glint shimmer VFX (deferred from Phase 3)
+- [x] **Lookout** (phase 1+) — stationary, scanning, slow reactions. Tutorial-tier fodder
+- [x] **Spotter** (phase 3+) — binocular glint, alerts all nearby enemies on detection. Priority target
+- [x] **Marksman** (phase 4+) — shoots back, repositions to cover after being shot at. Reactive threat
+- [x] **Drone** (phase 5+) — flies toward player, low HP, deals damage on proximity. Anti-camping pressure
+- [x] **Ghost** (phase 7+) — only visible through scope zoom, fast repositioning. Scope discipline check
+- [x] **Heavy** (phase 8+) — armored (needs AP or headshot), slow, high damage. Loadout gate
+- [x] Phase-gated spawning via `min_phase` on EnemyPoolEntry
 
-> Depends on: enemy_base.gd (ready), enemy_pool system (ready), spawn_point markers (ready)
+> Enemy pools updated for Industrial Yard and Dev Test levels
 
 ### 1.2 Phase-Gated Rewards [ ]
 
-Threat phases exist (EARLY/MID/LATE) but rewards don't scale with them yet.
+Threat phases (1-10) exist but rewards don't scale with them yet.
 
 - [ ] Phase-specific enemy type pools (tougher enemies only in MID/LATE)
 - [ ] Higher-value targets gated behind later phases
@@ -67,7 +69,7 @@ Infrastructure exists but no events are defined:
 - [ ] Event types TBD — designed in detail when needed
 - [ ] LevelEventData, LevelEventRunner, level_events_pool already exist
 
-### 1.5 Grid-Based Level Generation [~]
+### 1.5 Grid-Based Level Generation [x]
 
 Procedural level layout system — each run assembles the map from reusable blocks on a grid.
 
@@ -125,12 +127,25 @@ data/levels/   — <level>_rules.tres, <level>_catalog.tres
 ```
 
 **Tasks:**
-- [~] Core resources (BlockDef, BlockCatalog, GridLevelRules, sub-rules)
-- [ ] GridLevelBuilder solver
-- [ ] GridLevelData integration with BaseLevel
-- [ ] Block scenes — industrial theme (10-15 greybox blocks)
-- [ ] Convert Industrial Yard to grid system as test
+- [x] Core resources (BlockDef, BlockCatalog, GridLevelRules, sub-rules)
+- [x] GridLevelBuilder solver
+- [x] GridLevelData integration with BaseLevel
+- [x] Block scenes — industrial theme (17 block builders)
+- [x] Convert Industrial Yard to grid system as test
 - [ ] Second level (City) using grid system
+
+### 1.6 Destructible Types [ ]
+
+Expand destructible targets beyond the basic crate to add variety and tactical options.
+
+- [ ] Design destructible types list (explosive barrel, vehicle, supply cache, etc.)
+- [ ] Per-type properties: HP, reward, visual size, special effects (explosion radius, chain reactions)
+- [ ] DestructibleTarget base class refactor to support type variants
+- [ ] Visual/audio feedback per type (explosion VFX, debris, sound)
+- [ ] Phase-gated or level-specific destructible placement
+- [ ] Contract integration (DESTROY_TARGET contract type)
+
+> Depends on: destructible_box.gd (ready), VFXFactory (ready), kill feed (ready)
 
 ---
 

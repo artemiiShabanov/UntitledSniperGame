@@ -5,7 +5,8 @@ extends Node
 ## ── Enums ────────────────────────────────────────────────────────────────────
 
 enum GameState { HUB, DEPLOYING, IN_RUN, EXTRACTING, RESULT }
-enum ThreatPhase { EARLY, MID, LATE }
+const THREAT_PHASE_MIN: int = 1
+const THREAT_PHASE_MAX: int = 10
 
 ## ── Signals ──────────────────────────────────────────────────────────────────
 
@@ -19,7 +20,7 @@ signal extraction_progress_updated(progress: float)  ## 0.0 to 1.0
 signal run_completed(success: bool)
 signal run_timer_updated(time_left: float)
 signal run_timer_expired
-signal threat_phase_changed(phase: ThreatPhase)
+signal threat_phase_changed(phase: int)
 signal enemy_killed_with_info(info: Dictionary)  ## {enemy, headshot, distance, credits, xp}
 signal npc_killed_with_info(info: Dictionary)  ## {penalty, npc_kills}
 signal target_destroyed_with_info(info: Dictionary)  ## {credits, xp}
@@ -30,9 +31,8 @@ signal target_destroyed_with_info(info: Dictionary)  ## {credits, xp}
 @export var default_run_time: float = 300.0  ## 5 minutes per run
 @export var extraction_time: float = 3.0  ## Seconds to extract
 
-## Threat phase timing (seconds of elapsed time)
-@export var early_phase_duration: float = 60.0   ## Seconds in EARLY phase before MID
-@export var mid_phase_duration: float = 120.0    ## Seconds in MID phase before LATE
+## Threat phase timing — 10 phases spread evenly across the run duration
+## Override per-level via LevelData.phase_durations if non-uniform spacing is needed
 
 ## ── State ────────────────────────────────────────────────────────────────────
 
@@ -46,8 +46,8 @@ var run_timer: float = 0.0
 var run_start_time: float = 0.0  ## Actual starting value of run_timer (may differ from default)
 var extraction_timer: float = 0.0
 
-## Threat phase
-var threat_phase: ThreatPhase = ThreatPhase.EARLY
+## Threat phase (1-10)
+var threat_phase: int = 1
 
 ## Credits earned during this run (lost on death)
 var run_credits: int = 0
@@ -123,7 +123,7 @@ func deploy(level_path: String, ammo_loadout: Dictionary = {}) -> void:
 	hit_cooldown = 0.0
 	run_timer = default_run_time
 	run_start_time = default_run_time
-	threat_phase = ThreatPhase.EARLY
+	threat_phase = THREAT_PHASE_MIN
 	contract_completed = false
 	run_stats.reset()
 
@@ -360,14 +360,13 @@ func record_target_destroyed(credits: int, xp: int) -> void:
 
 func _update_threat_phase() -> void:
 	var elapsed := get_run_time_elapsed()
-	var new_phase: ThreatPhase
+	var total := run_start_time
+	if total <= 0.0:
+		return
 
-	if elapsed < early_phase_duration:
-		new_phase = ThreatPhase.EARLY
-	elif elapsed < early_phase_duration + mid_phase_duration:
-		new_phase = ThreatPhase.MID
-	else:
-		new_phase = ThreatPhase.LATE
+	## Phases 1-10 mapped evenly across run duration
+	var progress := clampf(elapsed / total, 0.0, 1.0)
+	var new_phase := clampi(int(progress * THREAT_PHASE_MAX) + 1, THREAT_PHASE_MIN, THREAT_PHASE_MAX)
 
 	if new_phase != threat_phase:
 		threat_phase = new_phase
@@ -375,14 +374,7 @@ func _update_threat_phase() -> void:
 
 
 func get_threat_phase_name() -> String:
-	match threat_phase:
-		ThreatPhase.EARLY:
-			return "EARLY"
-		ThreatPhase.MID:
-			return "MID"
-		ThreatPhase.LATE:
-			return "LATE"
-	return "UNKNOWN"
+	return "PHASE %d" % threat_phase
 
 
 ## ── Distance Bonus ──────────────────────────────────────────────────────────

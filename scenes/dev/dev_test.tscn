@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://c4adr8nhu3lui"]
+[gd_scene load_steps=31 format=3 uid="uid://c4adr8nhu3lui"]
 
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://bekdmpmob6j7c" path="res://scenes/world/zipline.tscn" id="2_zipline"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/extraction_zone.tscn" id="5_extraction"]
 [ext_resource type="Resource" uid="uid://damul4spf4c47" path="res://data/levels/dev_test_data.tres" id="6_level_data"]
 [ext_resource type="PackedScene" path="res://scenes/world/destructible_box.tscn" id="7_destructible"]
+[ext_resource type="Script" uid="uid://pe4xonfg3agm" path="res://scripts/dev/enemy_test_spawner.gd" id="8_test_spawner"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -234,3 +235,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -8)
 
 [node name="DBox3" parent="." instance=ExtResource("7_destructible")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -12)
+
+[node name="EnemyTestSpawner" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("8_test_spawner")

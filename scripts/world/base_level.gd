@@ -34,10 +34,6 @@ func _ready() -> void:
 		if level_data.run_time_override > 0.0:
 			RunManager.run_timer = level_data.run_time_override
 			RunManager.run_start_time = level_data.run_time_override
-		if level_data.early_phase_duration > 0.0:
-			RunManager.early_phase_duration = level_data.early_phase_duration
-		if level_data.mid_phase_duration > 0.0:
-			RunManager.mid_phase_duration = level_data.mid_phase_duration
 
 	# If loaded directly (not via deploy), auto-start a run for dev convenience
 	if RunManager.game_state != RunManager.GameState.DEPLOYING and \
@@ -151,7 +147,7 @@ func _spawn_enemies() -> void:
 		enemy.rotation.y = deg_to_rad(spawn.facing_direction)
 
 		if spawn.behavior_tag != "default" and "initial_behavior" in enemy:
-			enemy.initial_behavior = spawn.behavior_tag
+			enemy.initial_behavior = EnemyBase.behavior_from_string(spawn.behavior_tag)
 
 		# Track used counts for max_per_run
 		var path := scene.resource_path
@@ -267,14 +263,10 @@ func _setup_weather_particles() -> void:
 	add_child(weather_fx)
 
 
-func _on_threat_phase_changed(phase: RunManager.ThreatPhase) -> void:
-	match phase:
-		RunManager.ThreatPhase.MID:
-			AudioManager.play_music(&"combat_tension")
-		RunManager.ThreatPhase.LATE:
-			pass  # Could swap to a more intense track later
-		RunManager.ThreatPhase.EARLY:
-			AudioManager.stop_music()
+func _on_threat_phase_changed(phase: int) -> void:
+	if phase == 4:
+		# First enemies appearing — tension music
+		AudioManager.play_music(&"combat_tension")
 
 
 func _roll_events() -> void:
@@ -308,11 +300,12 @@ func _setup_enemy_spawner() -> void:
 	var spawner := EnemySpawner.new()
 	spawner.name = "EnemySpawner"
 
-	# Apply phase config from level data
-	spawner.mid_spawn_interval = level_data.mid_spawn_interval
-	spawner.late_spawn_interval = level_data.late_spawn_interval
-	spawner.mid_max_enemies = level_data.mid_max_enemies
-	spawner.late_max_enemies = level_data.late_max_enemies
+	# Apply spawner config from level data
+	spawner.spawn_start_phase = level_data.spawn_start_phase
+	spawner.spawn_interval_initial = level_data.spawn_interval_initial
+	spawner.spawn_interval_final = level_data.spawn_interval_final
+	spawner.max_enemies_initial = level_data.max_enemies_initial
+	spawner.max_enemies_final = level_data.max_enemies_final
 
 	add_child(spawner)
 	spawner.setup(self, level_data.enemy_pool, _unused_enemy_spawns)
