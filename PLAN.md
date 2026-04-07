@@ -31,7 +31,7 @@ Systems and mechanics active during a run.
 - [x] **Lookout** (phase 1+) — stationary, scanning, slow reactions. Tutorial-tier fodder
 - [x] **Spotter** (phase 3+) — binocular glint, alerts all nearby enemies on detection. Priority target
 - [x] **Marksman** (phase 4+) — shoots back, repositions to cover after being shot at. Reactive threat
-- [x] **Drone** (phase 5+) — flies toward player, low HP, deals damage on proximity. Anti-camping pressure
+- [x] **Drone** (phase 5+) — flying patrol, circles overhead, chases and shoots on alert. Fragile
 - [x] **Ghost** (phase 7+) — only visible through scope zoom, fast repositioning. Scope discipline check
 - [x] **Heavy** (phase 8+) — armored (needs AP or headshot), slow, high damage. Loadout gate
 - [x] Phase-gated spawning via `min_phase` on EnemyPoolEntry

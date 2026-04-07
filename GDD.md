@@ -280,7 +280,7 @@ All enemies are snipers. The battlefield is a network of sniper positions — th
 | **Lookout** | 1-10 | Stationary, scanning, slow reactions, poor accuracy. Tutorial-tier fodder. | Basic aiming — always present, scales via quantity |
 | **Spotter** | 3-8 | Binocular glint (blue). On detecting player, all enemies within 80m go ALERT instantly. Doesn't shoot. | Kill order — prioritize before they spot you |
 | **Marksman** | 4-10 | Competent sniper. Repositions to cover after being shot at or hearing gunfire. | Re-acquisition — target moves after you engage |
-| **Drone** | 5-10 | Flying quad-rotor, beelines toward player. Low HP (one shot). Deals 1 life damage on proximity, self-destructs. Audible buzz warning. | Position pressure — forces movement or quick reaction |
+| **Drone** | 5-10 | Flying quad-rotor, circles overhead scanning below. Chases player on alert, shoots while moving. Low HP (one shot), poor accuracy, audible buzz warning. | Aerial threat — forces awareness of vertical space |
 | **Ghost** | 7-10 | Only visible through scope zoom. Fast, repositions constantly. Accurate shooter. | Scope discipline — forces careful scanning at range |
 | **Heavy** | 8-10 | Armored — body shots with standard ammo do 15% damage. Requires AP ammo or headshot. Slow, stationary, high damage (2 lives per hit). | Loadout check — punishes wrong ammo choice |
 
