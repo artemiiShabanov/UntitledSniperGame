@@ -56,18 +56,25 @@ Infrastructure exists but no events are defined:
 - [ ] Event types TBD — designed in detail when needed
 - [ ] LevelEventData, LevelEventRunner, level_events_pool already exist
 
-### 1.5 Destructible Types [ ]
+### 1.5 Destructible Types [x]
 
-Expand destructible targets beyond the basic crate to add variety and tactical options.
+5 destructible types implemented. All one-shot kill (no HP). Each has skin variants.
 
-- [ ] Design destructible types list (explosive barrel, vehicle, supply cache, etc.)
-- [ ] Per-type properties: HP, reward, visual size, special effects (explosion radius, chain reactions)
-- [ ] DestructibleTarget base class refactor to support type variants
-- [ ] Visual/audio feedback per type (explosion VFX, debris, sound)
-- [ ] Phase-gated or level-specific destructible placement
-- [ ] Contract integration (DESTROY_TARGET contract type)
+- [x] **Crate** (static, large, $15) — wooden crate, cardboard box, trash can
+- [x] **Bottle** (static, tiny, $20) — bottle, jar, mug
+- [x] **Treasure** (static, rare, small, $150) — gold coins, jewel box, gold bar. Pulsing glow.
+- [x] **Rat** (moving, medium, $50) — scurries between random points with pauses
+- [x] **Bird** (moving, small, $80) — sit/eat/fly cycle, hard to hit in flight
+- [x] DestructibleTarget base class refactored: one-shot, per-type VFX/audio
+- [x] Level integration — DestructiblePool/DestructiblePoolEntry resources, DESTRUCTIBLE spawn type
+- [x] DestructibleSpawner — handles static (at spawn points) and dynamic (random positions) placement
+- [x] Treasure spawn logic (1-2 per run, random placement via DestructibleSpawner)
+- [x] Bird/Rat dynamic spawning system (random ground positions near existing spawn points)
+- [x] Block builders updated with destructible spawn points (ground cover, containers, work/rest areas)
+- [x] Pool .tres files for Industrial Yard and Dev Test levels
+- [x] LevelData extended with destructible config (pool, count ranges, treasure count)
 
-> Depends on: destructible_box.gd (ready), VFXFactory (ready), kill feed (ready)
+> Crate/Bottle: placed at DESTRUCTIBLE spawn points in blocks. Rat/Bird: spawned at random walkable positions. Treasure: 1-2 per run at random positions.
 
 ---
 

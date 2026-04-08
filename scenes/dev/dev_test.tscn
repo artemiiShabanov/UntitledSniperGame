@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://c4adr8nhu3lui"]
+[gd_scene load_steps=29 format=3 uid="uid://c4adr8nhu3lui"]
 
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://bekdmpmob6j7c" path="res://scenes/world/zipline.tscn" id="2_zipline"]
@@ -6,8 +6,6 @@
 [ext_resource type="Script" uid="uid://bt0op02i13jd1" path="res://scripts/world/spawn_point.gd" id="4_spawn_point"]
 [ext_resource type="PackedScene" path="res://scenes/world/extraction_zone.tscn" id="5_extraction"]
 [ext_resource type="Resource" uid="uid://damul4spf4c47" path="res://data/levels/dev_test_data.tres" id="6_level_data"]
-[ext_resource type="PackedScene" path="res://scenes/world/destructible_box.tscn" id="7_destructible"]
-[ext_resource type="Script" uid="uid://pe4xonfg3agm" path="res://scripts/dev/enemy_test_spawner.gd" id="8_test_spawner"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -227,21 +225,32 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, 10)
 [node name="ExtractionZone2" parent="." instance=ExtResource("5_extraction")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 15)
 
-[node name="DBox1" parent="." instance=ExtResource("7_destructible")]
+[node name="DestrSpawn1" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -6)
+script = ExtResource("4_spawn_point")
+spawn_type = 3
 
-[node name="DBox2" parent="." instance=ExtResource("7_destructible")]
+[node name="DestrSpawn2" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -8)
+script = ExtResource("4_spawn_point")
+spawn_type = 3
 
-[node name="DBox3" parent="." instance=ExtResource("7_destructible")]
+[node name="DestrSpawn3" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -12)
+script = ExtResource("4_spawn_point")
+spawn_type = 3
 
-[node name="EnemyTestSpawner" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("8_test_spawner")
+[node name="DestrSpawn4" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -15)
+script = ExtResource("4_spawn_point")
+spawn_type = 3
+
+[node name="DestrSpawn5" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -20)
+script = ExtResource("4_spawn_point")
+spawn_type = 3
+
+[node name="DestrSpawn6" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -5)
+script = ExtResource("4_spawn_point")
+spawn_type = 3

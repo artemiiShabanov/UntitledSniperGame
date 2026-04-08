@@ -38,6 +38,12 @@ static func build_ground_cover(b: BlockBuilderBase) -> void:
 			Vector3(b.rand_offset(4.0), 0.75, b.rand_offset(4.0)),
 			Vector3(2, 1.5, 1), b.mat_dark_metal(), "Pallet")
 
+	# Destructible spawn points (crates/bottles near cover)
+	if b.maybe(0.7):
+		b.add_destructible_spawn(Vector3(b.rand_offset(3.0), 0.2, b.rand_offset(3.0)))
+	if b.maybe(0.4):
+		b.add_destructible_spawn(Vector3(b.rand_offset(4.0), 0.2, b.rand_offset(4.0)))
+
 
 ## ── 3. Container Stack ───────────────────────────────────────────────────────
 
@@ -55,6 +61,9 @@ static func build_containers(b: BlockBuilderBase) -> void:
 	if b.maybe(0.6):
 		var c3 := b.add_box(Vector3(-1, 3.75, -2), Vector3(12, 2.5, 2.5), b.mat_dark_metal(), "Container_3")
 		c3.rotation_degrees.y = rot1
+
+	# Destructible between containers
+	b.add_destructible_spawn(Vector3(0, 0.2, 0))
 
 
 ## ── 4. Small Warehouse ───────────────────────────────────────────────────────
@@ -160,6 +169,10 @@ static func build_fuel_tanks(b: BlockBuilderBase) -> void:
 	# Connecting pipes
 	b.add_box(Vector3(0, 3.5, 0), Vector3(8, 0.3, 0.3), b.mat_metal(), "Pipe")
 
+	# Destructible near tanks
+	if b.maybe(0.5):
+		b.add_destructible_spawn(Vector3(b.rand_offset(3.0), 0.2, b.rand_offset(3.0)))
+
 
 ## ── 12. Enemy Rooftop ────────────────────────────────────────────────────────
 
@@ -190,6 +203,10 @@ static func build_enemy_ground(b: BlockBuilderBase) -> void:
 
 	b.add_enemy_spawn(Vector3(-2, 0.2, -2), 0.0, "ground", "patrol")
 	b.add_enemy_spawn(Vector3(2, 0.2, 1), 180.0, "ground", "idle")
+
+	# Destructible near cover
+	if b.maybe(0.6):
+		b.add_destructible_spawn(Vector3(b.rand_offset(2.0), 0.2, b.rand_offset(2.0)))
 
 
 ## ── 14. Enemy Elevated Nest ──────────────────────────────────────────────────
@@ -227,6 +244,11 @@ static func build_npc_work_area(b: BlockBuilderBase) -> void:
 	b.add_activity_point(Vector3(2, 0.2, 0), ActivityPoint.Activity.CARRY, 90.0, "yard")
 	b.add_activity_point(Vector3(0, 0.2, 3), ActivityPoint.Activity.INSPECT, 180.0, "yard")
 
+	# Destructible crates in work area
+	b.add_destructible_spawn(Vector3(4, 0.2, -3))
+	if b.maybe(0.5):
+		b.add_destructible_spawn(Vector3(-1, 0.2, 2))
+
 
 ## ── 16. NPC Rest Area ────────────────────────────────────────────────────────
 
@@ -243,6 +265,9 @@ static func build_npc_rest_area(b: BlockBuilderBase) -> void:
 
 	b.add_activity_point(Vector3(0, 0.2, -1), ActivityPoint.Activity.EAT, 0.0, "rest")
 	b.add_activity_point(Vector3(2, 0.2, 1), ActivityPoint.Activity.REST, 270.0, "rest")
+
+	# Bottles/crates near rest area
+	b.add_destructible_spawn(Vector3(-2, 0.2, 1))
 
 
 ## ── 17. Wall Segment ─────────────────────────────────────────────────────────

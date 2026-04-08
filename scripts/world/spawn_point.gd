@@ -3,7 +3,7 @@ extends Marker3D
 ## Marks a spawn location in a level. Use groups or the spawn_type export
 ## to query specific kinds at runtime.
 
-enum Type { PLAYER, ENEMY, EXTRACTION }
+enum Type { PLAYER, ENEMY, EXTRACTION, DESTRUCTIBLE }
 
 @export var spawn_type: Type = Type.PLAYER
 @export var spawn_group: String = ""  ## Grouping tag (e.g., "rooftop", "ground")

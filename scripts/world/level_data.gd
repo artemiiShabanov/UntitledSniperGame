@@ -45,6 +45,12 @@ func get_unlock_requirements_text() -> String:
 @export var npc_pool: NpcPool
 @export var npc_count_range: Vector2i = Vector2i(3, 6)  ## Min/max NPCs spawned at level start
 
+@export_group("Destructibles")
+@export var destructible_pool: DestructiblePool
+@export var static_destructible_count_range: Vector2i = Vector2i(4, 8)  ## Crates/bottles placed at spawn points
+@export var dynamic_destructible_count: int = 3  ## Rats/birds spawned at random positions
+@export var treasure_count_range: Vector2i = Vector2i(1, 2)  ## Rare treasures per run
+
 @export_group("Events")
 @export var level_events_pool: Array[LevelEventData] = []
 @export var max_events_per_run: int = 1

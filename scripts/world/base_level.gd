@@ -52,6 +52,7 @@ func _setup_run_variation() -> void:
 	_fill_level_slots()
 	_spawn_enemies()
 	_spawn_npcs()
+	_spawn_destructibles()
 	_pick_extraction_zone()
 	_roll_events()
 	_setup_enemy_spawner()
@@ -220,6 +221,33 @@ func get_activity_points() -> Array[ActivityPoint]:
 		if child is ActivityPoint:
 			result.append(child)
 	return result
+
+
+func _spawn_destructibles() -> void:
+	if not level_data or not level_data.destructible_pool:
+		return
+
+	var spawner := DestructibleSpawner.new()
+	spawner.name = "DestructibleSpawner"
+	add_child(spawner)
+	spawner.setup(self, level_data.destructible_pool)
+
+	# Static destructibles (crate, bottle) at DESTRUCTIBLE spawn points
+	var static_count := rng.randi_range(
+		level_data.static_destructible_count_range.x,
+		level_data.static_destructible_count_range.y
+	)
+	spawner.spawn_static(static_count)
+
+	# Dynamic destructibles (rat, bird) at random positions
+	spawner.spawn_dynamic(level_data.dynamic_destructible_count)
+
+	# Rare treasures
+	var treasure_count := rng.randi_range(
+		level_data.treasure_count_range.x,
+		level_data.treasure_count_range.y
+	)
+	spawner.spawn_treasures(treasure_count)
 
 
 func _pick_extraction_zone() -> void:

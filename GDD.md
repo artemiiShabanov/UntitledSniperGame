@@ -309,13 +309,22 @@ Three NPC types, each with activity-based behavior cycles (not just patrol):
 - Visually distinct from enemies (different mesh colors, different collision layer)
 - Creates moral/tactical tension — shooting near NPCs risks losing credits, shooting through NPC areas risks hitting civilians
 
-### 7.6 Non-NPC Targets
-- **DestructibleTarget** (`StaticBody3D`): takes bullet damage, breaks when health reaches 0
-- Currently one type: destructible box (50 HP, +$25 / +10 XP on destruction)
-- High-value variants possible (e.g., far-distance boxes with +$50)
-- Visual feedback: darkens on destruction, removed after 5 seconds
+### 7.6 Destructible Targets
+All destructibles are one-shot kill — any bullet destroys them instantly.
+
+| Type | Movement | Size | Reward | Skins |
+|------|----------|------|--------|-------|
+| **Crate** | Static | Large | $15 | Wooden crate, cardboard box, trash can |
+| **Bottle** | Static | Tiny | $20 | Bottle, jar, mug |
+| **Treasure** | Static (rare) | Small | $150 | Gold coins, jewel box, gold bar |
+| **Rat** | Scurries | Medium | $50 | Brown, grey, black |
+| **Bird** | Fly/sit/eat | Small | $80 | Brown, white, black |
+
+- **Crate/Bottle** — baked into level blocks as static props. Filler targets.
+- **Treasure** — 1-2 per run, randomly placed, glowing emissive effect visible through scope
+- **Rat** — spawns at ground level, scurries between random points with pauses
+- **Bird** — spawns on rooftops/ledges, cycles sit → eat → fly → land. Hard to hit in flight.
 - Kill feed shows "TARGET DESTROYED | +$X" in warm yellow
-- Future expansion: vehicles, equipment, supply caches, moving targets, contract objectives
 
 ### 7.7 Scaling with Threat Phase (1-10)
 Threat phases are evenly distributed across the run duration. Enemy types unlock at specific phases via `min_phase` on pool entries.

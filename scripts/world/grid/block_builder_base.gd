@@ -126,6 +126,16 @@ func add_enemy_spawn(pos: Vector3, facing_deg: float = 0.0, group: String = "", 
 	return sp
 
 
+func add_destructible_spawn(pos: Vector3, group: String = "") -> SpawnPoint:
+	var sp := SpawnPoint.new()
+	sp.name = "DestructibleSpawn_%d" % root.get_child_count()
+	sp.spawn_type = SpawnPoint.Type.DESTRUCTIBLE
+	sp.position = pos
+	sp.spawn_group = group
+	root.add_child(sp)
+	return sp
+
+
 func add_activity_point(pos: Vector3, activity: ActivityPoint.Activity, facing_deg: float = 0.0, group: String = "") -> ActivityPoint:
 	var ap := ActivityPoint.new()
 	ap.name = "ActivityPoint_%d" % root.get_child_count()
