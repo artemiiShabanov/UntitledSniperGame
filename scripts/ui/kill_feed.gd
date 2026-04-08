@@ -25,6 +25,7 @@ func _ready() -> void:
 	RunManager.enemy_killed_with_info.connect(_on_enemy_killed)
 	RunManager.npc_killed_with_info.connect(_on_npc_killed)
 	RunManager.target_destroyed_with_info.connect(_on_target_destroyed)
+	RunManager.event_announced.connect(_on_event_announced)
 
 
 func _process(delta: float) -> void:
@@ -137,3 +138,13 @@ func _on_target_destroyed(info: Dictionary) -> void:
 	row.add_child(label)
 	add_child(row)
 	_entries.append({"label": row, "timer": DISPLAY_DURATION})
+
+
+func _on_event_announced(text: String) -> void:
+	var row := _make_feed_row()
+	var label := _make_feed_label()
+	label.text = text
+	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
+	row.add_child(label)
+	add_child(row)
+	_entries.append({"label": row, "timer": DISPLAY_DURATION * 1.5})

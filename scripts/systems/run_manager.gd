@@ -24,6 +24,7 @@ signal threat_phase_changed(phase: int)
 signal enemy_killed_with_info(info: Dictionary)  ## {enemy, headshot, distance, credits, xp}
 signal npc_killed_with_info(info: Dictionary)  ## {penalty, npc_kills}
 signal target_destroyed_with_info(info: Dictionary)  ## {credits, xp}
+signal event_announced(text: String)  ## General HUD event feed message
 
 ## ── Exports ──────────────────────────────────────────────────────────────────
 
@@ -354,6 +355,13 @@ func record_target_destroyed(credits: int, xp: int) -> void:
 		"targets_destroyed": run_stats.targets_destroyed,
 	}
 	target_destroyed_with_info.emit(info)
+
+
+## ── Event Announcements ─────────────────────────────────────────────────────
+
+func announce_event(text: String) -> void:
+	## Show a message in the HUD event feed. Used by level events.
+	event_announced.emit(text)
 
 
 ## ── Threat Phase ────────────────────────────────────────────────────────────

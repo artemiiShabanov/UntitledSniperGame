@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="LevelEventData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/level_event_data.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/world/events/extraction_change_event.gd" id="2_event"]
+
+[resource]
+script = ExtResource("1_script")
+event_name = "Extraction Change"
+trigger_time_range = Vector2(30, 90)
+probability = 1.0
+event_script = ExtResource("2_event")
+params = {}

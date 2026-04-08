@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelData" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="LevelData" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/level_data.gd" id="1_script"]
 [ext_resource type="Resource" path="res://data/levels/industrial_yard_pool.tres" id="2_pool"]
@@ -6,6 +6,7 @@
 [ext_resource type="AudioStream" path="res://data/audio/Ambient/warehouse_ambient.mp3" id="4_ambient"]
 [ext_resource type="AudioStream" path="res://data/audio/Music/warehouse_theme.mp3" id="5_theme"]
 [ext_resource type="Resource" path="res://data/levels/industrial_yard_destructible_pool.tres" id="6_destr_pool"]
+[ext_resource type="Resource" path="res://data/events/extraction_change.tres" id="7_event_extraction"]
 
 [resource]
 script = ExtResource("1_script")
@@ -23,6 +24,7 @@ destructible_pool = ExtResource("6_destr_pool")
 static_destructible_count_range = Vector2i(5, 10)
 dynamic_destructible_count = 3
 treasure_count_range = Vector2i(1, 2)
+level_events_pool = [ExtResource("7_event_extraction")]
 max_events_per_run = 2
 level_ambient = ExtResource("4_ambient")
 level_theme = ExtResource("5_theme")

@@ -116,9 +116,12 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_handle_mouse_look(event)
 
-	# Debug: T to simulate taking a hit
-	if OS.is_debug_build() and event is InputEventKey and event.pressed and event.keycode == KEY_T:
-		RunManager.take_hit()
+	# Debug keys (only in debug builds)
+	if OS.is_debug_build() and event is InputEventKey and event.pressed:
+		if event.keycode == KEY_T:
+			RunManager.take_hit()
+		elif event.keycode == KEY_F8:
+			_debug_trigger_extraction_change()
 
 
 func _physics_process(delta: float) -> void:
@@ -398,6 +401,16 @@ func on_bullet_hit(_bullet: Node, _collision: KinematicCollision3D) -> void:
 	## Called by Bullet when an enemy projectile hits the player.
 	AudioManager.play_sfx_2d(&"hit_taken")
 	RunManager.take_hit()
+
+
+## ── Debug ───────────────────────────────────────────────────────────────────
+
+func _debug_trigger_extraction_change() -> void:
+	var level := get_parent()
+	if level is BaseLevel:
+		var event := ExtractionChangeEvent.new()
+		event.execute(level, {})
+		print("Debug: triggered extraction change event")
 
 
 ## ── Run callbacks ───────────────────────────────────────────────────────────
