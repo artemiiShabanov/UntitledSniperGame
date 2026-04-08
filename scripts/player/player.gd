@@ -120,6 +120,8 @@ func _input(event: InputEvent) -> void:
 	if OS.is_debug_build() and event is InputEventKey and event.pressed:
 		if event.keycode == KEY_T:
 			RunManager.take_hit()
+		elif event.keycode == KEY_F7:
+			_debug_spawn_balloon()
 		elif event.keycode == KEY_F8:
 			_debug_trigger_extraction_change()
 
@@ -404,6 +406,28 @@ func on_bullet_hit(_bullet: Node, _collision: KinematicCollision3D) -> void:
 
 
 ## ── Debug ───────────────────────────────────────────────────────────────────
+
+func _debug_spawn_balloon() -> void:
+	var forward := -global_basis.z
+	forward.y = 0.0
+	forward = forward.normalized()
+	var pos := global_position + forward * 15.0
+	pos.y = 0.0
+
+	var scene: PackedScene = load("res://scenes/world/destructibles/destructible_balloon.tscn")
+	var balloon: DestructibleBalloon = scene.instantiate()
+
+	# Cycle through tiers based on current phase, or use Gold for easy testing
+	var phase := RunManager.threat_phase
+	balloon.tier = DestructibleBalloon.get_tier_for_phase(maxi(phase, 3))
+
+	get_parent().add_child(balloon)
+	balloon.global_position = pos
+
+	var tier_name: String = ["BRONZE", "SILVER", "GOLD"][balloon.tier]
+	RunManager.announce_event("DEBUG: %s BALLOON" % tier_name)
+	print("Debug: spawned %s balloon at %s" % [tier_name, pos])
+
 
 func _debug_trigger_extraction_change() -> void:
 	var level := get_parent()

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://blodvmd77hwum" path="res://scripts/world/level_data.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://d4mwdl1gbu6p" path="res://scripts/world/level_event_data.gd" id="2_hkjl5"]
 [ext_resource type="Resource" uid="uid://cxxyg2bn7jdvy" path="res://data/levels/dev_test_pool.tres" id="2_pool"]
-[ext_resource type="Resource" path="res://data/levels/dev_test_destructible_pool.tres" id="4_destr_pool"]
+[ext_resource type="Resource" uid="uid://chllb0o8706nh" path="res://data/levels/dev_test_destructible_pool.tres" id="4_destr_pool"]
 [ext_resource type="Resource" path="res://data/events/extraction_change.tres" id="5_event_extraction"]
 
 [resource]
@@ -26,7 +26,9 @@ npc_count_range = Vector2i(3, 6)
 destructible_pool = ExtResource("4_destr_pool")
 static_destructible_count_range = Vector2i(3, 6)
 dynamic_destructible_count = 4
-treasure_count_range = Vector2i(1, 2)
+balloon_spawn_interval = 30.0
+balloon_max_concurrent = 2
+balloon_spawn_chance = 0.6
 level_events_pool = Array[ExtResource("2_hkjl5")]([ExtResource("5_event_extraction")])
 max_events_per_run = 1
 available_times_of_day = ["day"]

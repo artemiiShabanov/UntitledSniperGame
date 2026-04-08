@@ -53,6 +53,7 @@ func _setup_run_variation() -> void:
 	_spawn_enemies()
 	_spawn_npcs()
 	_spawn_destructibles()
+	_setup_balloon_spawner()
 	_pick_extraction_zone()
 	_roll_events()
 	_setup_enemy_spawner()
@@ -242,12 +243,18 @@ func _spawn_destructibles() -> void:
 	# Dynamic destructibles (rat, bird) at random positions
 	spawner.spawn_dynamic(level_data.dynamic_destructible_count)
 
-	# Rare treasures
-	var treasure_count := rng.randi_range(
-		level_data.treasure_count_range.x,
-		level_data.treasure_count_range.y
-	)
-	spawner.spawn_treasures(treasure_count)
+
+func _setup_balloon_spawner() -> void:
+	if not level_data:
+		return
+
+	var spawner := BalloonSpawner.new()
+	spawner.name = "BalloonSpawner"
+	spawner.spawn_interval = level_data.balloon_spawn_interval
+	spawner.max_concurrent = level_data.balloon_max_concurrent
+	spawner.spawn_chance = level_data.balloon_spawn_chance
+	add_child(spawner)
+	spawner.setup(self)
 
 
 func _pick_extraction_zone() -> void:

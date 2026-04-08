@@ -14,7 +14,7 @@ grid-based level generation, 10-phase threat system.
 
 | Section | Progress | Summary |
 |---------|----------|---------|
-| Run Lifecycle | ███░░ 60% | Enemy types + grid done, phase rewards, destructibles, events remaining |
+| Run Lifecycle | █████ 100% | Enemy types, destructibles, events, phase-gated balloons — all done |
 | Global Progression | ██░░░ 40% | Mods done, contracts + palettes remaining |
 | Content | █░░░░ 20% | 1/4 levels done, placeholder art/models/audio, UI polish |
 | Polish & Release | ░░░░░ 0% | Steam, controller, balancing, marketing |
@@ -39,22 +39,26 @@ Systems and mechanics active during a run.
 
 > Enemy pools updated for Industrial Yard and Dev Test levels
 
-### 1.2 Phase-Gated Rewards [ ]
+### 1.2 Phase-Gated Rewards [x]
 
-Threat phases (1-10) exist but rewards don't scale with them yet.
+- [x] Phase-specific enemy type pools — `min_phase` on EnemyPoolEntry gates tougher enemies
+- [x] **Balloon** — rising target with 3 tiers (Bronze phase 3+/$50, Silver phase 5+/$100, Gold phase 7+/$200)
+- [x] BalloonSpawner — spawns balloons near enemies mid-run, announced on HUD
+- [x] Balloons pop (no reward) if not shot before reaching max height
 
-- [ ] Phase-specific enemy type pools (tougher enemies only in MID/LATE)
-- [ ] Higher-value targets gated behind later phases
-- [ ] Spawn multiplier for credit/XP based on threat phase
+> Staying longer = higher phases = tougher enemies + higher-tier balloons. Risk/reward via proximity to enemies.
 
-> Depends on: run_manager.gd threat phases (ready), enemy_spawner.gd (ready)
+### 1.3 Events System [x]
 
-### 1.3 Events System [ ]
+Pipeline complete: LevelEventData → LevelEventRunner → HUD feed.
 
-Infrastructure exists but no events are defined:
+- [x] LevelEventData, LevelEventRunner, level_events_pool infrastructure
+- [x] RunManager.event_announced signal + HUD event feed in kill_feed.gd
+- [x] ExtractionChangeEvent — relocates extraction zone mid-run
+- [x] Event .tres wired into Dev Test and Industrial Yard levels
+- [x] F8 debug key to trigger events manually
 
-- [ ] Event types TBD — designed in detail when needed
-- [ ] LevelEventData, LevelEventRunner, level_events_pool already exist
+> Additional event types are content — added per-level as needed.
 
 ### 1.5 Destructible Types [x]
 
@@ -62,17 +66,17 @@ Infrastructure exists but no events are defined:
 
 - [x] **Crate** (static, large, $15) — wooden crate, cardboard box, trash can
 - [x] **Bottle** (static, tiny, $20) — bottle, jar, mug
-- [x] **Treasure** (static, rare, small, $150) — gold coins, jewel box, gold bar. Pulsing glow.
+- [x] **Balloon** (rising, 3 tiers, $50-$200) — spawns near enemies mid-run, must shoot before it pops
 - [x] **Rat** (moving, medium, $50) — scurries between random points with pauses
 - [x] **Bird** (moving, small, $80) — sit/eat/fly cycle, hard to hit in flight
 - [x] DestructibleTarget base class refactored: one-shot, per-type VFX/audio
 - [x] Level integration — DestructiblePool/DestructiblePoolEntry resources, DESTRUCTIBLE spawn type
 - [x] DestructibleSpawner — handles static (at spawn points) and dynamic (random positions) placement
-- [x] Treasure spawn logic (1-2 per run, random placement via DestructibleSpawner)
+- [x] BalloonSpawner — phase-aware mid-run spawning near enemies with HUD announcements
 - [x] Bird/Rat dynamic spawning system (random ground positions near existing spawn points)
 - [x] Block builders updated with destructible spawn points (ground cover, containers, work/rest areas)
 - [x] Pool .tres files for Industrial Yard and Dev Test levels
-- [x] LevelData extended with destructible config (pool, count ranges, treasure count)
+- [x] LevelData extended with destructible + balloon config
 
 > Crate/Bottle: placed at DESTRUCTIBLE spawn points in blocks. Rat/Bird: spawned at random walkable positions. Treasure: 1-2 per run at random positions.
 
