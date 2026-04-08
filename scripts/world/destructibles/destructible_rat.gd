@@ -1,24 +1,19 @@
 class_name DestructibleRat
-extends CharacterBody3D
+extends DestructibleMovingTarget
 ## Rat — medium-sized moving target that scurries between cover points.
 ## Spawns randomly in marked level blocks. Alternates run/pause.
 
-signal target_destroyed(target: DestructibleRat)
-
 enum SkinType { BROWN, GREY, BLACK }
-enum State { IDLE, RUNNING, PAUSING }
+enum State { RUNNING, PAUSING }
 
 @export var skin: SkinType = SkinType.BROWN
-@export var credit_reward: int = 50
-@export var xp_reward: int = 20
 @export var run_speed: float = 4.0
 @export var pause_time_min: float = 1.5
 @export var pause_time_max: float = 4.0
 @export var wander_radius: float = 15.0  ## How far from spawn it can wander
 @export var turn_speed: float = 6.0
 
-var is_destroyed: bool = false
-var _state: State = State.IDLE
+var _state: State = State.PAUSING
 var _target_pos: Vector3 = Vector3.ZERO
 var _pause_timer: float = 0.0
 var _origin: Vector3 = Vector3.ZERO
@@ -33,7 +28,9 @@ const SKIN_COLORS: Dictionary = {
 
 
 func _ready() -> void:
-	add_to_group("destructible")
+	super._ready()
+	credit_reward = 50
+	xp_reward = 20
 	_origin = global_position
 	_mesh_node = get_node_or_null("Mesh")
 	_apply_skin()
@@ -104,23 +101,3 @@ func _apply_skin() -> void:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = SKIN_COLORS.get(skin, Color(0.4, 0.28, 0.15))
 	body.material_override = mat
-
-
-func on_bullet_hit(_bullet: Bullet, _collision: KinematicCollision3D) -> void:
-	if is_destroyed:
-		return
-	_destroy()
-
-
-func _destroy() -> void:
-	is_destroyed = true
-	velocity = Vector3.ZERO
-	target_destroyed.emit(self)
-
-	RunManager.record_target_destroyed(credit_reward, xp_reward)
-	AudioManager.play_sfx(&"target_destroyed", global_position)
-
-	set_deferred("collision_layer", 0)
-	set_deferred("collision_mask", 0)
-
-	VFXFactory.spawn_death_effect(self, false)

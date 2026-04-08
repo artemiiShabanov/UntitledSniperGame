@@ -68,8 +68,6 @@ func _broadcast_alert() -> void:
 		enemy_node.last_known_player_pos = last_known_player_pos
 		enemy_node._set_alert_state(AlertState.ALERT)
 
-	AudioManager.play_sfx(&"alert_spotted", global_position)
-
 
 ## Reset alert broadcast when returning to unaware
 func _update_alert_state(delta: float) -> void:

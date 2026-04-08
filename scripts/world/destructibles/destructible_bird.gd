@@ -1,16 +1,12 @@
 class_name DestructibleBird
-extends CharacterBody3D
+extends DestructibleMovingTarget
 ## Bird — small flying target. Alternates between sitting, eating, and flying.
 ## Hard to hit in flight, easier when perched. High reward.
-
-signal target_destroyed(target: DestructibleBird)
 
 enum SkinType { BROWN, WHITE, BLACK }
 enum State { SITTING, EATING, TAKING_OFF, FLYING, LANDING }
 
 @export var skin: SkinType = SkinType.BROWN
-@export var credit_reward: int = 80
-@export var xp_reward: int = 30
 @export var fly_speed: float = 6.0
 @export var fly_height: float = 8.0
 @export var wander_radius: float = 20.0
@@ -22,7 +18,6 @@ enum State { SITTING, EATING, TAKING_OFF, FLYING, LANDING }
 @export var fly_time_max: float = 8.0
 @export var turn_speed: float = 4.0
 
-var is_destroyed: bool = false
 var _state: State = State.SITTING
 var _state_timer: float = 0.0
 var _target_pos: Vector3 = Vector3.ZERO
@@ -39,7 +34,9 @@ const SKIN_COLORS: Dictionary = {
 
 
 func _ready() -> void:
-	add_to_group("destructible")
+	super._ready()
+	credit_reward = 80
+	xp_reward = 30
 	_origin = global_position
 	_ground_y = global_position.y
 	_mesh_node = get_node_or_null("Mesh")
@@ -174,23 +171,3 @@ func _apply_skin() -> void:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = SKIN_COLORS.get(skin, Color(0.45, 0.3, 0.15))
 	body.material_override = mat
-
-
-func on_bullet_hit(_bullet: Bullet, _collision: KinematicCollision3D) -> void:
-	if is_destroyed:
-		return
-	_destroy()
-
-
-func _destroy() -> void:
-	is_destroyed = true
-	velocity = Vector3.ZERO
-	target_destroyed.emit(self)
-
-	RunManager.record_target_destroyed(credit_reward, xp_reward)
-	AudioManager.play_sfx(&"target_destroyed", global_position)
-
-	set_deferred("collision_layer", 0)
-	set_deferred("collision_mask", 0)
-
-	VFXFactory.spawn_death_effect(self, false)

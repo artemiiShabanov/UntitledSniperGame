@@ -84,12 +84,9 @@ func _pick_spawn_position() -> Vector3:
 	var alive: Array[Node3D] = []
 	for enemy in enemies:
 		if is_instance_valid(enemy) and not enemy.is_queued_for_deletion():
-			if "is_dead" in enemy and not enemy.is_dead:
-				alive.append(enemy)
-			elif "health" in enemy and enemy.health > 0:
-				alive.append(enemy)
-			else:
-				alive.append(enemy)  # Fallback: assume alive if no health field
+			if "is_dead" in enemy and enemy.is_dead:
+				continue
+			alive.append(enemy)
 
 	if alive.is_empty():
 		# Fallback to enemy spawn points

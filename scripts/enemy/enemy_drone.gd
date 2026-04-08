@@ -57,7 +57,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if is_dead or RunManager.game_state != RunManager.GameState.IN_RUN:
+	if is_dead or is_stunned or RunManager.game_state != RunManager.GameState.IN_RUN:
 		return
 
 	_maintain_altitude(delta)

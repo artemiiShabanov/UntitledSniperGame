@@ -1,22 +1,17 @@
 class_name DestructibleBalloon
-extends CharacterBody3D
+extends DestructibleMovingTarget
 ## Balloon — rising target that must be shot before it floats away.
 ## 3 tiers tied to threat phases, spawns near enemies mid-run.
 ## Pops (despawns with no reward) when it reaches max height.
 
-signal target_destroyed(target: DestructibleBalloon)
-
 enum Tier { BRONZE, SILVER, GOLD }
 
 @export var tier: Tier = Tier.BRONZE
-@export var credit_reward: int = 50
-@export var xp_reward: int = 20
 @export var rise_speed: float = 1.5  ## Meters per second
 @export var max_height: float = 40.0  ## Pops at this height above spawn
 @export var sway_amount: float = 0.3  ## Horizontal sway amplitude
 @export var sway_speed: float = 1.5
 
-var is_destroyed: bool = false
 var _spawn_y: float = 0.0
 var _mesh_node: Node3D
 var _time: float = 0.0
@@ -48,7 +43,7 @@ const TIER_MIN_PHASE: Dictionary = {
 
 
 func _ready() -> void:
-	add_to_group("destructible")
+	super._ready()
 	_spawn_y = global_position.y
 	_mesh_node = get_node_or_null("Mesh")
 	_apply_tier()
@@ -103,26 +98,6 @@ func _apply_tier() -> void:
 	mat.emission = config.color
 	mat.emission_energy_multiplier = 1.5
 	body.material_override = mat
-
-
-func on_bullet_hit(_bullet: Bullet, _collision: KinematicCollision3D) -> void:
-	if is_destroyed:
-		return
-	_destroy()
-
-
-func _destroy() -> void:
-	is_destroyed = true
-	velocity = Vector3.ZERO
-	target_destroyed.emit(self)
-
-	RunManager.record_target_destroyed(credit_reward, xp_reward)
-	AudioManager.play_sfx(&"target_destroyed", global_position)
-
-	set_deferred("collision_layer", 0)
-	set_deferred("collision_mask", 0)
-
-	VFXFactory.spawn_death_effect(self, false)
 
 
 func _pop() -> void:

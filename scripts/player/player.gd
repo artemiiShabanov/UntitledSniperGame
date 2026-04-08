@@ -426,7 +426,6 @@ func _debug_spawn_balloon() -> void:
 
 	var tier_name: String = ["BRONZE", "SILVER", "GOLD"][balloon.tier]
 	RunManager.announce_event("DEBUG: %s BALLOON" % tier_name)
-	print("Debug: spawned %s balloon at %s" % [tier_name, pos])
 
 
 func _debug_trigger_extraction_change() -> void:
@@ -434,7 +433,6 @@ func _debug_trigger_extraction_change() -> void:
 	if level is BaseLevel:
 		var event := ExtractionChangeEvent.new()
 		event.execute(level, {})
-		print("Debug: triggered extraction change event")
 
 
 ## ── Run callbacks ───────────────────────────────────────────────────────────

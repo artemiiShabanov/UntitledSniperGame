@@ -127,11 +127,7 @@ func _spawn_enemies() -> void:
 
 	# Shuffle and pick a subset
 	var shuffled := spawns.duplicate()
-	for i in range(shuffled.size() - 1, 0, -1):
-		var j := rng.randi_range(0, i)
-		var tmp: SpawnPoint = shuffled[j]
-		shuffled[j] = shuffled[i]
-		shuffled[i] = tmp
+	ArrayUtils.shuffle(shuffled, rng)
 
 	var count := rng.randi_range(level_data.enemy_count_range.x, level_data.enemy_count_range.y)
 	count = mini(count, shuffled.size())
@@ -267,11 +263,7 @@ func _pick_extraction_zone() -> void:
 		return
 
 	# Shuffle zones
-	for i in range(zones.size() - 1, 0, -1):
-		var j := rng.randi_range(0, i)
-		var tmp: ExtractionZone = zones[j]
-		zones[j] = zones[i]
-		zones[i] = tmp
+	ArrayUtils.shuffle(zones, rng)
 
 	var keep_count := 1
 	if level_data:

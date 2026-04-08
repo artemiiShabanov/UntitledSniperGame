@@ -23,7 +23,7 @@ func spawn_static(count: int) -> void:
 		return
 
 	# Shuffle spawns
-	_shuffle_array(spawns)
+	ArrayUtils.shuffle(spawns, _rng)
 
 	count = mini(count, spawns.size())
 	for i in count:
@@ -100,9 +100,3 @@ func _find_dynamic_positions(count: int) -> Array[Vector3]:
 	return result
 
 
-func _shuffle_array(arr: Array) -> void:
-	for i in range(arr.size() - 1, 0, -1):
-		var j := _rng.randi_range(0, i)
-		var tmp = arr[j]
-		arr[j] = arr[i]
-		arr[i] = tmp

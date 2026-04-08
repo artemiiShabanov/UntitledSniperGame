@@ -21,13 +21,13 @@ func _ready() -> void:
 	health = 100.0
 
 	initial_behavior = Behavior.SCANNING
-	patrol_speed = reposition_speed
 	scan_speed = 0.3
 	scan_angle = 50.0
 
 	# Reposition behavior
 	can_reposition = true
 	reposition_speed = 4.0
+	patrol_speed = reposition_speed
 	auto_reposition_interval = 20.0
 
 	credit_reward = 75

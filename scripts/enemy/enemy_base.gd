@@ -17,7 +17,7 @@ signal enemy_killed(enemy: EnemyBase, headshot: bool)
 ## ── Exports: Debug ───────────────────────────────────────────────────────────
 
 @export_group("Debug")
-@export var show_debug: bool = true  ## Toggle FOV cone and state indicator
+@export var show_debug: bool = false  ## Toggle FOV cone and state indicator
 
 ## ── Exports: Detection ───────────────────────────────────────────────────────
 
