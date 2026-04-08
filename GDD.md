@@ -345,20 +345,14 @@ Before deploying, the player picks one contract from the board in the hub:
 Future contract types (deferred):
 - **Eliminate high-value target** — a specific marked enemy in the level
 - **Destroy target** — locate and destroy a specific vehicle, equipment, or supply cache
+- **All headshots** — every kill must be a headshot (no body shots)
+- **Full stealth** — extract without triggering any alerts
+- **No missed shots** — perfect accuracy for the entire run
+- **No civilian casualties** — don't kill any NPCs
 
 Contracts provide bonus currency and XP on completion, incentivizing specific playstyles and adding structure to runs.
 
-### 8.2 In-Run Optional Objectives
-Dynamic challenges that appear during a run:
-- All headshots (no body shots)
-- No alerts triggered (full stealth)
-- Extract before mid phase (speed run)
-- No missed shots (perfect accuracy)
-- No civilian casualties
-
-Completing optional objectives grants bonus rewards at the end of the run.
-
-### 8.3 Run Result
+### 8.2 Run Result
 After each run (extraction or death), the player sees raw stats:
 - Enemies eliminated
 - Accuracy percentage
@@ -400,9 +394,8 @@ Minimal and clean — should not obstruct the sniper's view:
 - Extraction progress bar (when extracting)
 - Interaction prompt (contextual)
 
-Future (deferred to Phase 4):
-- Objective tracker (for in-run optional objectives)
-- Active contract tracker
+Future:
+- Active contract tracker on HUD
 
 ### 10.2 Menus
 - **Main Menu** — start run, hub, settings, quit

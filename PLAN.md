@@ -7,14 +7,15 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 ## Status Overview
 
 **Completed:** Core gameplay loop, progression systems, UI/menus, palette system, hub,
-save system, audio/VFX systems, 1 greybox level (Industrial Yard).
+save system, audio/VFX systems, 1 greybox level (Industrial Yard), enemy types (6),
+grid-based level generation, 10-phase threat system.
 
 **Current phase:** Technical development & content production.
 
 | Section | Progress | Summary |
 |---------|----------|---------|
-| Run Lifecycle | ███░░ 50% | Enemy types done, phase rewards, objectives, events, variation |
-| Global Progression | ██░░░ 40% | Mods, contracts, palettes |
+| Run Lifecycle | ███░░ 60% | Enemy types + grid done, phase rewards, destructibles, events remaining |
+| Global Progression | ██░░░ 40% | Mods done, contracts + palettes remaining |
 | Content | █░░░░ 20% | 1/4 levels done, placeholder art/models/audio, UI polish |
 | Polish & Release | ░░░░░ 0% | Steam, controller, balancing, marketing |
 
@@ -48,93 +49,14 @@ Threat phases (1-10) exist but rewards don't scale with them yet.
 
 > Depends on: run_manager.gd threat phases (ready), enemy_spawner.gd (ready)
 
-### 1.3 In-Run Objectives [ ]
-
-Dynamic challenges that appear during a run with bonus rewards:
-
-- [ ] All headshots (no body shots)
-- [ ] No alerts triggered (full stealth)
-- [ ] Extract before mid phase (speed run)
-- [ ] No missed shots (perfect accuracy)
-- [ ] No civilian casualties
-- [ ] HUD objective tracker
-- [ ] Active contract tracker on HUD
-
-> New system — needs objective_manager + HUD integration
-
-### 1.4 Events System [ ]
+### 1.3 Events System [ ]
 
 Infrastructure exists but no events are defined:
 
 - [ ] Event types TBD — designed in detail when needed
 - [ ] LevelEventData, LevelEventRunner, level_events_pool already exist
 
-### 1.5 Grid-Based Level Generation [x]
-
-Procedural level layout system — each run assembles the map from reusable blocks on a grid.
-
-**Architecture:**
-- Grid: `width × depth` cells (e.g. 15×15), each cell 15m×15m
-- Blocks: PackedScene `.tscn` files with geometry, spawn markers, cover positions
-- Rules: per-level Resource defining all constraints as data, not code
-- Solver: anchor-first placement → sightline lanes → constraint-based fill
-
-**Resources:**
-
-| Resource | Purpose |
-|----------|---------|
-| `BlockDef` | Block descriptor: scene, grid_size, height_type, block_type, tags, weight |
-| `BlockCatalog` | Collection of BlockDefs per theme, weighted selection helpers |
-| `GridLevelRules` | All per-level constraints: anchors, zones, height neighbors, budgets |
-| `GridLevelData` | Extends LevelData — adds block_catalog + level_rules |
-| `AnchorPlacement` | Randomized anchor zone + min_distance + facing mode |
-| `ZoneRule` | Region constraint: shape (RING/RECT/ROW/COL), allowed heights/types |
-| `HeightNeighborRule` | Adjacency constraint: source height → forbidden neighbor heights |
-| `BlockBudget` | Min/max count per height_type, block_type, or tag |
-
-**Solver steps:**
-1. Initialize empty grid, stamp zone constraints onto cells
-2. Place anchors — each picks random cell within its allowed_zone, respecting min_distance_to_anchors
-3. Auto-generate sightline lanes from sniper nest anchors (row + column → height-capped)
-4. Fill remaining cells most-constrained-first, weighted random selection
-5. Budget check — swap blocks if minimums unmet
-6. Retry with relaxed soft constraints if stuck
-7. Instantiate block scenes, position at grid coordinates
-
-**Block scene convention:**
-```
-BlockRoot (Node3D)
-  ├── Geometry/       # StaticBody3D + meshes + colliders
-  ├── SpawnPoints/    # Marker3D — enemy/NPC positions
-  ├── ActivityPoints/ # Marker3D — NPC activities
-  ├── CoverPositions/ # Marker3D — AI cover
-  └── Props/          # Optional randomizable sub-objects
-```
-
-**Integration:** BaseLevel discovers SpawnPoints/ActivityPoints recursively — blocks just
-need markers inside them. RunManager, entity spawning, extraction zones all unchanged.
-
-**File structure:**
-```
-scripts/world/grid/
-	block_def.gd, block_catalog.gd, block_instance.gd
-	grid_level_data.gd, grid_level_rules.gd
-	grid_level_builder.gd, grid_build_result.gd
-	rules/ — anchor_placement.gd, zone_rule.gd,
-			 height_neighbor_rule.gd, block_budget.gd
-scenes/blocks/ — industrial/, city/, shared/
-data/levels/   — <level>_rules.tres, <level>_catalog.tres
-```
-
-**Tasks:**
-- [x] Core resources (BlockDef, BlockCatalog, GridLevelRules, sub-rules)
-- [x] GridLevelBuilder solver
-- [x] GridLevelData integration with BaseLevel
-- [x] Block scenes — industrial theme (17 block builders)
-- [x] Convert Industrial Yard to grid system as test
-- [ ] Second level (City) using grid system
-
-### 1.6 Destructible Types [ ]
+### 1.5 Destructible Types [ ]
 
 Expand destructible targets beyond the basic crate to add variety and tactical options.
 
@@ -171,14 +93,19 @@ Full mod catalog implemented across all slots:
 
 ### 1.7 Contract Expansion [ ]
 
-5 contract types work. Two more designed but returning false:
+5 contract types work. Additional types designed (merged from in-run objectives):
 
 - [ ] KILL_TARGET — eliminate a named high-value target (target_id field exists)
 - [ ] DESTROY_TARGET — destroy a specific object
+- [ ] ALL_HEADSHOTS — every kill must be a headshot
+- [ ] FULL_STEALTH — extract without triggering any alerts
+- [ ] NO_MISSED_SHOTS — perfect accuracy for the entire run
+- [ ] NO_CIVILIAN_KILLS — don't kill any NPCs
 - [ ] Contract templates per level
 - [ ] Contract reward balancing
 - [ ] Level-specific contracts (level_restriction field ready)
 - [ ] Higher-risk/higher-reward contracts for harder levels
+- [ ] Active contract tracker on HUD
 
 > Depends on: contract.gd (ready), contract_registry (ready), contract_panel (ready)
 

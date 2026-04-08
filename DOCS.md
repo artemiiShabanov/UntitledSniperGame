@@ -193,8 +193,12 @@ Each step is a separate panel. The flow can be cancelled at any point.
 ```
 CharacterBody3D
   └─ EnemyBase (scripts/enemy/enemy_base.gd)
-       └─ EnemyLookout (scripts/enemy/enemy_lookout.gd)
-       └─ [future: EnemyMarksman, EnemyCountersniper, etc.]
+       ├─ EnemyLookout  — stationary scanner, tutorial-tier
+       ├─ EnemySpotter  — wide FOV, broadcasts alert to nearby enemies
+       ├─ EnemyMarksman — repositions on sound/hit, auto-repositions every 20s
+       ├─ EnemyDrone    — flies at fixed height, circles/chases, shoots from above
+       ├─ EnemyGhost    — invisible without scope, repositions like Marksman
+       └─ EnemyHeavy    — armored, high damage, stationary scanner
 ```
 
 ### AI State Machine
@@ -202,16 +206,58 @@ CharacterBody3D
 ```
 UNAWARE ──(sees player)──► SUSPICIOUS ──(confirmed)──► ALERT
     ▲                          │                          │
-    └──────(timer expired)─────┘          (lost LOS)──► SEARCHING
-                                                          │
-                                                    (timer)──► UNAWARE
+    └──(suspicion < 30%)───────┘          (lost LOS)──► SEARCHING
+    ▲                                                     │
+    └─────────────────────(timer expired)─────────────────┘
 ```
+
+### Alert States
+
+| State | Behavior | Rotation |
+|-------|----------|----------|
+| **UNAWARE** | Scanning or patrolling per `initial_behavior` | Smooth scan oscillation |
+| **SUSPICIOUS** | Faces sound origin (if heard) or player (if visible) | Smooth toward source |
+| **ALERT** | Tracks player, fires after `reaction_time` | Smooth toward player |
+| **SEARCHING** | Stares at last known player position | Smooth toward last pos |
 
 ### Detection
 
-- **Visual:** FOV cone + range + raycast occlusion check
-- **Audio:** Gunshot/impact sound propagation alerts nearby enemies
-- **States:** Each state has different behavior (idle, scanning, shooting, searching)
+- **Visual:** FOV cone (configurable half-angle) + range + raycast occlusion check
+- **Audio:** `hear_sound(origin, loudness)` — suspicion scales with loudness/distance
+- **Suspicion:** Builds while player is in LOS, decays when not. Thresholds: 30% → SUSPICIOUS, 100% → ALERT
+- **Sound reaction:** Enemy faces sound origin (not player), repositioners move first then go SUSPICIOUS
+
+### Base Behaviors (Behavior enum)
+
+| Behavior | Description |
+|----------|-------------|
+| `DEFAULT` | No idle behavior — stands still |
+| `SCANNING` | Oscillates rotation within `scan_angle` at `scan_speed` |
+| `PATROL` | Walks between `patrol_points` with wait times |
+
+### Reposition System
+
+Enabled per-type via `can_reposition = true` on EnemyBase:
+
+- **Auto-reposition:** Timer ticks in UNAWARE only. On expiry, moves to farthest patrol point
+- **Reactive (sound):** Repositions first, then defers SUSPICIOUS state until arrival
+- **Reactive (hit):** Repositions while staying ALERT
+- **During reposition:** Won't shoot, faces movement direction with smooth rotation
+- **Timer resets** when returning to UNAWARE from any other state
+
+### Spawning
+
+- **EnemyPool** — weighted random selection from `EnemyPoolEntry` list
+- **EnemyPoolEntry** — scene reference, weight, max_per_run, min_phase (1-10)
+- **EnemySpawner** — dynamic spawning during run, lerps interval/max_enemies from start phase to phase 10
+- **Phase gating** — entries filtered by `RunManager.threat_phase < entry.min_phase`
+
+### Visuals (EnemyVisuals)
+
+- **Sight cone:** ArrayMesh flat fan with custom shader, fades from tip to edge
+- **Glint:** Billboard Sprite3D with procedural 4-point star shader. Flickers in SUSPICIOUS, full in ALERT, half in SEARCHING
+- **State indicator:** Debug label showing current alert state
+- **Body color:** Per-type color override on Body mesh (head stays palette-colored)
 
 ---
 
@@ -252,15 +298,70 @@ Orchestrates a playable level:
 Each level has a `LevelData` resource (.tres) with:
 - Scene path, display name
 - Enemy pool, NPC pool
-- Phase config (durations, spawn intervals)
+- Phase config (spawn_start_phase, spawn_interval_initial/final, max_enemies_initial/final)
 - Time/weather options (randomized per run)
 - Unlock gates (extraction count, XP threshold)
 - Entry fee
 
-### Procedural Builders
+### Grid-Based Level Generation
 
-Levels use builder scripts (e.g., `IndustrialYardBuilder`) to generate greybox geometry
-from code. This allows rapid iteration before committing to 3D models.
+Procedural level layout system — each run assembles the map from reusable blocks on a grid.
+
+**Architecture:**
+
+```
+GridLevelData (extends LevelData)
+  ├─ BlockCatalog — collection of BlockDefs per theme
+  └─ GridLevelRules — all per-level constraints as data
+       ├─ AnchorPlacement[] — sniper nests, extraction zones
+       ├─ ZoneRule[] — region constraints (RING/RECT/ROW/COL)
+       ├─ HeightNeighborRule[] — adjacency height constraints
+       └─ BlockBudget[] — min/max counts per type/height/tag
+```
+
+**Resources:**
+
+| Resource | Purpose |
+|----------|---------|
+| `BlockDef` | Block descriptor: scene, grid_size, height_type, block_type, tags, weight |
+| `BlockCatalog` | Collection of BlockDefs per theme, weighted selection helpers |
+| `GridLevelRules` | All per-level constraints: anchors, zones, height neighbors, budgets |
+| `GridLevelData` | Extends LevelData — adds block_catalog + level_rules |
+
+**Solver steps (GridLevelBuilder):**
+1. Initialize empty grid (`width × depth` cells, each 15m × 15m)
+2. Stamp zone constraints onto cells
+3. Place anchors — each picks random cell within allowed zone, respecting min distances
+4. Auto-generate sightline lanes from sniper nest anchors (row + column → height-capped)
+5. Fill remaining cells most-constrained-first, weighted random selection
+6. Budget check — swap blocks if minimums unmet
+7. Retry with relaxed soft constraints if stuck
+8. Instantiate block scenes at grid coordinates
+
+**Block scene convention:**
+```
+BlockRoot (Node3D)
+  ├── Geometry/       # StaticBody3D + meshes + colliders
+  ├── SpawnPoints/    # Marker3D — enemy/NPC positions
+  ├── ActivityPoints/ # Marker3D — NPC activities
+  ├── CoverPositions/ # Marker3D — AI cover
+  └── Props/          # Optional randomizable sub-objects
+```
+
+**Integration:** BaseLevel discovers SpawnPoints/ActivityPoints recursively from blocks.
+RunManager, entity spawning, and extraction zones work unchanged.
+
+**File structure:**
+```
+scripts/world/grid/
+    block_def.gd, block_catalog.gd, block_instance.gd
+    grid_level_data.gd, grid_level_rules.gd
+    grid_level_builder.gd, grid_build_result.gd
+    rules/ — anchor_placement.gd, zone_rule.gd,
+             height_neighbor_rule.gd, block_budget.gd
+scenes/blocks/ — industrial/, city/, shared/
+data/levels/   — <level>_rules.tres, <level>_catalog.tres
+```
 
 ---
 
