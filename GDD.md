@@ -1,14 +1,14 @@
-# Sniper Extraction — Game Design Document
+# Sniper Extraction: The Last Rifle — Game Design Document
 
 ---
 
 ## 1. Game Overview
 
 ### 1.1 Elevator Pitch
-A single-player extraction shooter where you play as a sniper deployed into hostile environments. Each run drops you into a large, vertical map with a ticking clock. Stay longer for better rewards, but the world grows deadlier by the minute. Extract with your earnings — or lose it all.
+A modern sniper is teleported onto a medieval battlefield. Perched on castle walls, you defend against an ever-growing siege — picking off warriors, destroying siege equipment, and managing your limited ammunition. Lose your weapon mods if you fall. Unlock army upgrades across runs to eventually win the war.
 
 ### 1.2 Genre
-First-person shooter / Extraction roguelike
+First-person shooter / Roguelike defense
 
 ### 1.3 Platform
 PC (Steam)
@@ -17,17 +17,17 @@ PC (Steam)
 Godot 4.4
 
 ### 1.5 Core Fantasy
-You are a patient, precise sniper perched in a tower, picking off targets through your scope. You choose when to reposition, when to push your luck, and when to get out. Every bullet counts. Every second raises the stakes.
+You are a modern sniper dropped into a medieval world. From atop castle walls, you look down on a raging battlefield — hundreds of warriors clashing below. Your rifle is impossibly powerful here. Every bullet can change the tide. But bullets are finite, the enemy grows stronger, and the castle won't hold forever.
 
 ### 1.6 Target Audience
-Players who enjoy tactical shooters, extraction games, and roguelike progression. Fans of Escape from Tarkov's tension, Hades' meta-progression, and Sniper Elite's satisfying gunplay — but in a single-player, run-based format.
+Players who enjoy tactical shooters, roguelike progression, and tower-defense-adjacent gameplay. Fans of Sniper Elite's satisfying gunplay, Slay the Spire's risk/reward meta-progression, Kingdom's "protect the walls" tension, and Hades' hub-between-runs loop.
 
 ### 1.7 Key Pillars
-- **Precision over speed** — rewarding careful aim and patience, not run-and-gun
-- **Long-range mastery** — the game rewards shots at 100-200m+; levels, mechanics, and scoring are built around this
-- **Risk vs. reward** — every second in a run is a choice between greed and survival
-- **Satisfying progression** — always moving forward, whether through credits or experience
-- **Replayability** — randomized elements ensure no two runs feel identical
+- **Precision over speed** — every bullet counts; rewarding careful aim and target prioritization
+- **Living battlefield** — the level is alive with warriors fighting each other; the player influences but doesn't control the battle
+- **Escalating siege** — threat grows infinitely; the question is never "will you win" but "how long can you hold"
+- **Meaningful loss** — weapon mods are lost on failure, creating real stakes per run
+- **Meta-progression toward victory** — across many runs, unlock army upgrades that eventually let you win the war
 
 ---
 
@@ -35,458 +35,643 @@ Players who enjoy tactical shooters, extraction games, and roguelike progression
 
 ### 2.1 Session Flow
 ```
-HUB (prepare) → DEPLOY (enter level) → OPERATE (eliminate targets, complete objectives) → EXTRACT or DIE → HUB
+HUB (equip mods, select level) → DEPLOY (castle walls) → DEFEND (snipe targets, survive threat, handle opportunities) → EXTRACT or FALL → HUB
 ```
 
 ### 2.2 Moment-to-Moment
-The player spawns into a level, typically near a sniper nest or elevated position. From there, they survey the environment through their scope, identify targets, and begin engaging. The gameplay is deliberate — lining up shots, managing ammo, and deciding when to reposition.
+The player spawns atop castle walls or towers overlooking a battlefield. Below, friendly and enemy warriors clash in melee combat. The player surveys through their scope, identifies priority targets — enemy warriors pushing the walls, ranged threats targeting the player, siege equipment, opportunity events — and fires.
 
-As time passes, the threat level rises. New enemies spawn, patrols intensify, and the environment becomes more dangerous. But higher threat also means more valuable targets and events. The player is constantly weighing: take one more shot, push for more kills — or head to extraction and secure what they've earned.
+Every shot is a decision: bullets are limited, and each one spent on a low-value target is one fewer for the elite enemies coming later. As phases progress, the enemy army grows stronger — tougher warriors, more ranged threats, siege equipment. The castle takes damage from enemy melee warriors reaching the walls. The player must balance killing threats to themselves (ranged enemies) vs. threats to the castle (melee warriors at the gates).
+
+Extraction windows appear periodically — a brief chance to leave with your rewards. Miss it, and you wait for the next one while the siege intensifies.
 
 ### 2.3 Run-to-Run
-Between runs, the player returns to the hub. Successful extractions convert accumulated run earnings (enemy kills, destroyed targets, contracts) into credits for weapon upgrades. Every run (even failed ones) earns experience, which is spent on permanent player skill unlocks. Over time, the player unlocks new levels, better gear, and passive abilities that make them more effective in the field.
+Between runs, the player returns to the hub. Successful extractions award a choice of weapon mods (rarity based on performance). Failed runs lose all equipped mods. XP is always earned. Over many runs, the player unlocks permanent army upgrades that strengthen the friendly forces, eventually enabling a winnable final stand at phase 20.
 
 ---
 
 ## 3. Player Mechanics
 
 ### 3.1 Movement
-The game emphasizes **minimal, deliberate movement**. The player is a sniper, not an assault trooper. Most of the time is spent stationary, aiming from a position.
+The player operates on castle walls and towers but retains full movement for repositioning.
 
 - **WASD + mouse look** — standard first-person controls
-- **Sprint** — for repositioning between cover
-- **Jump** — for navigating vertical environments
+- **Sprint** — for quick repositioning between firing positions
+- **Jump** — for navigating vertical elements on the walls/towers
 - **Crouch** — reduces profile, increases accuracy, slower movement
 - **Slide** — triggered from sprint + crouch, useful for quick dashes between cover
-- **Ziplines** — contextual traversal for moving between buildings or elevation levels quickly
+- **Ziplines** — traverse between wall sections and towers quickly (deferred — design levels without, add if playtesting reveals need for faster traversal)
 
 ### 3.2 Weapon — Sniper Rifle
-The sniper rifle is the player's only weapon. There is no secondary — every encounter must be handled at range.
+The sniper rifle is the player's only weapon. It is anachronistically powerful on this battlefield.
 
 - Bolt-action — single shot, must cycle bolt between shots
 - Scope with adjustable zoom
 - Bullet drop and travel time (projectile-based, not hitscan)
 - Scope sway when aiming — reduced by holding breath (limited duration)
 - Magazine-based reload
-- Multiple ammo types with different damage and penetration values
-- Ammo is selected and loaded at the hub before deploying — no pickups in the field
+- Fixed bullet count per run (no ammo types, no shop — bullet count upgraded via progression)
 - Upgradeable parts: barrel, stock, bolt, magazine, scope (all visually distinct)
-- Palette-colored via accent_hostile with PBR shading (metallic/roughness)
-- Weapon inspect animation (dedicated key) — shows off current rifle and equipped mods
+- Palette-colored via accent colors with PBR shading
+- Weapon inspect animation (dedicated key)
 
 ### 3.3 Shooting Model
-Shooting is the core skill expression of the game. It should feel weighty and rewarding.
+Shooting is the core skill expression. It should feel weighty and rewarding.
 
-- **Projectile-based bullets** — bullets are physical objects with travel time, not instant hitscan
-- **Bullet drop** — gravity affects bullets over distance, requiring compensation for long shots
-- **Scope sway** — crosshair drifts naturally; holding breath temporarily steadies the aim
-- **Reload** — manual reload with animation, player is vulnerable during reload
-- **Ammo management** — all ammo is brought from the hub; no ammo pickups in the field. Every shot matters.
-- **Ammo types** — different rounds with varying damage and penetration (e.g. standard, armor-piercing, high-damage). Chosen at loadout before deploying.
+- **Projectile-based bullets** — physical objects with travel time
+- **Bullet drop** — gravity affects bullets over distance
+- **Scope sway** — crosshair drifts naturally; holding breath temporarily steadies aim
+- **Reload** — manual reload with animation, player is vulnerable
+- **Ammo management** — fixed bullet count per run, no pickups, no resupply. Every shot matters.
 
 ### 3.4 Lives System
 - The player has a limited number of lives per run (no health bar)
-- Any hit from an enemy costs one life
-- When all lives are lost, the player dies and the run ends (all credits lost, XP kept)
-- No healing — lives are a finite resource that cannot be restored mid-run
-- This reinforces the sniper fantasy: you should avoid taking hits entirely, not tank through damage
+- Any hit from a ranged enemy costs one life
+- When all lives are lost, the run fails (mods lost, XP kept)
+- No healing — lives are finite and unrestorable mid-run
+- Reinforces the sniper fantasy: avoid taking hits entirely
 
 ### 3.5 Interactions
-- **Look + press E** — universal interaction for ziplines and extraction point
-- **Ziplines** — approach and press E to attach, press again or reach the end to detach
+- **Look + press E** — universal interaction for ziplines and extraction points
+- **Ziplines** — approach and press E to attach, press again or reach end to detach (deferred)
 
-### 3.6 Earning Credits (per run)
-Credits accumulate during a run but are only kept on successful extraction:
-- **Enemy kills** — each enemy type has a bounty value (higher for tougher snipers)
-- **Distance bonus** — kills at 100m+ earn a multiplier (e.g. 1.5x at 100m, 2x at 150m, 3x at 200m+), rewarding the intended long-range playstyle
-- **Headshot bonus** — headshots earn additional credits on top of the base bounty
-- **Destroying non-NPC targets** — vehicles, equipment, supply caches scattered across the map
-- **Contract completion** — bonus reward for fulfilling the chosen contract
+### 3.6 Scoring
+Score accumulates during a run and determines mod rarity on extraction:
+
+- **Enemy kills** — each enemy type has a base score value
+- **Headshot bonus** — 2x score multiplier
+- **Destructible targets** — bonus score for powder kegs, siege equipment
+- **Opportunity completion** — bonus score for handling special events
+- **Castle HP remaining** — bonus multiplier based on how much castle HP is left at extraction
 
 ---
 
-## 4. Extraction & Danger System
+## 4. Battlefield & Threat System
 
 ### 4.1 Run Structure
-Each run takes place on a single level. The player deploys from the hub with their current loadout and must extract before the time limit expires or they are overwhelmed.
+Each run is a defense mission on a single level. The player deploys from the hub with their equipped mods and a fixed bullet count. There is no timer — the run ends when:
+- The player extracts during an extraction window (success)
+- The player loses all lives (failure)
+- The castle HP reaches 0 (failure)
 
-- **Time limit** — a hard cap on how long a run can last; at zero, the run forcibly ends (death)
-- **Early extraction** — the player can leave at any time via the extraction point
-- **Death** — all accumulated credits and ammo brought are lost; only XP is retained
+Phase 20 is simply the hardest phase. Surviving it and extracting is the "win" — there is no separate end condition when phase 20 completes. The siege continues until the player extracts, dies, or the castle falls.
 
-### 4.2 Escalating Danger (Threat Phases)
-The level becomes progressively more dangerous the longer the player stays. Danger escalation is tied to elapsed time and displayed as a visible **threat meter** on the HUD.
+### 4.2 Castle HP
+The castle has a visible HP bar. Enemy melee warriors that reach the castle walls deal damage to it.
 
-**Early Phase**
-- Environment is calm
-- Basic targets and non-NPC objects available
-- Good time to survey the map and plan
+- **Castle HP** starts at a fixed value (tunable per level)
+- **Damage scaling** — stronger enemy warrior types in later phases deal more castle damage
+- **Player agency** — killing melee warriors before they reach the walls prevents castle damage
+- **Phase 20 cap** — the final phase sends an overwhelming wave designed to test whether the player has enough army upgrades to survive
+- **Visual feedback** — castle HP bar on HUD (future: cracks, fires, defenders overwhelmed)
 
-**Mid Phase**
-- Aggressive enemies begin spawning
-- Patrols appear and move through the level
-- Higher-value targets and events start appearing
+### 4.3 Threat Escalation (20 Phases)
+Threat increases continuously. No timer — phases advance at fixed intervals. Extraction windows grow further apart as phases increase.
 
-**Late Phase**
-- Heavy enemy presence throughout the level
-- Elite enemies with special abilities spawn
-- Rare high-value targets and bonus events appear
-- Maximum risk, maximum reward
+**Phase Progression:**
+- **Phases 1-3 (Early)** — Swordsmen only on both sides. Few spawns, calm battlefield. Player learns the flow.
+- **Phases 4-5 (Building)** — First archers appear (phase 4). Swordsman spawning accelerates. Battlefield starts to feel real.
+- **Phases 6-7 (Rising)** — Big guys start appearing (phase 6). Heavy archers join (phase 7). Castle pressure begins as big guys deal serious wall damage.
+- **Phases 8-9 (Dangerous)** — Crossbowmen appear (phase 9). Big guys are now common. Significant ranged threat to player and melee threat to castle.
+- **Phase 10 (Major Wave)** — First boss-tier wave. Knights debut. Surge of all types, multiple ranged threats. Tests mid-game readiness.
+- **Phases 11-14 (Escalation)** — Bird trainers appear (phase 11). Knights become regular. Castle damage rate spikes.
+- **Phase 15 (Elite Wave)** — Second boss-tier wave. Heavy siege pressure. Knight-heavy assault. Demands strong loadout and army upgrades.
+- **Phases 16-19 (Endgame)** — Maximum enemy density. All types active. Knights in every wave. Castle under relentless pressure.
+- **Phase 20 (Final Stand)** — Overwhelming knight-heavy assault with full ranged support. Designed to be unwinnable without sufficient army upgrades. The ultimate test.
 
-### 4.3 Risk / Reward Curve
-The central tension of every run: **stay or go?**
-
-- Higher-value targets and events only appear as danger rises
-- Rare targets and bonus objectives are gated behind later phases
-- The player who extracts early gets modest but guaranteed earnings
-- The player who pushes deep gets the best payouts — if they survive
-
-This creates a natural difficulty curve within each run and ensures every run has dramatic tension, even for experienced players.
+**Extraction Window Pacing:**
+- Early phases: extraction windows every ~2 minutes, lasting ~15 seconds
+- Mid phases: every ~3 minutes, lasting ~10 seconds
+- Late phases: every ~4-5 minutes, lasting ~8 seconds
+- This creates increasing tension: "can I survive until the next window?"
 
 ### 4.4 Extraction
-- **Single extraction point** per level — a fixed location the player must reach
-- **Extraction channel** — the player must hold E for several seconds at an extraction point to extract, creating a moment of vulnerability
-- **Interruption** — extraction is cancelled if the player moves away or takes damage
-- **Success** — all accumulated credits and unused ammo are transferred to the player's global save
+- **Multiple extraction points** exist in each level, but only one activates at a time
+- **Timed windows** — an extraction point activates for a short duration, then deactivates
+- **HUD announcement** — "EXTRACTION AVAILABLE" with location indicator and countdown
+- **Hold E** to extract (several seconds), cancelled by movement or damage
+- **Success** — score tallied, mod choice offered, XP awarded, run stats recorded
+- **Missing the window** — must survive until the next one activates
+
+### 4.5 Failure
+On death (lives lost) or castle destruction:
+- **All equipped weapon mods are lost** — this is the core risk/stake
+- **XP is kept** — ensures even failed runs contribute to meta-progression
+- **Run stats are recorded** — for tracking improvement
 
 ---
 
-## 5. Progression Systems
+## 5. The Battlefield
 
-### 5.1 Dual Currency Model
-Two currencies serve different purposes and create different incentives:
+### 5.1 Level Structure
+Every level follows a three-zone layout designed for the sniper fantasy:
 
-**Extraction Currency (Credits)**
-- Accumulated during a run from enemy kills, destroyed targets, and contract completion
-- Only kept on successful extraction — lost entirely on death
-- Spent on: weapon upgrades, ammo
+**Zone 1 — The Castle (Player Base)**
+- Elevated walls, towers, and ramparts where the player operates
+- Multiple firing positions with different sightlines
+- Ziplines connecting wall sections and towers (deferred)
+- Extraction points located along the walls
+- Castle gate/entrance — where enemy melee warriors attack
 
-**Experience (XP)**
-- Earned every run, regardless of outcome (extraction or death)
-- Never lost — represents overall player growth
-- Spent on: player skill unlocks
-- Ensures even failed runs feel meaningful and forward-moving
+**Zone 2 — The Battlefield (Kill Zone)**
+- Open ground between the castle and enemy positions
+- Where friendly and enemy warriors clash in melee
+- Long sightlines (100-200m+) for sniper engagement
+- Scattered cover (rocks, barricades, trenches) creating partial occlusion
+- Terrain variation (hills, ditches) affecting sightlines
 
-### 5.2 Weapon Upgrades
-Purchased with extraction currency at the hub. Every upgrade is a visible, physical part attached to or swapped on the rifle — no invisible stat boosts.
+**Zone 3 — Enemy Positions (Far Side)**
+- Where enemy warriors spawn and advance from
+- Enemy structures (camps, towers, siege positions)
+- Ranged enemies positioned here targeting the player
+- Siege equipment assembled here
+- Destructible targets (powder kegs, siege equipment) located in this zone
 
-Upgrade categories:
-- **Barrel** — affects bullet velocity (longer barrel = faster bullet, less drop)
-- **Stock** — affects sway reduction (better stock = steadier aim)
-- **Bolt** — affects reload speed (smoother bolt = faster cycling)
-- **Magazine** — affects capacity (larger mag = more rounds before reloading)
-- **Scope** — swappable optics with different zoom levels, reticles, and clarity
+### 5.2 Battlefield Feel
+The level must feel like a living battlefield:
+- **Constant spawning** — warriors spawn from both sides continuously
+- **Melee combat** — friendly and enemy warriors engage each other on the battlefield
+- **Flow of battle** — warriors advance, clash, and fall. The battlefield shifts as one side pushes
+- **Player influence** — the player's shots can tip local engagements by removing key enemies
+- **Chaos increases** — more warriors, faster spawning, tougher types as phases progress
 
-Each upgrade tier has a distinct visual model on the rifle. The player's weapon visually evolves as they progress.
-
-### 5.3 Player Skill Unlocks
-Purchased with experience at the hub. Permanent passive abilities:
-
-- **Longer hold breath** — extended scope steadying duration
-- **Faster zipline traversal** — quicker movement on ziplines
-- **Faster reload** — stacks with weapon upgrade
-- **Extra life** — start runs with an additional life
-
-### 5.4 Color Palettes
-- Achievement-gated palette unlocks (Tactical free, Midnight = 5 extractions, Noir = 50 kills)
-- Palette selection panel in hub (browse, preview colors, equip unlocked palettes)
-- Palette HUD indicator showing current palette name + accent swatches
-- Entire game world recolors instantly on palette swap via global shader uniforms
-- Future: more palettes with varied unlock conditions (headshot streaks, speed runs, etc.)
-
-### 5.5 Ammo Economy
-- Ammo is purchased with credits at the hub and stored in the player's inventory
-- Before each run, the player chooses how much and which types to bring (not forced to take everything)
-- Standard ammo is cheap; specialized ammo (armor-piercing, high-damage) costs more
-- All 5 ammo types are available from the start — cost is the gating mechanism
-- **On death:** all ammo brought into the run is lost
-- **On extraction:** unused ammo returns to the hub inventory
-- Creates multiple tensions: upgrades vs. ammo spending, bring more ammo (risk losing it) vs. bring less (risk running out)
-
-### 5.6 Level Unlocks
-New levels unlock through progression gates:
-- Successful extraction count thresholds
-- Total XP earned thresholds (not spendable XP)
-- Displayed in the hub level select with requirements visible
-
-### 5.7 Level Entry Fees
-- Each level may have a credits entry fee deducted on deploy (0 = free)
-- Entry fees are not refunded on death — part of the run's risk
-- Harder/later levels have higher entry fees, creating an additional credit sink
-- Hub level select shows fee amount and whether the player can afford it
-
-### 5.8 Per-Level Stats
-- The game tracks detailed stats per level: runs, extractions, deaths, total kills, best time, best credits
-- Viewable from the Stats terminal in the hub
-- Provides insight into which levels the player is most effective on
+### 5.3 Per-Run Variation
+Each run on the same level feels different:
+- **Randomized spawn timing** — warrior waves vary in composition and timing
+- **Time of day** — morning, day, evening, night; affects visibility
+- **Weather** — clear, fog, rain; affects sightlines and atmosphere
+- **Opportunity events** — different events trigger each run
+- **Extraction point rotation** — different points activate each cycle
 
 ---
 
-## 6. Level Design
+## 6. Warriors
 
 ### 6.1 Design Philosophy
-Levels are large, detailed, and vertical. The player should feel like a sniper operating in a complex environment — not running through corridors. **The game is designed around 100-200m+ engagements.** Level geometry, enemy placement, and scoring must consistently support and reward long-range shooting.
+Warriors are the lifeblood of the battlefield. They spawn from both sides (friendly and enemy), advance toward each other, and fight in melee. The player doesn't control friendly warriors — they fight autonomously. Enemy warriors are the player's targets and the source of castle damage.
 
-Every level should provide:
-- **Sniper nests / towers** — elevated positions with good sightlines as the primary gameplay location
-- **Long-range sightlines (100-200m+)** — the dominant engagement range; most enemies should be placed at distances where bullet drop and travel time matter
-- **Open kill zones** — large courtyards, plazas, valleys, or industrial yards that force engagements at range
-- **Repositioning routes** — ziplines, catwalks, rooftops for moving between positions
-- **Limited close-range paths** — interior areas exist for sneaking and repositioning, but enemies should rarely be encountered at close range
-- **Verticality** — multiple elevation levels creating interesting long-range shooting angles and bullet drop compensation
-- **Distance-based reward scaling** — longer shots earn more credits/XP to incentivize the intended playstyle
+Friendly and enemy warriors share the same types but are visually distinguished by palette colors (accent_friendly vs. accent_hostile).
 
-### 6.1.1 Long-Range Design Rules
-- **Minimum engagement distance:** Most enemy spawn points should be 80m+ from player vantage points. Close spawns (under 50m) should be rare exceptions.
-- **Level scale:** Maps should be at least 200m x 200m to support proper sightlines.
-- **Elevation matters:** Player nests should overlook large areas at 10-30m elevation advantage. This creates natural long-range angles.
-- **Sight blockers, not walls:** Use terrain, foliage, scaffolding, and breakable cover to create partial occlusion at range — not solid walls that force CQB.
-- **Sightline lanes:** Open lanes 150m+ long where the player can see deep into the map. Every level needs at least 2-3 of these.
-- **Scope-mandatory zones:** Some targets/enemies should be visible only through scope zoom, reinforcing the sniper identity.
+### 6.2 Melee Warrior Types
 
-### 6.2 Environment Types
-- Industrial warehouses and compounds
-- Castle/fortress structures
-- Multi-story buildings with rooftop access
-- Mixed environments combining open courtyards with dense interiors
+| Type | Phase | HP | Damage | Armor | Speed | Score | XP | Notes |
+|------|-------|----|--------|-------|-------|-------|----|-------|
+| **Swordsman** | 1+ | Low | Medium | None | Medium | 20 | 10 | Standard infantry. The backbone of the army from phase 1 onward. |
+| **Big Guy** | 6+ | High | High | Light | Slow | 40 | 20 | Large, tough brute. Slow but hits hard. Easy to spot, takes multiple body shots. |
+| **Knight** | 10+ | Very high | Very high | Heavy | Medium | 70 | 35 | Fully armored elite. Headshot or multiple body shots required. Devastating castle damage. |
 
-### 6.3 Per-Run Variation
-Each run on the same level should feel different:
-- **Randomized spawn points** — enemies, targets, and events appear in different locations
-- **Time of day** — morning, day, evening, night selected per run; affects visibility and atmosphere
-- **Weather** — clear, fog, rain, overcast selected per run; affects sightlines and mood
-- **Random events** — enemy ambushes can occur mid-run
-- **Variable sniper positions** — some nests may be blocked or revealed depending on the run
+- **Swordsman** — the standard warrior. Carries a sword, deals respectable damage. Present from phase 1 in small numbers, scaling up through mid-game. One body shot or headshot to kill.
+- **Big Guy** — a large, imposing brute with a two-handed weapon (axe or hammer). High HP means he survives a body shot — requires a headshot or 2 body shots. Slow movement makes him an easier target at range, but if he reaches the castle walls he deals heavy damage. Visually distinct due to size.
+- **Knight** — the elite. Full plate armor, sword and shield. Very high HP and heavy armor — body shots do reduced damage. Headshot is the efficient answer. Deals devastating castle damage. Becomes the primary castle threat in late phases. Visually distinct (armored silhouette, shield).
 
-> Detailed individual map designs will be documented in a separate plan.
+**Armor:** Knights have heavy armor (body shot damage significantly reduced). Big Guys have light armor (moderate reduction). Swordsmen have no armor. Headshots bypass armor on all types.
+
+**Castle damage:** When an enemy melee warrior reaches the castle gate/walls, they deal damage to castle HP proportional to their type. Swordsmen deal low damage, big guys heavy, knights devastating. This naturally scales castle pressure with threat phase as tougher types spawn later.
+
+### 6.3 Ranged Enemy Types (Threats to Player)
+Ranged enemies target the player specifically. They spawn in enemy positions (Zone 3) and don't advance into melee.
+
+| Type | Phase | HP | Accuracy | Fire Rate | Damage | Score | XP | Behavior |
+|------|-------|----|----------|-----------|--------|-------|----|----------|
+| **Archer** | 4+ | Low | Low | Slow | 1 life | 40 | 20 | Basic ranged threat. Visible arrow travel time. Stationary. |
+| **Heavy Archer** | 7+ | Medium | Medium | Slow | 1 life | 60 | 30 | Better accuracy, repositions between shots. |
+| **Crossbowman** | 9+ | Medium | High | Very slow | 1 life | 80 | 40 | High accuracy, long reload. Dangerous but predictable timing. |
+| **Bird Trainer** | 11+ | Low | N/A | Medium | 1 life | 100 | 50 | Spawns kamikaze birds that fly toward the player. Birds must be shot down or they deal damage. Max 3 active birds. |
+
+- **Archer** — the introductory ranged threat. Low accuracy, visible arrow flight gives the player time to react. Teaches the player to prioritize ranged enemies.
+- **Heavy Archer** — more dangerous version. Better accuracy, repositions to new cover after each shot. Requires re-acquisition after engaging.
+- **Crossbowman** — the precision threat. High accuracy but very slow reload. Player can learn the timing and use the reload window to engage safely.
+- **Bird Trainer** — doesn't attack directly. Instead, releases trained birds that kamikaze toward the player. Birds are small, fast-moving aerial targets that must be shot down. Creates ammo pressure (spending bullets on birds vs. saving for warriors). Replaces the drone concept from the original design.
+
+### 6.4 Friendly Warriors
+Friendly warriors share the same types as enemy warriors (swordsman, big guy, knight). They:
+- Spawn from the castle side and advance toward the enemy
+- Fight enemy warriors autonomously in melee
+- Are colored with `accent_friendly` palette slot
+- **Killing a friendly warrior incurs a score penalty** (shown in kill feed as red text)
+- Cannot be healed or commanded by the player
+- Their strength can be upgraded via army upgrades (see §8.3)
+
+### 6.5 Warrior AI
+Warriors use a simple state machine with readable, predictable behavior:
+
+**States:**
+- **Advancing** — marching toward the enemy side in a straight line. Default state after spawning.
+- **Focusing** — an opposing warrior is within engagement range. Warrior turns toward them and closes distance.
+- **Attacking** — in melee range with an opponent. Warriors take turns rolling attacks (see combat below).
+- **Idle** — brief pause after winning a fight before resuming advance.
+- **Dead** — plays death animation, removed from battlefield.
+
+**State transitions:**
+```
+Spawn → Advancing → (enemy in range?) → Focusing → (in melee range?) → Attacking
+Attacking → (opponent dies?) → Idle → Advancing
+Attacking → (self dies?) → Dead
+Advancing → (reached castle walls?) → Attacking (deals damage to castle HP)
+```
+
+**Roll-based combat:**
+When two opposing warriors enter Attacking state, they exchange blows in turns:
+1. Attacker rolls: **hit** (deals damage to opponent HP) or **miss** (nothing happens)
+2. Short delay (tunable, ~0.5-1s)
+3. Defender rolls their attack
+4. Repeat until one warrior's HP reaches 0
+
+Hit chance and damage are based on warrior type stats. This creates visible, readable fights where warriors clash for a few seconds before one falls — without requiring complex animation sync or real combat AI.
+
+**Pathing:** Warriors do NOT path intelligently or flank. They march forward and fight what's in front of them. This creates a predictable, readable battlefield that the player can learn to influence with precision shots.
 
 ---
 
-## 7. Enemies, NPCs & Targets
+## 7. Destructible Targets
 
 ### 7.1 Design Philosophy
-All enemies are snipers. The battlefield is a network of sniper positions — the player must spot and eliminate threats before being spotted. Enemies exist to create pressure and force decisions. Neutral NPCs and destructible targets add life and additional objectives to the environment.
+Destructibles are static, high-value targets placed in the enemy zone. They are thematic — destroying them weakens the enemy war effort. All are one-shot kills.
 
-### 7.2 Detection System
-- Line of sight + sound reaction (gunshots, bullet impacts, ally eliminations)
-- Alert states: Unaware → Suspicious → Alert → Searching
-- Gunshots attract nearby enemies toward the shooter's position
+### 7.2 Destructible Types
 
-### 7.3 Enemy Types
-6 distinct enemy types, each requiring a different counter-strategy:
+| Type | Location | Size | Score | XP | Effect |
+|------|----------|------|-------|----|--------|
+| **Powder Keg** | Near enemy groups, siege positions | Medium | 80 | 30 | Explodes on hit — deals AoE damage to nearby enemy warriors, potentially killing several |
+| **Siege Equipment** | Enemy zone | Large | 150 | 60 | Phase-gated (phase 6+). While alive, deals passive castle HP damage per second. Priority target. |
 
-| Type | Phases | Reward | Behavior | Counter-Strategy |
-|------|--------|--------|----------|------------------|
-| **Lookout** | 1+ | $50 / 25 XP | Stationary, scanning, slow reactions, poor accuracy. Tutorial-tier fodder. | Basic aiming — always present, scales via quantity |
-| **Spotter** | 3+ | $60 / 30 XP | Binocular glint (blue). On detecting player, all enemies within 80m go ALERT instantly. Doesn't shoot. Max 3 per run. | Kill order — prioritize before they spot you |
-| **Marksman** | 4+ | $75 / 35 XP | Competent sniper. Repositions to cover after being shot at or hearing gunfire. Auto-repositions every 20s while unaware. | Re-acquisition — target moves after you engage |
-| **Drone** | 5+ | $40 / 20 XP | Flying quad-rotor at 12m altitude, circles in 15m radius. Chases player on alert, shoots while moving. Low HP (one shot), poor accuracy, audible buzz warning at 60m. Cannot be headshot. Max 4 per run. | Aerial threat — forces awareness of vertical space |
-| **Ghost** | 7+ | $100 / 45 XP | Near-invisible without scope (8% opacity unscoped, 100% scoped). Fast, auto-repositions every 20s. Accurate shooter. Max 2 per run. | Scope discipline — forces careful scanning at range |
-| **Heavy** | 8+ | $120 / 50 XP | Armored — body shots with standard ammo do 15% damage. Requires AP ammo or headshot. Slow, stationary, high damage (2 lives per hit). Max 2 per run. | Loadout check — punishes wrong ammo choice |
-
-### 7.4 Spotter Behavior
-- Visible binocular glint (blue tint) — distinguishable from sniper scope glint
-- Wide scan pattern, long sight range (200m)
-- On ALERT: broadcasts player position to all enemies within 80m radius
-- Doesn't shoot — purely a detection/alert threat
-- Creates "kill the spotter first" priority puzzle
-
-### 7.5 Neutral NPCs
-Three NPC types, each with activity-based behavior cycles (not just patrol):
-
-| Type | Activity Cycle | Visual Color | Kill Penalty |
-|------|---------------|--------------|--------------|
-| **Laborer** | Work (station) → Carry (between points) → Rest (sit/smoke) | Orange/brown | -$150 |
-| **Technician** | Operate (panel/radio) → Inspect (walk stations) → Rest | Green | -$100 |
-| **Civilian** | Walk (paths) → Eat (bench) → Idle (phone/chat) | Blue | -$200 |
-
-- **Activity Points**: Marker3D nodes placed in levels define where NPCs perform each activity
-- NPCs cycle through their activities, traveling between matching ActivityPoints
-- **Panic/flee**: gunfire (gunshot or bullet impact) within range triggers flee behavior — NPC runs away from sound origin for several seconds, then resumes activities at nearest matching point
-- NPCs do NOT alert enemies when panicking
-- **Static spawning**: NPCs are placed at level start (configurable count range per level), no dynamic spawning
-- **Kill penalty**: flat credit deduction from run earnings (floored at 0), shown in kill feed as red text
-- Visually distinct from enemies (different mesh colors, different collision layer)
-- Creates moral/tactical tension — shooting near NPCs risks losing credits, shooting through NPC areas risks hitting civilians
-
-### 7.6 Destructible Targets
-All destructibles are one-shot kill — any bullet destroys them instantly.
-
-| Type | Movement | Size | Reward | Skins |
-|------|----------|------|--------|-------|
-| **Crate** | Static | Large | $15 / 5 XP | Wooden crate, cardboard box, trash can |
-| **Bottle** | Static | Tiny | $20 / 8 XP | Bottle, jar, mug |
-| **Rat** | Scurries | Medium | $50 / 20 XP | Brown, grey, black |
-| **Bird** | Fly/sit/eat | Small | $80 / 30 XP | Brown, white, black |
-| **Balloon** | Rising | Small | Tiered (see below) | Bronze, silver, gold |
-
-- **Crate/Bottle** — placed at DESTRUCTIBLE spawn points in level blocks. Static filler targets.
-- **Rat** — spawns at random walkable ground positions near spawn points. Scurries between random points with pauses.
-- **Bird** — spawns at random ground positions. Cycles sit → eat → fly → land. Hard to hit in flight.
-- **Balloon** — phase-gated rising targets that spawn near living enemies mid-run via BalloonSpawner. Must be shot before reaching max height or they pop (despawn with no reward). 3 tiers:
-
-| Tier | Min Phase | Reward | Rise Speed | Max Height |
-|------|-----------|--------|------------|------------|
-| Bronze | 3 | $50 / 20 XP | 1.8 m/s | 35m |
-| Silver | 5 | $100 / 40 XP | 2.2 m/s | 40m |
-| Gold | 7 | $200 / 75 XP | 2.8 m/s | 50m |
-
-- Kill feed shows "TARGET DESTROYED | +$X" in warm yellow
-- Balloon spawns announced on HUD feed (e.g. "GOLD BALLOON SPOTTED")
-
-### 7.7 Scaling with Threat Phase (1-10)
-Threat phases are evenly distributed across the run duration. Enemy types unlock at specific phases via `min_phase` on pool entries.
-
-- **Phases 1-2:** NPCs, destructible targets, Lookouts only
-- **Phase 3:** Spotters appear — area detection threat begins. Bronze Balloons start spawning.
-- **Phase 4:** Marksmen appear — enemies that shoot back and reposition
-- **Phase 5:** Drones appear — anti-camping pressure, forces movement. Silver Balloons start spawning.
-- **Phases 7+:** Ghosts appear — near-invisible without scope, high skill ceiling. Gold Balloons start spawning.
-- **Phases 8+:** Heavies appear — armored, require AP ammo or headshots
-- **Phase 10:** Maximum spawn density, all types active, highest rewards
+- **Powder Keg** — placed near groups of warriors. The AoE explosion can kill multiple enemies with a single bullet — extremely ammo-efficient. Rewards patience (wait for enemies to cluster near it).
+- **Siege Equipment** — appears in later phases. Catapults or battering rams that passively drain castle HP while they exist (flat DPS, no projectile simulation needed). Visually: the equipment animates a repeating attack cycle (catapult arm swings, ram rocks back and forth) so the player can see it's actively damaging the castle. Must be destroyed or the castle bleeds out. Creates clear priority targets.
 
 ---
 
-## 8. Objectives & Contracts
+## 8. Progression Systems
 
-### 8.1 Contracts
-Before deploying, the player picks one contract from the board in the hub:
-- **Kill count** — eliminate at least N enemies
-- **Headshot count** — get at least N headshots
-- **Accuracy challenge** — finish with accuracy at or above N%
-- **No hits** — extract without taking any damage
-- **Speed extract** — extract within N seconds
-- Contracts may have a credit cost to accept (higher cost = higher reward)
-- Contracts can be restricted to specific levels (level_restriction field)
+### 8.1 Experience (XP)
+- Earned every run, regardless of outcome
+- Never lost
+- Spent on: player skills, army upgrades
+- Ensures even failed runs are meaningful
 
-Future contract types (deferred):
-- **Eliminate high-value target** — a specific marked enemy in the level
-- **Destroy target** — locate and destroy a specific vehicle, equipment, or supply cache
-- **All headshots** — every kill must be a headshot (no body shots)
-- **Full stealth** — extract without triggering any alerts
-- **No missed shots** — perfect accuracy for the entire run
-- **No civilian casualties** — don't kill any NPCs
+### 8.2 Player Skills
+Purchased with XP at the hub. Permanent passive abilities:
 
-Contracts provide bonus currency and XP on completion, incentivizing specific playstyles and adding structure to runs.
+| Skill | XP Cost | Effect |
+|-------|---------|--------|
+| **Iron Lungs** | 100 | +2 seconds breath hold duration |
+| **Quick Hands** | 150 | 20% faster reload speed |
+| **Last Stand** | 200 | +1 extra life per run |
+| **Deep Pockets** | 150 | +5 bullets per run |
 
-### 8.2 Run Result
-After each run (extraction or death), the player sees raw stats:
-- Enemies eliminated
-- Accuracy percentage
-- Time survived
-- Contract status
-- Credits earned (or lost on death)
-- XP earned
+### 8.3 Army Upgrades (Global Goal)
+The meta-progression system. Purchased with XP and/or global progression points (earned from opportunities). Army upgrades strengthen the friendly forces permanently across all future runs.
+
+**Design goal:** ~15-20 runs to fully upgrade and beat a level's phase 20.
+
+Army upgrades are **visible on the battlefield** — the player sees their investment in action.
+
+| Upgrade | Cost | Effect | Visual |
+|---------|------|--------|--------|
+| **Hardened Warriors** | — | Friendly warriors gain +30% HP | Warriors wear helmets/padding |
+| **Battle Training** | — | Friendly warriors deal +25% damage and have higher hit chance | Warriors have larger weapons |
+| **Reinforced Gates** | — | +40% castle max HP | Visible gate reinforcement (iron bands, thicker walls) |
+| **Faster Muster** | — | Friendly warriors spawn 25% more frequently | More warriors visible on the field |
+| **Archer Tower** | — | Adds a friendly archer tower on the castle walls that periodically shoots enemy warriors | Tower physically appears on castle |
+| **Elite Guard** | — | A squad of elite friendly knights spawns every 5 phases | Visually distinct armored knights march out |
+
+> Exact costs, unlock order, and balance TBD. The key principle: each upgrade is visible and felt in gameplay. The first 4 are stat modifiers (cheap to implement). Archer Tower and Elite Guard are the only upgrades that spawn new entities.
+
+### 8.4 Bullet Count Progression
+- Player starts with a base bullet count (e.g., 15 bullets per run)
+- Upgradeable via the **Deep Pockets** skill and potentially army upgrades
+- No ammo types — all bullets are standard sniper rounds
+- No ammo shop — simplifies the loop, makes each shot count
+
+### 8.5 Color Palettes
+- Achievement-gated palette unlocks
+- Palette selection panel in hub
+- Entire game world recolors instantly via global shader uniforms
+- Palette colors: `bg_light`, `bg_mid`, `fg_dark`, `accent_hostile`, `accent_friendly`, `accent_loot`, `danger`, `reward`
 
 ---
 
-## 9. Hub
+## 9. Weapon Modification System
 
-The hub is the player's base of operations between runs. It serves as the central menu and progression space.
+### 9.1 Mods as Roguelike Items
+Weapon mods are procedurally generated and function like roguelike relics:
 
-### 9.1 Hub Areas / Screens
-- **Loadout** — select ammo type and amount before deploying
-- **Contract Board** — browse and accept bounties
-- **Weapon Upgrades** — spend extraction currency on weapon improvements
-- **Skill Tree** — spend XP on passive ability unlocks
-- **Palettes** — browse, preview, and equip unlocked color palettes
-- **Level Select** — choose deployment level (locked/unlocked, difficulty, best stats)
-- **Stats** — lifetime statistics, records, per-level performance
-- **Deploy** — start a run
+- **Earned on extraction** — after a successful run, the player chooses 1 mod from 3 randomly generated options
+- **Lost on failure** — all equipped mods are lost when the player dies or the castle falls
+- **Stored in hub inventory** — unequipped mods are safe in the hub stash
+- **Inventory cap** — 5 mods per slot (25 total across 5 slots)
+- **Rarity system** — Common, Uncommon, Rare, Epic (determines stat ranges)
+
+### 9.2 Procedural Mod Generation
+Mods are **not** hand-crafted items from a fixed catalog. Each mod is generated with:
+
+1. **Slot** — which slot it belongs to (barrel, stock, bolt, magazine, scope)
+2. **Rarity** — determines the stat budget (higher rarity = better stat rolls)
+3. **Stats** — randomly rolled within the rarity's range for that slot
+4. **Visual type** — randomly selected from 3 visual variants per slot
+
+This means every mod is unique. Two "Rare Barrels" will have different stat values. Players compare mods by their actual numbers, not by name.
+
+**Rarity determines stat ranges, not fixed values:**
+
+| Rarity | Color | Stat Range | Drop Weight (early) | Drop Weight (late) |
+|--------|-------|-----------|--------------------|--------------------|
+| Common | White | 50-70% of max | 60% | 20% |
+| Uncommon | Green | 60-80% of max | 30% | 35% |
+| Rare | Blue | 75-90% of max | 9% | 30% |
+| Epic | Purple | 85-100% of max | 1% | 15% |
+
+Rarity of offered mods depends on **phase reached** and **run score**.
+
+### 9.3 Mod Slots & Stats
+Each slot has defined stats that are rolled on generation:
+
+**Barrel** — 3 visual types
+| Stat | Min | Max | Effect |
+|------|-----|-----|--------|
+| Velocity | 280 | 450 | Bullet travel speed (less drop at range) |
+
+**Stock** — 3 visual types
+| Stat | Min | Max | Effect |
+|------|-----|-----|--------|
+| Sway reduction | 0% | 40% | Reduces scope sway amplitude |
+| Move speed | -20% | +15% | Walk/sprint speed modifier (trade-off) |
+
+**Bolt** — 3 visual types
+| Stat | Min | Max | Effect |
+|------|-----|-----|--------|
+| Cycle time | 0.6s | 1.2s | Time between shots (lower = faster) |
+| Stay scoped | No / Yes | — | Whether player stays zoomed during cycling |
+
+**Magazine** — 3 visual types
+| Stat | Min | Max | Effect |
+|------|-----|-----|--------|
+| Capacity | 4 | 10 | Rounds per magazine |
+| Reload speed | -30% | +20% | Reload time modifier |
+
+**Scope** — 3 visual types
+| Stat | Min | Max | Effect |
+|------|-----|-----|--------|
+| FOV (zoomed) | 8° | 40° | Zoom level (lower = more zoom) |
+| Variable zoom | No / Yes | — | Scroll wheel zoom adjustment |
+
+> Boolean stats (stay scoped, variable zoom) have a % chance to roll "Yes" that increases with rarity.
+
+### 9.4 Mod Visuals
+- Each slot has **3 visual types** — distinct 3D models on the rifle viewmodel
+- Visual type is randomly assigned on generation (purely cosmetic, independent of stats)
+- Rarity indicated by trim/glow color (white/green/blue/purple)
+- Player's weapon visually evolves as they equip better mods
 
 ---
 
-## 10. UI & HUD
+## 10. Opportunities (Events + Contracts)
 
-### 10.1 In-Run HUD
-Minimal and clean — should not obstruct the sniper's view:
-- Crosshair (center)
-- Scope overlay (when zoomed)
-- Weapon state + ammo counter (type + magazine/reserve + credits)
-- Lives indicator (hearts)
-- Run timer (turns red under 30s)
-- Threat phase indicator (EARLY/MID/LATE with color)
-- Hold-breath meter
-- Kill feed (enemy type, distance, multipliers, credits)
-- Extraction progress bar (when extracting)
-- Interaction prompt (contextual)
+### 10.1 Design Philosophy
+Opportunities replace the old contract and event systems. They are dynamic events that occur during a run — each with a timing window, a chance to trigger, and a reward if handled. They create moment-to-moment decision points beyond basic target prioritization.
 
-Future:
-- Active contract tracker on HUD
+### 10.2 Opportunity Structure
+Each opportunity has:
+- **Phase range** — earliest and latest phase it can trigger
+- **Chance** — probability of triggering when its phase range is active
+- **Duration** — how long the player has to complete it
+- **Reward** — score, XP, and/or global progression points
+- **Announcement** — HUD notification when triggered
 
-### 10.2 Menus
-- **Main Menu** — start run, hub, settings, quit
+### 10.3 Opportunity Types
+All 4 types follow the same pattern: a target appears, the player must kill it within a time limit.
+
+| Opportunity | Phase Range | Duration | Reward | Description |
+|-------------|-----------|----------|--------|-------------|
+| **Enemy Champion** | 4-15 | 60s | High score + XP | A named, tougher enemy warrior appears on the battlefield. Visually distinct (larger, glowing). Must be killed before they reach the castle. Deals massive castle damage if they arrive. |
+| **Siege Assault** | 8-18 | 90s | Global progression point | Multiple siege weapons activate simultaneously. Destroy all within the time limit to earn a progression point. |
+| **Archer Ambush** | 6-16 | 45s | High score + XP | A group of enemy archers appears at unexpected positions. Kill all within the time limit. |
+| **War Horn** | 5-15 | Instant | Global progression point | An enemy war horn carrier appears briefly. One-shot opportunity — if hit, disrupts the next enemy wave (delays it by one phase interval). Awards a progression point. |
+
+> All opportunities use the same system: "kill target(s) within time." More types can be added as content using this pattern.
+
+---
+
+## 11. Level Design
+
+### 11.1 Design Philosophy
+All levels follow the three-zone structure (§5.1): Castle → Battlefield → Enemy Positions. Levels are procedurally generated within set rules using the grid-based generation system.
+
+**Long-range design rules:**
+- Minimum engagement distance: most enemies at 80m+ from player positions
+- Level scale: at least 200m deep (castle to far enemy positions)
+- Elevation: player on walls at 10-30m height advantage
+- Sightline lanes: 2-3 clear lanes of 150m+ per level
+- Partial occlusion via terrain, cover, structures — not solid walls
+
+### 11.2 Level Generation
+Each level is built from a grid of blocks with constraint-based placement:
+
+- **Castle blocks** — wall sections, towers, gate, ramparts (Zone 1)
+- **Battlefield blocks** — open ground, trenches, scattered cover, terrain features (Zone 2)
+- **Enemy blocks** — camps, siege positions, archer towers, rally points (Zone 3)
+- **Constraint rules** — ensure proper sightlines, spawn point placement, extraction point distribution
+- **Sniper nest anchors** — define player firing positions with guaranteed sightline lanes
+
+### 11.3 Level Themes
+Each level is a different medieval setting with unique block catalogs:
+
+#### Level 1 — Castle Keep
+- Classic stone castle with thick walls and square towers
+- Battlefield: open meadow with scattered rocks and wooden barriers
+- Enemy: wooden palisade camp with tents and siege equipment
+- Difficulty: introductory, fewer ranged threats
+
+#### Level 2 — Hilltop Fortress
+- Fortress on a hill with sloped approaches
+- Battlefield: terraced hillside with stone walls and ditches
+- Enemy: forest edge with hidden positions and winding paths
+- Difficulty: elevation advantage but enemies have more cover
+
+#### Level 3 — River Crossing
+- Castle walls along a river with a bridge as the main chokepoint
+- Battlefield: river banks and bridge — warriors funnel across
+- Enemy: far bank with elevated positions for ranged enemies
+- Difficulty: concentrated action at bridge creates target-rich but chaotic environment
+
+#### Level 4+ — Additional themes as needed
+- Mountain pass, coastal cliff fortress, walled city, etc.
+
+### 11.4 Per-Run Variation
+- **Time of day** — morning, day, evening, night
+- **Weather** — clear, fog, rain
+- **Spawn timing variation** — wave composition varies per run
+- **Opportunity selection** — different opportunities trigger each run
+- **Extraction point rotation** — different points activate each cycle
+
+---
+
+## 12. Hub
+
+### 12.1 Hub Areas / Screens
+The hub is the player's base between runs:
+
+- **Armory** — equip weapon mods from inventory, view current loadout
+- **Mod Stash** — browse owned mods, manage inventory (6 per slot cap)
+- **Skill Board** — spend XP on permanent player skills
+- **War Room** — view army upgrades, spend XP/progression points on unlocks
+- **Level Select** — choose deployment level, view level stats and requirements
+- **Palettes** — browse, preview, and equip color palettes
+- **Stats Terminal** — lifetime statistics, per-level records, achievement progress
+- **Deploy** — start a run with current loadout
+
+### 12.2 Removed Hub Elements
+The following are removed from the old design:
+- ~~Ammo shop~~ — bullets are fixed per run, no purchasing
+- ~~Contract board~~ — replaced by in-run opportunities
+- ~~Mod shop~~ — mods are earned through extraction, not purchased
+- ~~Credits/money system~~ — replaced by score + mod drops
+
+---
+
+## 13. UI & HUD
+
+### 13.1 In-Run HUD
+Minimal and clean:
+- **Crosshair** (center, hidden when scoped)
+- **Scope overlay** (when zoomed, style matches equipped scope)
+- **Ammo counter** — bullets remaining / magazine (no reserve — total bullets shown)
+- **Lives indicator** — hearts
+- **Castle HP bar** — prominent, shows castle health
+- **Threat phase indicator** — "PHASE N" with color coding
+- **Hold-breath meter** — cyan when holding, red when exhausted
+- **Kill feed** — target type, distance, multipliers, score
+- **Extraction notification** — "EXTRACTION AVAILABLE" with timer and location
+- **Extraction progress bar** — when extracting
+- **Opportunity notification** — event announcements with timer
+- **Interaction prompt** — contextual (E key)
+
+### 13.2 Menus
+- **Main Menu** — new game, continue, settings, quit
 - **Pause Menu** — resume, settings, abandon run
-- **Death Screen** — XP earned, credits + ammo lost, return to hub
-- **Run Result Screen** — stats, contract status, credits/XP earned
+- **Run Result Screen** — score breakdown, phase reached, castle HP remaining, opportunity completions, mod choice (if extracted), XP earned
+- **Failure Screen** — stats, mods lost, XP kept, return to hub
 - **Settings** — controls, audio, video, sensitivity
 
 ---
 
-## 11. Audio Direction
+## 14. Audio Direction
 
-### 11.1 Philosophy
-Audio should reinforce the tension and precision of the sniper fantasy. Silence is as important as sound — quiet moments broken by a gunshot should feel impactful.
+### 14.1 Philosophy
+The medieval battlefield should sound chaotic and alive. The player's rifle is the anachronistic intrusion — it should sound distinct and powerful against the medieval soundscape.
 
-### 11.2 Sound Categories
-- **Weapons** — distinct, punchy rifle shot; bolt cycling; reload; dry fire
-- **Impacts** — differentiated by surface (metal, ground, wood)
-- **Enemies** — footsteps, alert calls, patrol chatter, death sounds
-- **Ambient** — per-level atmosphere that shifts with threat phase; calm and quiet early, tense and layered late
-- **UI** — menu interactions, extraction countdown, objective completion
+### 14.2 Sound Categories
+- **Weapons** — modern rifle: punchy shot, bolt cycling, reload, dry fire. Sounds alien in this world.
+- **Battlefield** — sword clashing, shields hitting, war cries, death sounds, marching. The ambient noise of war.
+- **Ranged enemies** — arrow whistles (warning sound when arrows fly near player), crossbow thunks, bird screeches
+- **Castle** — stone impacts when castle takes damage, crumbling sounds at low HP
+- **Ambient** — wind on the walls, distant battle sounds that intensify with phase
+- **UI** — extraction alerts, opportunity announcements, phase transitions
+
+### 14.3 Removed Audio Needs
+- ~~Enemy detection/alert sounds~~ — no longer relevant (warriors don't detect the player, ranged enemies simply shoot)
+- ~~Stealth audio~~ — no stealth system in the new design
 
 ---
 
-## 12. Art Direction
+## 15. Art Direction
 
-### 12.1 Visual Style — Palette-Driven Minimal
-- Clean low-poly geometry, flat or minimal shading
-- Bold readable silhouettes — player can identify enemy types at distance through scope
-- **Swappable color palettes** — player cycles through palettes in-game with a keybind
-- **B&W base** — non-interactive world geometry rendered in grayscale
-- **Pale palette tones** for backgrounds, large surfaces, terrain
-- **Three accent colors per palette:**
-  - `accent_hostile` — enemies, destructible targets (things to shoot)
-  - `accent_loot` — pickups, ammo, credit rewards (things to collect)
-  - `accent_friendly` — NPCs, interactive objects, HUD elements, extraction (things to protect / use)
-- `danger` color for damage, penalties, alerts
-- `reward` color for credits, XP gains, success states
-- Light **film grain** post-process overlay for atmosphere
-- All materials reference palette slots via shader uniforms — one update recolors the entire scene
+### 15.1 Visual Style — Palette-Driven Minimal
+Same as original — clean low-poly geometry with swappable color palettes.
 
-### 12.2 Environments
-- Blocky architecture with sharp angles — fits warehouses, castles, towers
-- Verticality reads clearly with contrasting floor levels
-- Fog/haze for depth and atmosphere (also helps with draw distance)
+- **B&W base** — world geometry in grayscale
+- **Palette accent colors:**
+  - `accent_hostile` — enemy warriors, ranged threats, siege equipment
+  - `accent_friendly` — friendly warriors, castle elements
+  - `accent_loot` — destructibles, opportunity targets, extraction points
+- `danger` — damage, castle HP loss, failure states
+- `reward` — score gains, XP, successful extraction
+- Light **film grain** post-process overlay
 
-### 12.3 Rifle & Upgrades
-- Each upgrade part is a distinct geometric shape — easy to model, visually clear progression
-- Rifle evolves visually as the player upgrades
-- Scope glint on enemies as a bright accent dot
+### 15.2 Medieval Environments
+- Blocky stone architecture for castle walls and towers
+- Open terrain with low-poly grass, rocks, trenches
+- Enemy camps with tents, palisades, siege equipment
+- Verticality through castle elevation over battlefield
 
-### 12.4 UI Style
-- Clean, minimal, geometric — matches the world
+### 15.3 Warriors
+- Simple humanoid meshes, distinguished by silhouette (swordsman = medium, big guy = large/bulky, knight = armored with shield)
+- Friendly vs enemy distinguished by palette color (`accent_friendly` vs `accent_hostile`)
+- Ranged enemies visually distinct (bow shape, crossbow shape, bird perch)
+
+### 15.4 Rifle & Mods
+- Same as original: each mod is a distinct geometric shape
+- Rarity indicated by subtle trim/glow (white/green/blue/purple)
+- Rifle is visually anachronistic — modern weapon in medieval world
+
+### 15.5 UI Style
+- Clean, minimal, geometric
 - Monospace or angular font
-- Minimal HUD that doesn't obstruct the sniper's view
-- **Snappy fast transitions** — instant palette-aware theming, no sluggish animations
-
-### 12.5 Audio Pairing
-- Minimal ambient soundscape — distant sounds, environmental hum
-- Sharp, punchy weapon sounds that contrast the quiet
-- Synth or electronic tension music that builds with threat phase
+- Medieval-inspired borders/frames for menus (subtle, not overdone)
+- Palette-aware theming
 
 ---
 
-## 13. References & Inspirations
+## 16. Save System
+
+### 16.1 Save Data
+- Multiple save slots
+- Per-slot data:
+  - XP total and spent
+  - Mod inventory (per slot, with rarity)
+  - Equipped mod loadout
+  - Purchased skills
+  - Army upgrades unlocked
+  - Unlocked palettes
+  - Global progression points
+  - Lifetime stats (kills, headshots, shots, extractions, deaths, phases reached, etc.)
+  - Per-level stats (runs, extractions, deaths, best phase, best score, etc.)
+
+### 16.2 Migration
+- Save system version with automatic migration from previous versions
+
+---
+
+## 17. References & Inspirations
 
 | Game | Inspiration |
 |------|-------------|
-| Escape from Tarkov | Extraction loop, tension of loot-or-leave decisions, environment hostility |
-| Hades | Meta-progression structure, always-progressing feel, hub between runs |
 | Sniper Elite | Satisfying sniping mechanics, bullet physics, long-range gameplay |
-| Slay the Spire | Run variation, risk/reward decisions, clean progression systems |
-| Hitman | Level replayability, multiple approaches, contract-based objectives |
-| Neon White | Clean minimal aesthetic, bold accent colors on light environments, snappy UI |
-| SUPERHOT | Red-on-white interactive vs non-interactive color split, gameplay clarity through art |
-| Return of the Obra Dinn | Monochrome + grain atmosphere, proving minimal palette can be striking |
-| Sable | Limited color palette as core art identity, palette as mood control |
+| Slay the Spire | Roguelike item loss/gain, risk/reward per run, relic system (→ mods) |
+| Hades | Meta-progression, hub between runs, always-progressing feel |
+| Kingdom (Two Crowns) | Castle defense from an elevated position, watching your army fight |
+| They Are Billions | Escalating siege defense, base HP as fail condition |
+| Neon White | Clean minimal aesthetic, bold accent colors, snappy UI |
+| Return of the Obra Dinn | Monochrome + grain atmosphere |
+| Totally Accurate Battle Simulator | Chaotic battlefield as spectacle (inspiration for battlefield feel) |
+| Rogue Legacy | Permanent upgrades across roguelike runs, progressive power growth |
+
+---
+
+## Appendix A: Removed Systems
+The following systems from the original "Sniper Extraction" design are removed in this pivot:
+
+| System | Reason |
+|--------|--------|
+| Credits/money currency | Replaced by score-based mod drops |
+| Ammo types (AP, shock, etc.) | Simplified to fixed bullet count |
+| Ammo shop | No longer needed |
+| Mod shop (purchase with credits) | Mods earned through extraction |
+| Hand-crafted mod catalog | Replaced by procedural mod generation |
+| Level entry fees | Levels are free (risk is mod loss) |
+| Run timer (5-min hard cap) | Replaced by escalation capped at phase 20 |
+| Enemy detection/alert AI | Warriors don't detect player; ranged enemies simply target player |
+| NPC civilians/laborers/technicians | Replaced by friendly warriors |
+| Contracts (pre-run selection) | Replaced by in-run opportunities |
+| Industrial/modern setting | Replaced by medieval battlefield |
+| Extensive repositioning across large maps | Player operates on castle walls, movement is local |
+| Sound-based enemy alerting | Removed (no stealth system) |
+| Suppressor barrel mods | Removed (no sound detection) |
+| Always-available extraction points | Replaced by timed extraction windows |
+| Distance bonus scoring | Removed (range is constant from castle walls) |
+| Rookie warrior type | Cut — swordsmen start from phase 1 instead |
+| Directional shield armor | Cut — shield-bearers replaced by high-HP types |
+| War Banner destructible | Cut — simplified destructible roster |
+| Eagle Eye skill | Cut — threat scanning is core player skill |
+| Overcast weather | Cut — clear, fog, rain only |
+| Treasure Cart / Supply Drop / Duel opportunities | Deferred — 4 core opportunity types ship first |
+| Zipline Runner skill | Deferred with ziplines |
