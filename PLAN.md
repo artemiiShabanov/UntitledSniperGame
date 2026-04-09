@@ -78,7 +78,7 @@ Pipeline complete: LevelEventData → LevelEventRunner → HUD feed.
 - [x] Pool .tres files for Industrial Yard and Dev Test levels
 - [x] LevelData extended with destructible + balloon config
 
-> Crate/Bottle: placed at DESTRUCTIBLE spawn points in blocks. Rat/Bird: spawned at random walkable positions. Treasure: 1-2 per run at random positions.
+> Crate/Bottle: placed at DESTRUCTIBLE spawn points in blocks. Rat/Bird: spawned at random walkable positions. Balloons: spawned near enemies mid-run via BalloonSpawner.
 
 ---
 
