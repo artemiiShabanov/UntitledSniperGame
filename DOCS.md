@@ -79,6 +79,7 @@ HUB ──(deploy)──► DEPLOYING ──(level loaded)──► IN_RUN
 - `lives_changed(current: int)` — life lost
 - `kill_recorded(info: Dictionary)` — enemy killed with metadata
 - `threat_phase_changed(phase: int)` — phase 1→10 transitions (evenly spaced across run duration)
+- `event_announced(text: String)` — mid-run event or announcement for HUD feed
 
 ---
 
@@ -193,13 +194,24 @@ Each step is a separate panel. The flow can be cancelled at any point.
 ```
 CharacterBody3D
   └─ EnemyBase (scripts/enemy/enemy_base.gd)
-       ├─ EnemyLookout  — stationary scanner, tutorial-tier
-       ├─ EnemySpotter  — wide FOV, broadcasts alert to nearby enemies
-       ├─ EnemyMarksman — repositions on sound/hit, auto-repositions every 20s
-       ├─ EnemyDrone    — flies at fixed height, circles/chases, shoots from above
-       ├─ EnemyGhost    — invisible without scope, repositions like Marksman
-       └─ EnemyHeavy    — armored, high damage, stationary scanner
+       ├─ EnemyLookout  — stationary scanner, tutorial-tier ($50/25XP, phase 1+)
+       ├─ EnemySpotter  — wide FOV, broadcasts alert ($60/30XP, phase 3+, max 3/run)
+       ├─ EnemyMarksman — repositions on sound/hit ($75/35XP, phase 4+)
+       ├─ EnemyDrone    — flies, circles/chases, no headshot ($40/20XP, phase 5+, max 4/run)
+       ├─ EnemyGhost    — 8% opacity unscoped, fast reposition ($100/45XP, phase 7+, max 2/run)
+       └─ EnemyHeavy    — armored 15% damage, high damage ($120/50XP, phase 8+, max 2/run)
 ```
+
+### Spawn Weights (Industrial Yard)
+
+| Type | Weight | Max/Run | Min Phase |
+|------|--------|---------|-----------|
+| Lookout | 2.0 | unlimited | 1 |
+| Spotter | 1.0 | 3 | 3 |
+| Marksman | 1.2 | unlimited | 4 |
+| Drone | 0.8 | 4 | 5 |
+| Ghost | 0.6 | 2 | 7 |
+| Heavy | 0.5 | 2 | 8 |
 
 ### AI State Machine
 
@@ -261,6 +273,57 @@ Enabled per-type via `can_reposition = true` on EnemyBase:
 
 ---
 
+## Destructible System
+
+### Class Hierarchy
+
+```
+StaticBody3D
+  └─ DestructibleTarget (scripts/world/destructibles/destructible_target.gd)
+       ├─ DestructibleCrate  — static, large ($15 / 5 XP), 3 skins
+       └─ DestructibleBottle — static, tiny ($20 / 8 XP), 3 skins
+
+CharacterBody3D
+  └─ DestructibleMovingTarget (scripts/world/destructible_moving_target.gd)
+       ├─ DestructibleRat     — scurries between random points ($50 / 20 XP), 3 skins
+       ├─ DestructibleBird    — sit/eat/fly cycle ($80 / 30 XP), 3 skins
+       └─ DestructibleBalloon — rising, 3 tiers, phase-gated ($50-200), pops at max height
+```
+
+### DestructibleMovingTarget Base
+
+Shared base for CharacterBody3D destructibles (Rat, Bird, Balloon):
+- `on_bullet_hit()` → `_destroy()` — one-shot kill
+- `_destroy()` — emits `target_destroyed`, records credits/XP, plays SFX/VFX, disables collision
+- `_on_destroy()` — virtual, defaults to `VFXFactory.spawn_death_effect()`
+- Subclasses override `credit_reward` / `xp_reward` in `_ready()`
+
+### Spawning
+
+- **DestructiblePool** / **DestructiblePoolEntry** — weighted random selection (mirrors EnemyPool pattern)
+  - `spawn_mode` enum: STATIC (placed at spawn points) or DYNAMIC (random walkable positions)
+  - `max_per_run` cap per entry
+- **DestructibleSpawner** — handles placement:
+  - `spawn_static(count)` — places at DESTRUCTIBLE SpawnPoints in level blocks
+  - `spawn_dynamic(count)` — raycasts random walkable positions near existing spawn points
+- **BalloonSpawner** — mid-run phase-aware spawning:
+  - Listens to `threat_phase_changed` signal
+  - Spawns balloons near living enemies (filters dead enemies)
+  - Configurable: `spawn_interval` (30s default), `max_concurrent` (2), `spawn_chance` (0.6)
+  - Announces tier on HUD via `RunManager.announce_event()`
+
+### Balloon Tiers
+
+| Tier | Min Phase | Credits | XP | Rise Speed | Max Height |
+|------|-----------|---------|-----|------------|------------|
+| Bronze | 3 | 50 | 20 | 1.8 m/s | 35m |
+| Silver | 5 | 100 | 40 | 2.2 m/s | 40m |
+| Gold | 7 | 200 | 75 | 2.8 m/s | 50m |
+
+Balloons rise with gentle horizontal sway. If not shot before reaching max height, they pop (despawn with no reward).
+
+---
+
 ## NPC System
 
 ### Class Hierarchy
@@ -281,6 +344,19 @@ CharacterBody3D
 
 ---
 
+## Events System
+
+Mid-run events that change level conditions. Pipeline: `LevelEventData` → `LevelEventRunner` → HUD feed.
+
+- **LevelEventData** (.tres) — defines event: script path, trigger time range, probability
+- **LevelEventRunner** — attached to BaseLevel, checks trigger conditions each phase tick, fires eligible events
+- **Event scripts** extend base and implement `execute(level, params)`:
+  - `ExtractionChangeEvent` — removes active extraction zone, spawns new one at farthest available position
+- **HUD integration** — events call `RunManager.announce_event(text)`, kill feed shows announcements in reward color for 6s
+- **Debug:** F8 triggers extraction change manually
+
+---
+
 ## Level System
 
 ### BaseLevel (scripts/world/base_level.gd)
@@ -289,16 +365,22 @@ Orchestrates a playable level:
 1. Finds player node, places at random PLAYER spawn point
 2. Spawns enemies from EnemyPool at ENEMY spawn points
 3. Spawns NPCs from NpcPool at activity points
-4. Picks random extraction zone
-5. Applies environment config (time of day, weather)
-6. Colors all unscripted meshes via PaletteManager
+4. Spawns destructibles (static at DESTRUCTIBLE spawn points, dynamic at random positions)
+5. Sets up BalloonSpawner for mid-run phase-gated balloon spawning
+6. Picks random extraction zone
+7. Starts LevelEventRunner for mid-run events
+8. Applies environment config (time of day, weather)
+9. Colors all unscripted meshes via PaletteManager
 
 ### Level Data
 
 Each level has a `LevelData` resource (.tres) with:
 - Scene path, display name
-- Enemy pool, NPC pool
+- Enemy pool, NPC pool, destructible pool
 - Phase config (spawn_start_phase, spawn_interval_initial/final, max_enemies_initial/final)
+- Destructible config (static_destructible_count_range, dynamic_destructible_count)
+- Balloon config (balloon_spawn_interval, balloon_max_concurrent, balloon_spawn_chance)
+- Level events pool (LevelEventData list)
 - Time/weather options (randomized per run)
 - Unlock gates (extraction count, XP threshold)
 - Entry fee
@@ -342,7 +424,7 @@ GridLevelData (extends LevelData)
 ```
 BlockRoot (Node3D)
   ├── Geometry/       # StaticBody3D + meshes + colliders
-  ├── SpawnPoints/    # Marker3D — enemy/NPC positions
+  ├── SpawnPoints/    # Marker3D — PLAYER, ENEMY, EXTRACTION, DESTRUCTIBLE types
   ├── ActivityPoints/ # Marker3D — NPC activities
   ├── CoverPositions/ # Marker3D — AI cover
   └── Props/          # Optional randomizable sub-objects
@@ -454,8 +536,8 @@ scripts/
   npc/        — NPC behavior and types
   hub/        — Hub stations and panels
   ui/         — HUD, menus, UI controllers
-  world/      — Levels, spawning, environment
+  world/      — Levels, spawning, environment, destructibles
   projectile/ — Bullet physics
   data/       — Resource definitions and registries
-  util/       — Shared utilities
+  utils/      — Shared utilities (ArrayUtils, etc.)
 ```

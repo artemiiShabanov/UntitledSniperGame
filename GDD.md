@@ -275,14 +275,14 @@ All enemies are snipers. The battlefield is a network of sniper positions — th
 ### 7.3 Enemy Types
 6 distinct enemy types, each requiring a different counter-strategy:
 
-| Type | Phases | Behavior | Counter-Strategy |
-|------|--------|----------|------------------|
-| **Lookout** | 1-10 | Stationary, scanning, slow reactions, poor accuracy. Tutorial-tier fodder. | Basic aiming — always present, scales via quantity |
-| **Spotter** | 3-8 | Binocular glint (blue). On detecting player, all enemies within 80m go ALERT instantly. Doesn't shoot. | Kill order — prioritize before they spot you |
-| **Marksman** | 4-10 | Competent sniper. Repositions to cover after being shot at or hearing gunfire. | Re-acquisition — target moves after you engage |
-| **Drone** | 5-10 | Flying quad-rotor, circles overhead scanning below. Chases player on alert, shoots while moving. Low HP (one shot), poor accuracy, audible buzz warning. | Aerial threat — forces awareness of vertical space |
-| **Ghost** | 7-10 | Only visible through scope zoom. Fast, repositions constantly. Accurate shooter. | Scope discipline — forces careful scanning at range |
-| **Heavy** | 8-10 | Armored — body shots with standard ammo do 15% damage. Requires AP ammo or headshot. Slow, stationary, high damage (2 lives per hit). | Loadout check — punishes wrong ammo choice |
+| Type | Phases | Reward | Behavior | Counter-Strategy |
+|------|--------|--------|----------|------------------|
+| **Lookout** | 1+ | $50 / 25 XP | Stationary, scanning, slow reactions, poor accuracy. Tutorial-tier fodder. | Basic aiming — always present, scales via quantity |
+| **Spotter** | 3+ | $60 / 30 XP | Binocular glint (blue). On detecting player, all enemies within 80m go ALERT instantly. Doesn't shoot. Max 3 per run. | Kill order — prioritize before they spot you |
+| **Marksman** | 4+ | $75 / 35 XP | Competent sniper. Repositions to cover after being shot at or hearing gunfire. Auto-repositions every 20s while unaware. | Re-acquisition — target moves after you engage |
+| **Drone** | 5+ | $40 / 20 XP | Flying quad-rotor at 12m altitude, circles in 15m radius. Chases player on alert, shoots while moving. Low HP (one shot), poor accuracy, audible buzz warning at 60m. Cannot be headshot. Max 4 per run. | Aerial threat — forces awareness of vertical space |
+| **Ghost** | 7+ | $100 / 45 XP | Near-invisible without scope (8% opacity unscoped, 100% scoped). Fast, auto-repositions every 20s. Accurate shooter. Max 2 per run. | Scope discipline — forces careful scanning at range |
+| **Heavy** | 8+ | $120 / 50 XP | Armored — body shots with standard ammo do 15% damage. Requires AP ammo or headshot. Slow, stationary, high damage (2 lives per hit). Max 2 per run. | Loadout check — punishes wrong ammo choice |
 
 ### 7.4 Spotter Behavior
 - Visible binocular glint (blue tint) — distinguishable from sniper scope glint
@@ -314,26 +314,34 @@ All destructibles are one-shot kill — any bullet destroys them instantly.
 
 | Type | Movement | Size | Reward | Skins |
 |------|----------|------|--------|-------|
-| **Crate** | Static | Large | $15 | Wooden crate, cardboard box, trash can |
-| **Bottle** | Static | Tiny | $20 | Bottle, jar, mug |
-| **Treasure** | Static (rare) | Small | $150 | Gold coins, jewel box, gold bar |
-| **Rat** | Scurries | Medium | $50 | Brown, grey, black |
-| **Bird** | Fly/sit/eat | Small | $80 | Brown, white, black |
+| **Crate** | Static | Large | $15 / 5 XP | Wooden crate, cardboard box, trash can |
+| **Bottle** | Static | Tiny | $20 / 8 XP | Bottle, jar, mug |
+| **Rat** | Scurries | Medium | $50 / 20 XP | Brown, grey, black |
+| **Bird** | Fly/sit/eat | Small | $80 / 30 XP | Brown, white, black |
+| **Balloon** | Rising | Small | Tiered (see below) | Bronze, silver, gold |
 
-- **Crate/Bottle** — baked into level blocks as static props. Filler targets.
-- **Treasure** — 1-2 per run, randomly placed, glowing emissive effect visible through scope
-- **Rat** — spawns at ground level, scurries between random points with pauses
-- **Bird** — spawns on rooftops/ledges, cycles sit → eat → fly → land. Hard to hit in flight.
+- **Crate/Bottle** — placed at DESTRUCTIBLE spawn points in level blocks. Static filler targets.
+- **Rat** — spawns at random walkable ground positions near spawn points. Scurries between random points with pauses.
+- **Bird** — spawns at random ground positions. Cycles sit → eat → fly → land. Hard to hit in flight.
+- **Balloon** — phase-gated rising targets that spawn near living enemies mid-run via BalloonSpawner. Must be shot before reaching max height or they pop (despawn with no reward). 3 tiers:
+
+| Tier | Min Phase | Reward | Rise Speed | Max Height |
+|------|-----------|--------|------------|------------|
+| Bronze | 3 | $50 / 20 XP | 1.8 m/s | 35m |
+| Silver | 5 | $100 / 40 XP | 2.2 m/s | 40m |
+| Gold | 7 | $200 / 75 XP | 2.8 m/s | 50m |
+
 - Kill feed shows "TARGET DESTROYED | +$X" in warm yellow
+- Balloon spawns announced on HUD feed (e.g. "GOLD BALLOON SPOTTED")
 
 ### 7.7 Scaling with Threat Phase (1-10)
 Threat phases are evenly distributed across the run duration. Enemy types unlock at specific phases via `min_phase` on pool entries.
 
 - **Phases 1-2:** NPCs, destructible targets, Lookouts only
-- **Phase 3:** Spotters appear — area detection threat begins
+- **Phase 3:** Spotters appear — area detection threat begins. Bronze Balloons start spawning.
 - **Phase 4:** Marksmen appear — enemies that shoot back and reposition
-- **Phase 5:** Drones appear — anti-camping pressure, forces movement
-- **Phases 7+:** Ghosts appear — invisible without scope, high skill ceiling
+- **Phase 5:** Drones appear — anti-camping pressure, forces movement. Silver Balloons start spawning.
+- **Phases 7+:** Ghosts appear — near-invisible without scope, high skill ceiling. Gold Balloons start spawning.
 - **Phases 8+:** Heavies appear — armored, require AP ammo or headshots
 - **Phase 10:** Maximum spawn density, all types active, highest rewards
 
