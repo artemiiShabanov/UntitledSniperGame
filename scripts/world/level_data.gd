@@ -53,10 +53,6 @@ func get_unlock_requirements_text() -> String:
 @export var balloon_max_concurrent: int = 2  ## Max balloons in the air at once
 @export var balloon_spawn_chance: float = 0.6  ## Chance per interval (0-1)
 
-@export_group("Events")
-@export var level_events_pool: Array[LevelEventData] = []
-@export var max_events_per_run: int = 1
-
 @export_group("Audio")
 @export var level_ambient: AudioStream  ## Per-level ambient soundscape
 @export var level_theme: AudioStream    ## Per-level music bed

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://clsw50y4t4k45"]
+[gd_scene load_steps=17 format=3 uid="uid://clsw50y4t4k45"]
 
 [ext_resource type="Script" uid="uid://pgmlxsj4tuhw" path="res://scripts/ui/crosshair.gd" id="1_crosshair"]
 [ext_resource type="Script" uid="uid://oy7dkie7naqf" path="res://scripts/ui/scope_overlay.gd" id="2_scope"]
@@ -13,6 +13,9 @@
 [ext_resource type="Script" uid="uid://b0qu6ksdlvl4v" path="res://scripts/ui/hit_flash.gd" id="11_hit_flash"]
 [ext_resource type="Script" uid="uid://gho1w5184ybl" path="res://scripts/ui/run_timer_display.gd" id="12_run_timer"]
 [ext_resource type="Script" uid="uid://dlnvjab51i8ck" path="res://scripts/ui/threat_display.gd" id="13_threat"]
+[ext_resource type="Script" path="res://scripts/ui/castle_hp_bar.gd" id="14_castle_hp"]
+[ext_resource type="Script" path="res://scripts/ui/extraction_window_display.gd" id="15_extraction_window"]
+[ext_resource type="Script" path="res://scripts/ui/opportunity_display.gd" id="16_opportunity"]
 
 [node name="HUD" type="CanvasLayer"]
 layer = 10
@@ -240,6 +243,40 @@ offset_right = 300.0
 offset_bottom = 100.0
 mouse_filter = 2
 script = ExtResource("8_palette_indicator")
+
+[node name="CastleHPBar" type="Control" parent="."]
+offset_left = 20.0
+offset_top = 100.0
+offset_right = 240.0
+offset_bottom = 140.0
+mouse_filter = 2
+script = ExtResource("14_castle_hp")
+
+[node name="ExtractionWindowDisplay" type="Label" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 120.0
+offset_right = 200.0
+offset_bottom = 150.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+script = ExtResource("15_extraction_window")
+
+[node name="OpportunityDisplay" type="Label" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 155.0
+offset_right = 200.0
+offset_bottom = 185.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+script = ExtResource("16_opportunity")
 
 [node name="InteractPrompt" type="Label" parent="."]
 anchors_preset = 7

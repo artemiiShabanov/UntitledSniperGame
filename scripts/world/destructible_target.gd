@@ -5,9 +5,8 @@ extends StaticBody3D
 
 signal target_destroyed(target: DestructibleTarget)
 
-@export var credit_reward: int = 25
-@export var xp_reward: int = 10
-@export var fade_delay: float = 5.0  ## Seconds before removal after destruction
+@export var score_reward: int = 80
+@export var fade_delay: float = 5.0
 
 var is_destroyed: bool = false
 
@@ -29,7 +28,7 @@ func _destroy() -> void:
 	is_destroyed = true
 	target_destroyed.emit(self)
 
-	RunManager.record_target_destroyed(credit_reward, xp_reward)
+	RunManager.record_target_destroyed(score_reward)
 	AudioManager.play_sfx(&"target_destroyed", global_position)
 
 	_on_destroy()
@@ -46,7 +45,6 @@ func _destroy() -> void:
 		queue_free()
 
 
-## Override in subclasses for custom destruction visuals
 func _on_destroy() -> void:
 	_darken_mesh()
 

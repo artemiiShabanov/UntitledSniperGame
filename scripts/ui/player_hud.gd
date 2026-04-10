@@ -13,6 +13,9 @@ extends CanvasLayer
 @onready var run_timer_label: Label = $RunTimer         ## run_timer_display.gd
 @onready var threat_phase_label: Label = $ThreatPhase   ## threat_display.gd
 @onready var interact_prompt: Label = $InteractPrompt
+@onready var castle_hp_bar: Control = $CastleHPBar
+@onready var extraction_window_display: Label = $ExtractionWindowDisplay
+@onready var opportunity_display: Label = $OpportunityDisplay
 
 
 func _ready() -> void:
@@ -80,5 +83,8 @@ func _update_hud_visibility() -> void:
 	weapon_state.visible = in_run
 	lives_label.visible = in_run
 	run_timer_label.visible = in_run
-	threat_phase_label.visible = in_run
+	threat_phase_label.visible = false  # Removed per GDD — phase shown in run timer
 	breath_meter.visible = false  # Shown dynamically by update_breath
+	castle_hp_bar.visible = in_run
+	extraction_window_display.visible = false  # Shown dynamically by signal
+	opportunity_display.visible = false  # Shown dynamically by polling

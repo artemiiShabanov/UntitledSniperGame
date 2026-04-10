@@ -16,8 +16,8 @@ save system with migration, loading screen, settings, film grain overlay.
 | Section | Progress | Summary |
 |---------|----------|---------|
 | 1 · Core Rework | █████ 100% | RunManager, weapon, data resources — adapted to GDD |
-| 2 · Warriors | ░░░░░ 0% | Complete rewrite — medieval warrior AI replaces modern enemy snipers |
-| 3 · Battlefield | ░░░░░ 0% | Castle HP, extraction windows, destructibles, opportunities |
+| 2 · Warriors | █████ 100% | Complete rewrite — medieval warrior AI replaces modern enemy snipers |
+| 3 · Battlefield | █████ 100% | Castle HP, extraction windows, destructibles, opportunities |
 | 4 · Progression | ░░░░░ 0% | Procedural mods, tiered skills, army upgrades, scoring |
 | 5 · Hub | ░░░░░ 0% | Rework stations for new economy (no credits, no contracts, no ammo shop) |
 | 6 · Level | ░░░░░ 0% | Castle Keep — three-zone blocks, medieval theme |
@@ -122,7 +122,7 @@ GDD §3: Score determines mod rarity on extraction. Sources: kills (per-type bas
 
 Complete rewrite. Replace 6 modern sniper enemy types + 3 NPC types with medieval warrior system.
 
-### 2.1 Warrior Base [ ]
+### 2.1 Warrior Base [x]
 
 Current `enemy_base.gd` (441 lines): alert state machine, LOS detection, shooting AI, patrol, reposition.
 GDD §6: Warriors advance, pair off 1v1, melee combat. Both sides use same base. No stealth/detection.
@@ -145,7 +145,7 @@ GDD §6: Warriors advance, pair off 1v1, melee combat. Both sides use same base.
 
 > **Delete:** All 6 enemy scripts (enemy_lookout/spotter/marksman/drone/ghost/heavy.gd), enemy_visuals.gd. All 3 NPC scripts (npc_civilian/laborer/technician.gd), npc_visuals.gd, npc_base.gd.
 
-### 2.2 Melee Warrior Types [ ]
+### 2.2 Melee Warrior Types [x]
 
 GDD §6.1: Swordsman, Big Guy, Knight, Bombardier (enemy-only).
 
@@ -156,7 +156,7 @@ GDD §6.1: Swordsman, Big Guy, Knight, Bombardier (enemy-only).
 - [ ] Scenes for each (shared humanoid skeleton, distinguished by silhouette)
 - [ ] Body shot / headshot damage tables per type (swordsman=1 body, big guy=2 body or 1 head, knight=headshot efficient)
 
-### 2.3 Ranged Warrior Types [ ]
+### 2.3 Ranged Warrior Types [x]
 
 GDD §6.2: Archer, Heavy Archer, Crossbowman, Bird Trainer. Spawn in Zone 3, advance to ~80-100m, shoot at player.
 
@@ -169,7 +169,7 @@ GDD §6.2: Archer, Heavy Archer, Crossbowman, Bird Trainer. Spawn in Zone 3, adv
 - [ ] Arrow/bolt projectile (visible travel, hits player for 1 life)
 - [ ] Ranged warriors don't melee — they stop and shoot
 
-### 2.4 Warrior Spawning [ ]
+### 2.4 Warrior Spawning [x]
 
 Current `enemy_spawner.gd`: phase-gated, interval-based, hidden spawn selection.
 GDD: Both sides spawn continuously. Enemy count escalates per phase. Friendly count based on army upgrades.
@@ -183,7 +183,7 @@ GDD: Both sides spawn continuously. Enemy count escalates per phase. Friendly co
 - [ ] Numerical advantage tracking — excess warriors advance to castle
 - [ ] Spawn off-screen preference (reuse `_pick_hidden_spawn()` logic)
 
-### 2.5 Melee Combat System [ ]
+### 2.5 Melee Combat System [x]
 
 GDD §6.4: Warriors pair off 1v1, roll-based attacks.
 
@@ -201,7 +201,7 @@ GDD §6.4: Warriors pair off 1v1, roll-based attacks.
 
 Castle defense, extraction schedule, destructibles, opportunities.
 
-### 3.1 Castle HP System [ ]
+### 3.1 Castle HP System [x]
 
 GDD §4.1: Castle starts at fixed HP. Enemies reaching walls deal damage. HP bar on HUD.
 
@@ -213,7 +213,7 @@ GDD §4.1: Castle starts at fixed HP. Enemies reaching walls deal damage. HP bar
 - [ ] HUD: castle HP bar (§3.5)
 - [ ] Army upgrade: Reinforced Gates (+40% max HP)
 
-### 3.2 Extraction Window System [ ]
+### 3.2 Extraction Window System [x]
 
 GDD §4.3: Timed windows on a schedule. Multiple points, one active at a time.
 
@@ -227,7 +227,7 @@ GDD §4.3: Timed windows on a schedule. Multiple points, one active at a time.
 - [ ] Player must reach active point + hold E within window duration
 - [ ] Extraction cancelled by movement or damage (existing mechanic)
 
-### 3.3 Destructibles Rework [ ]
+### 3.3 Destructibles Rework [x]
 
 Current: 5 types (crate, bottle, balloon, rat, bird) with skins.
 GDD §7: 2 types — Powder Keg (AoE) and Siege Equipment (passive castle drain).
@@ -241,7 +241,7 @@ GDD §7: 2 types — Powder Keg (AoE) and Siege Equipment (passive castle drain)
 - [ ] Reuse `DestructibleTarget` base class pattern (one-shot kill, VFX/audio)
 - [ ] Update `DestructiblePool`/`DestructiblePoolEntry` for new types
 
-### 3.4 Opportunity System [ ]
+### 3.4 Opportunity System [x]
 
 GDD §10: 6 dynamic in-run events, each paired 1:1 with army upgrades. Kill targets within time.
 
@@ -258,7 +258,7 @@ GDD §10: 6 dynamic in-run events, each paired 1:1 with army upgrades. Kill targ
 - [ ] 1-2 opportunities per run, selected from eligible pool based on current phase
 - [ ] HUD: opportunity name + countdown timer
 
-### 3.5 HUD Updates [ ]
+### 3.5 HUD Updates [x]
 
 Current HUD: crosshair, scope overlay, ammo counter, lives, breath meter, kill feed, extraction bar, threat display, run timer, weapon state.
 GDD §12: Add castle HP bar, opportunity timer. Remove run timer (no time limit). Remove ammo type display.

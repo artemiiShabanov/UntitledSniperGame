@@ -55,7 +55,7 @@ func _setup_run_variation() -> void:
 	_spawn_destructibles()
 	_setup_balloon_spawner()
 	_pick_extraction_zone()
-	_roll_events()
+	_setup_opportunity_runner()
 	_setup_enemy_spawner()
 
 	# Palette: color all unscripted world geometry (ground, walls, etc.)
@@ -296,25 +296,9 @@ func _on_threat_phase_changed(phase: int) -> void:
 		AudioManager.play_music(&"combat_tension")
 
 
-func _roll_events() -> void:
-	if not level_data or level_data.level_events_pool.is_empty():
-		return
-
-	var selected: Array[LevelEventData] = []
-	for event_data in level_data.level_events_pool:
-		if rng.randf() <= event_data.probability:
-			selected.append(event_data)
-
-	if selected.is_empty():
-		return
-
-	# Limit to max_events_per_run
-	while selected.size() > level_data.max_events_per_run:
-		selected.remove_at(rng.randi() % selected.size())
-
-	var runner := LevelEventRunner.new()
-	runner.name = "LevelEventRunner"
-	runner.setup(selected, rng, self)
+func _setup_opportunity_runner() -> void:
+	var runner := OpportunityRunner.new()
+	runner.name = "OpportunityRunner"
 	add_child(runner)
 
 
