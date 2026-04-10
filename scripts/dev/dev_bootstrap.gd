@@ -8,15 +8,13 @@ func _ready() -> void:
 		return
 
 	# Dev HUD (F3 toggle).
-	var hud_script := load("res://scripts/dev/dev_hud.gd")
-	var hud := Node.new()
-	hud.set_script(hud_script)
+	var hud := CanvasLayer.new()
+	hud.set_script(load("res://scripts/dev/dev_hud.gd"))
 	hud.name = "DevHUD"
 	add_child(hud)
 
 	# Dev Console (backtick toggle).
-	var console_script := load("res://scripts/dev/dev_console.gd")
-	var console := Node.new()
-	console.set_script(console_script)
+	var console := CanvasLayer.new()
+	console.set_script(load("res://scripts/dev/dev_console.gd"))
 	console.name = "DevConsole"
 	add_child(console)

@@ -408,25 +408,17 @@ func _debug_spawn_balloon() -> void:
 	var pos := global_position + forward * 15.0
 	pos.y = 0.0
 
-	var scene: PackedScene = load("res://scenes/world/destructibles/destructible_balloon.tscn")
-	var balloon: DestructibleBalloon = scene.instantiate()
-
-	# Cycle through tiers based on current phase, or use Gold for easy testing
-	var phase := RunManager.threat_phase
-	balloon.tier = DestructibleBalloon.get_tier_for_phase(maxi(phase, 3))
-
-	get_parent().add_child(balloon)
-	balloon.global_position = pos
-
-	var tier_name: String = ["BRONZE", "SILVER", "GOLD"][balloon.tier]
-	RunManager.announce_event("DEBUG: %s BALLOON" % tier_name)
+	var scene: PackedScene = load("res://scenes/world/destructibles/powder_keg.tscn")
+	var keg := scene.instantiate()
+	get_parent().add_child(keg)
+	keg.global_position = pos
+	RunManager.announce_event("DEBUG: POWDER KEG")
 
 
 func _debug_trigger_extraction_change() -> void:
-	var level := get_parent()
-	if level is BaseLevel:
-		var event := ExtractionChangeEvent.new()
-		event.execute(level, {})
+	RunManager.extraction_window_open = true
+	RunManager.extraction_window_timer = 15.0
+	RunManager.extraction_window_opened.emit(15.0)
 
 
 ## ── Run callbacks ───────────────────────────────────────────────────────────
