@@ -35,6 +35,7 @@ LoadingScreen="*res://scenes/ui/loading_screen.tscn"
 FilmGrainOverlay="*res://scenes/ui/film_grain_overlay.tscn"
 VFXFactory="*res://scripts/systems/vfx_factory.gd"
 AudioManager="*res://scripts/systems/audio_manager.gd"
+DevBootstrap="*res://scripts/dev/dev_bootstrap.gd"
 
 [display]
 

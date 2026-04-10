@@ -13,10 +13,10 @@ func _ready() -> void:
 	visible = false
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not _window_open:
 		return
-	_time_remaining = RunManager.extraction_window_timer
+	_time_remaining -= delta
 	if _time_remaining > 0.0:
 		text = "EXTRACTION OPEN — %.0fs" % _time_remaining
 	else:

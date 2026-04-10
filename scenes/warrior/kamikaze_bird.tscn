@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/warrior/kamikaze_bird.gd" id="1_script"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_1"]
+radius = 0.3
+
+[node name="KamikazeBird" type="CharacterBody3D"]
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_1")
+
+[node name="Mesh" type="CSGSphere3D" parent="."]
+radius = 0.3
+material = null
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+text = "BIRD"
+font_size = 24
+outline_size = 6

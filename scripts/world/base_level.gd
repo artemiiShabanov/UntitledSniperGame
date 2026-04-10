@@ -51,6 +51,7 @@ func _setup_run_variation() -> void:
 	_pick_environment()
 	_fill_level_slots()
 	_setup_warrior_spawner()
+	_setup_combat_manager()
 	_setup_extraction_window_manager()
 	_setup_opportunity_runner()
 
@@ -104,6 +105,12 @@ func _setup_warrior_spawner() -> void:
 	var spawner := WarriorSpawner.new()
 	spawner.name = "WarriorSpawner"
 	add_child(spawner)
+
+
+func _setup_combat_manager() -> void:
+	var manager := CombatManager.new()
+	manager.name = "CombatManager"
+	add_child(manager)
 
 
 func _setup_extraction_window_manager() -> void:

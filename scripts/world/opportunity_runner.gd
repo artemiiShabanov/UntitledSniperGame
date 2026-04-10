@@ -78,33 +78,12 @@ func _start_opportunity(opp: OpportunityData) -> void:
 	_offered_ids.append(opp.id)
 	_active_timer = opp.duration
 	_active_kill_count = 0
-	_active_kill_target = _get_kill_target(opp.id)
+	_active_kill_target = opp.kill_target
 
 	if opp.duration > 0.0:
 		RunManager.announce_event("%s — %.0fs" % [opp.name.to_upper(), opp.duration])
 	else:
 		RunManager.announce_event(opp.name.to_upper())
-
-
-func _get_kill_target(opp_id: String) -> int:
-	## Returns how many kills/destroys are needed to complete the opportunity.
-	## When actual special spawns exist (Section 6+), these will correspond to
-	## spawned targets. For now, any hostile kill/destroy counts.
-	match opp_id:
-		"enemy_champion":
-			return 1
-		"archer_ambush":
-			return 3
-		"siege_assault":
-			return 3
-		"war_horn":
-			return 1
-		"siege_tower":
-			return 1
-		"war_chief":
-			return 1
-		_:
-			return 1
 
 
 func _on_enemy_killed(_info: Dictionary) -> void:

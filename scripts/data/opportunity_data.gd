@@ -10,3 +10,4 @@ extends Resource
 @export var duration: float = 60.0  ## Seconds to complete (0 = instant/one-shot)
 @export var description: String = ""
 @export var xp_reward: int = 100
+@export var kill_target: int = 1  ## Kills/destroys needed to complete

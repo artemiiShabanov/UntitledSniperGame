@@ -78,17 +78,9 @@ func _update_tab_highlight() -> void:
 func _rebuild_mod_list() -> void:
 	UIUtils.clear_children(item_list)
 
-	var inventory: Array = SaveManager.get_mod_inventory()
 	var equipped: Dictionary = SaveManager.get_equipped_loadout()
 	var equipped_index: int = equipped.get(_current_slot, -1)
-
-	# Filter mods for current slot.
-	var slot_mods: Array[Dictionary] = []  ## [{index, mod_data}]
-	for i in range(inventory.size()):
-		var mod_data: Dictionary = inventory[i]
-		var slot_name: String = RifleMod.SLOT_NAMES[mod_data.get("slot", 0)]
-		if slot_name == _current_slot:
-			slot_mods.append({"index": i, "mod_data": mod_data})
+	var slot_mods: Array = SaveManager.get_mods_for_slot(_current_slot)
 
 	# Slot header.
 	var header := Label.new()

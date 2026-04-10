@@ -1,30 +1,22 @@
-[gd_scene load_steps=20 format=3 uid="uid://bwh5bc43q01ws"]
+[gd_scene load_steps=16 format=3 uid="uid://bwh5bc43q01ws"]
 
 [ext_resource type="Script" uid="uid://s52rkyeu1kxe" path="res://scripts/hub/hub.gd" id="1_hub"]
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://cmocsbk6rgc2t" path="res://scripts/hub/deploy_board.gd" id="3_deploy"]
-[ext_resource type="Script" uid="uid://bc0rf240lb2ja" path="res://scripts/hub/ammo_crate.gd" id="4_ammo"]
 [ext_resource type="Script" uid="uid://d17fgkr7081ri" path="res://scripts/hub/save_terminal.gd" id="5_save"]
-[ext_resource type="Script" uid="uid://b16075m32j71r" path="res://scripts/hub/ammo_shop.gd" id="6_ammo_shop"]
-[ext_resource type="Script" uid="uid://bny6a12nat13f" path="res://scripts/hub/loadout_panel.gd" id="7_loadout"]
-[ext_resource type="Script" uid="uid://caf273t4815bh" path="res://scripts/hub/mod_shop.gd" id="8_mod_shop"]
 [ext_resource type="Script" uid="uid://iye08sxbqpay" path="res://scripts/hub/mod_bench.gd" id="9_mod_bench"]
 [ext_resource type="Script" uid="uid://d1g16ea7iyde7" path="res://scripts/hub/skill_shop.gd" id="10_skill_shop"]
 [ext_resource type="Script" uid="uid://cgtgbthc7ps50" path="res://scripts/hub/skill_board.gd" id="11_skill_board"]
-[ext_resource type="Script" uid="uid://6gtch1tmr82" path="res://scripts/hub/contract_panel.gd" id="12_contract"]
 [ext_resource type="Script" uid="uid://d3grg5bfugprn" path="res://scripts/hub/stats_panel.gd" id="13_stats_panel"]
 [ext_resource type="Script" uid="uid://wqdmtojsm1x" path="res://scripts/hub/stats_terminal.gd" id="14_stats_terminal"]
 [ext_resource type="Script" uid="uid://b8wr37oyicjrx" path="res://scripts/hub/palette_station.gd" id="15_palette_station"]
 [ext_resource type="Script" uid="uid://bgtx08a13qrut" path="res://scripts/hub/palette_panel.gd" id="16_palette_panel"]
+[ext_resource type="Script" path="res://scripts/hub/armory.gd" id="17_armory"]
+[ext_resource type="Script" path="res://scripts/hub/war_room.gd" id="18_war_room"]
+[ext_resource type="Script" path="res://scripts/hub/war_room_station.gd" id="19_war_room_station"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station1"]
 size = Vector3(1.5, 2, 0.3)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_station2"]
-size = Vector3(1.5, 1, 1.5)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_station3"]
-size = Vector3(0.8, 2, 0.3)
 
 [node name="Hub" type="Node3D"]
 script = ExtResource("1_hub")
@@ -72,15 +64,6 @@ size = Vector3(12, 0.2, 12)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-move_speed = 5.0
-sprint_speed = 8.0
-jump_velocity = 12.0
-crouch_speed = 2.5
-gravity = 20.0
-slide_min_speed = 6.0
-slide_friction = 10.0
-slide_duration = 0.8
-interact_range = 3.0
 
 [node name="DeployBoard" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -5.85)
@@ -94,22 +77,7 @@ size = Vector3(1.5, 2, 0.3)
 
 [node name="Label3D" type="Label3D" parent="DeployBoard"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
-text = "MISSION BOARD"
-font_size = 48
-
-[node name="AmmoCrate" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 0)
-script = ExtResource("4_ammo")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="AmmoCrate"]
-shape = SubResource("BoxShape3D_station2")
-
-[node name="MeshInstance3D" type="CSGBox3D" parent="AmmoCrate"]
-size = Vector3(1.5, 1, 1.5)
-
-[node name="Label3D" type="Label3D" parent="AmmoCrate"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-text = "AMMO CRATE"
+text = "DEPLOY"
 font_size = 48
 
 [node name="SaveTerminal" type="StaticBody3D" parent="."]
@@ -117,29 +85,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.5, 0)
 script = ExtResource("5_save")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SaveTerminal"]
-shape = SubResource("BoxShape3D_station3")
+shape = SubResource("BoxShape3D_station1")
 
 [node name="MeshInstance3D" type="CSGBox3D" parent="SaveTerminal"]
-size = Vector3(0.8, 2, 0.3)
+size = Vector3(1.5, 2, 0.3)
 
 [node name="Label3D" type="Label3D" parent="SaveTerminal"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
 text = "SAVE"
 font_size = 48
 
-[node name="StatsTerminal" type="StaticBody3D" parent="."]
+[node name="ModBench" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.5, -3)
-script = ExtResource("14_stats_terminal")
+script = ExtResource("9_mod_bench")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StatsTerminal"]
-shape = SubResource("BoxShape3D_station3")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ModBench"]
+shape = SubResource("BoxShape3D_station1")
 
-[node name="MeshInstance3D" type="CSGBox3D" parent="StatsTerminal"]
-size = Vector3(0.8, 2, 0.3)
+[node name="MeshInstance3D" type="CSGBox3D" parent="ModBench"]
+size = Vector3(1.5, 2, 0.3)
 
-[node name="Label3D" type="Label3D" parent="StatsTerminal"]
+[node name="Label3D" type="Label3D" parent="ModBench"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
-text = "STATS"
+text = "ARMORY"
 font_size = 48
 
 [node name="SkillBoard" type="StaticBody3D" parent="."]
@@ -154,28 +122,58 @@ size = Vector3(1.5, 2, 0.3)
 
 [node name="Label3D" type="Label3D" parent="SkillBoard"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
-text = "SKILL BOARD"
+text = "SKILLS"
 font_size = 48
 
-[node name="ModBench" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.5, -3)
-script = ExtResource("9_mod_bench")
+[node name="WarRoomStation" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.5, 3)
+script = ExtResource("19_war_room_station")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="ModBench"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WarRoomStation"]
 shape = SubResource("BoxShape3D_station1")
 
-[node name="MeshInstance3D" type="CSGBox3D" parent="ModBench"]
+[node name="MeshInstance3D" type="CSGBox3D" parent="WarRoomStation"]
 size = Vector3(1.5, 2, 0.3)
 
-[node name="Label3D" type="Label3D" parent="ModBench"]
+[node name="Label3D" type="Label3D" parent="WarRoomStation"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
-text = "MOD BENCH"
+text = "WAR ROOM"
+font_size = 48
+
+[node name="StatsTerminal" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.5, -3)
+script = ExtResource("14_stats_terminal")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StatsTerminal"]
+shape = SubResource("BoxShape3D_station1")
+
+[node name="MeshInstance3D" type="CSGBox3D" parent="StatsTerminal"]
+size = Vector3(1.5, 2, 0.3)
+
+[node name="Label3D" type="Label3D" parent="StatsTerminal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
+text = "STATS"
+font_size = 48
+
+[node name="PaletteStation" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.5, -5.85)
+script = ExtResource("15_palette_station")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PaletteStation"]
+shape = SubResource("BoxShape3D_station1")
+
+[node name="MeshInstance3D" type="CSGBox3D" parent="PaletteStation"]
+size = Vector3(1.5, 2, 0.3)
+
+[node name="Label3D" type="Label3D" parent="PaletteStation"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
+text = "PALETTES"
 font_size = 48
 
 [node name="StationUI" type="CanvasLayer" parent="."]
 layer = 20
 
-[node name="CreditsLabel" type="Label" parent="StationUI"]
+[node name="XPLabel" type="Label" parent="StationUI"]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -185,7 +183,7 @@ offset_right = -20.0
 offset_bottom = 60.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 32
-text = "Credits: 0 | XP: 0"
+text = "XP: 0"
 horizontal_alignment = 2
 
 [node name="DeployPanel" type="PanelContainer" parent="StationUI"]
@@ -207,22 +205,14 @@ theme_override_font_sizes/font_size = 42
 text = "SELECT MISSION"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="StationUI/DeployPanel/VBox"]
-custom_minimum_size = Vector2(0, 20)
-layout_mode = 2
-
 [node name="MissionList" type="VBoxContainer" parent="StationUI/DeployPanel/VBox"]
-layout_mode = 2
-
-[node name="Spacer2" type="Control" parent="StationUI/DeployPanel/VBox"]
-custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 
 [node name="CancelButton" type="Button" parent="StationUI/DeployPanel/VBox"]
 layout_mode = 2
 text = "Cancel"
 
-[node name="AmmoShop" type="PanelContainer" parent="StationUI"]
+[node name="Armory" type="PanelContainer" parent="StationUI"]
 visible = false
 anchors_preset = -1
 anchor_left = 0.1
@@ -231,146 +221,36 @@ anchor_right = 0.9
 anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("6_ammo_shop")
+script = ExtResource("17_armory")
 
-[node name="VBox" type="VBoxContainer" parent="StationUI/AmmoShop"]
+[node name="VBox" type="VBoxContainer" parent="StationUI/Armory"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="StationUI/AmmoShop/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 42
-text = "AMMO SHOP"
-horizontal_alignment = 1
-
-[node name="CreditsLabel" type="Label" parent="StationUI/AmmoShop/VBox"]
+[node name="XPLabel" type="Label" parent="StationUI/Armory/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
-text = "Credits: $0"
+text = "XP: 0"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="StationUI/AmmoShop/VBox"]
-layout_mode = 2
-
-[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/AmmoShop/VBox"]
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="ItemList" type="VBoxContainer" parent="StationUI/AmmoShop/VBox/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 12
-
-[node name="CloseButton" type="Button" parent="StationUI/AmmoShop/VBox"]
-layout_mode = 2
-text = "Close"
-
-[node name="LoadoutPanel" type="PanelContainer" parent="StationUI"]
-visible = false
-anchors_preset = -1
-anchor_left = 0.1
-anchor_top = 0.05
-anchor_right = 0.9
-anchor_bottom = 0.95
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("7_loadout")
-
-[node name="VBox" type="VBoxContainer" parent="StationUI/LoadoutPanel"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="Title" type="Label" parent="StationUI/LoadoutPanel/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 42
-text = "SELECT LOADOUT"
-horizontal_alignment = 1
-
-[node name="HSeparator" type="HSeparator" parent="StationUI/LoadoutPanel/VBox"]
-layout_mode = 2
-
-[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/LoadoutPanel/VBox"]
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="ItemList" type="VBoxContainer" parent="StationUI/LoadoutPanel/VBox/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 12
-
-[node name="DeployButton" type="Button" parent="StationUI/LoadoutPanel/VBox"]
-layout_mode = 2
-text = "DEPLOY"
-
-[node name="CancelButton" type="Button" parent="StationUI/LoadoutPanel/VBox"]
-layout_mode = 2
-text = "Cancel"
-
-[node name="SaveFeedback" type="Label" parent="StationUI"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -25.0
-offset_right = 100.0
-offset_bottom = 25.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 32
-text = "GAME SAVED"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ModShop" type="PanelContainer" parent="StationUI"]
-visible = false
-anchors_preset = -1
-anchor_left = 0.1
-anchor_top = 0.05
-anchor_right = 0.9
-anchor_bottom = 0.95
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("8_mod_shop")
-
-[node name="VBox" type="VBoxContainer" parent="StationUI/ModShop"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="Title" type="Label" parent="StationUI/ModShop/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 42
-text = "RIFLE MODIFICATIONS"
-horizontal_alignment = 1
-
-[node name="CreditsLabel" type="Label" parent="StationUI/ModShop/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "Credits: $0"
-horizontal_alignment = 1
-
-[node name="TabBar" type="HBoxContainer" parent="StationUI/ModShop/VBox"]
+[node name="TabBar" type="HBoxContainer" parent="StationUI/Armory/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="HSeparator" type="HSeparator" parent="StationUI/ModShop/VBox"]
+[node name="HSeparator" type="HSeparator" parent="StationUI/Armory/VBox"]
 layout_mode = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/ModShop/VBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/Armory/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="ItemList" type="VBoxContainer" parent="StationUI/ModShop/VBox/ScrollContainer"]
+[node name="ItemList" type="VBoxContainer" parent="StationUI/Armory/VBox/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="CloseButton" type="Button" parent="StationUI/ModShop/VBox"]
+[node name="CloseButton" type="Button" parent="StationUI/Armory/VBox"]
 layout_mode = 2
 text = "Close"
 
@@ -388,12 +268,6 @@ script = ExtResource("10_skill_shop")
 [node name="VBox" type="VBoxContainer" parent="StationUI/SkillShop"]
 layout_mode = 2
 theme_override_constants/separation = 16
-
-[node name="Title" type="Label" parent="StationUI/SkillShop/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 42
-text = "SKILL UNLOCKS"
-horizontal_alignment = 1
 
 [node name="XPLabel" type="Label" parent="StationUI/SkillShop/VBox"]
 layout_mode = 2
@@ -418,7 +292,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 text = "Close"
 
-[node name="ContractPanel" type="PanelContainer" parent="StationUI"]
+[node name="WarRoom" type="PanelContainer" parent="StationUI"]
 visible = false
 anchors_preset = -1
 anchor_left = 0.1
@@ -427,39 +301,25 @@ anchor_right = 0.9
 anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("12_contract")
+script = ExtResource("18_war_room")
 
-[node name="VBox" type="VBoxContainer" parent="StationUI/ContractPanel"]
+[node name="VBox" type="VBoxContainer" parent="StationUI/WarRoom"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="StationUI/ContractPanel/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 42
-text = "SELECT CONTRACT"
-horizontal_alignment = 1
-
-[node name="Subtitle" type="Label" parent="StationUI/ContractPanel/VBox"]
-layout_mode = 2
-text = "Complete for bonus rewards. Optional."
-horizontal_alignment = 1
-
-[node name="HSeparator" type="HSeparator" parent="StationUI/ContractPanel/VBox"]
-layout_mode = 2
-
-[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/ContractPanel/VBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="StationUI/WarRoom/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="ItemList" type="VBoxContainer" parent="StationUI/ContractPanel/VBox/ScrollContainer"]
+[node name="ItemList" type="VBoxContainer" parent="StationUI/WarRoom/VBox/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="SkipButton" type="Button" parent="StationUI/ContractPanel/VBox"]
+[node name="CloseButton" type="Button" parent="StationUI/WarRoom/VBox"]
 layout_mode = 2
-text = "Skip (No Contract)"
+text = "Close"
 
 [node name="StatsPanel" type="PanelContainer" parent="StationUI"]
 visible = false
@@ -525,19 +385,22 @@ theme_override_constants/separation = 12
 layout_mode = 2
 text = "Close"
 
-[node name="PaletteStation" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.5, -5.85)
-script = ExtResource("15_palette_station")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PaletteStation"]
-shape = SubResource("BoxShape3D_station1")
-
-[node name="MeshInstance3D" type="CSGBox3D" parent="PaletteStation"]
-size = Vector3(1.5, 2, 0.3)
-
-[node name="Label3D" type="Label3D" parent="PaletteStation"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
-text = "PALETTES"
-font_size = 48
+[node name="SaveFeedback" type="Label" parent="StationUI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -25.0
+offset_right = 100.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 32
+text = "GAME SAVED"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [connection signal="pressed" from="StationUI/DeployPanel/VBox/CancelButton" to="." method="_close_active_panel"]

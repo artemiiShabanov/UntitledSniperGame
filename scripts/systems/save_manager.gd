@@ -133,6 +133,18 @@ func get_mod_inventory() -> Array:
 	return data.get("mod_inventory", [])
 
 
+func get_mods_for_slot(slot_name: String) -> Array:
+	## Returns [{index: int, mod_data: Dictionary}] for mods matching the given slot.
+	var result: Array = []
+	var inv: Array = get_mod_inventory()
+	for i in range(inv.size()):
+		var mod_data: Dictionary = inv[i]
+		var s: int = mod_data.get("slot", 0)
+		if s >= 0 and s < RifleMod.SLOT_NAMES.size() and RifleMod.SLOT_NAMES[s] == slot_name:
+			result.append({"index": i, "mod_data": mod_data})
+	return result
+
+
 func get_mod_at(index: int) -> Dictionary:
 	var inv: Array = get_mod_inventory()
 	if index < 0 or index >= inv.size():

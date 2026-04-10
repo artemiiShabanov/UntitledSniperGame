@@ -58,6 +58,18 @@ static var PLACEHOLDER_MAP: Dictionary = {
 	&"breath_exhale": "breath_out",
 	# Scope
 	&"scope_zoom": "click_quiet",
+	# Medieval combat
+	&"explosion": "noise_burst",
+	&"siege_destroyed": "noise_burst",
+	&"target_destroyed": "noise_short",
+	&"opportunity_complete": "beep_high",
+	&"sword_clash": "click_low",
+	&"war_cry": "tone_short",
+	&"arrow_whistle": "tone_quiet",
+	&"bird_screech": "beep_fast",
+	&"melee_hit": "noise_short",
+	&"melee_miss": "click_quiet",
+	&"warrior_death": "tone_low",
 	# Music / Ambient
 	&"hub_theme": "drone",
 	&"combat_tension": "drone",
