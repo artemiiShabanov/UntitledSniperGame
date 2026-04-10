@@ -18,9 +18,9 @@ save system with migration, loading screen, settings, film grain overlay.
 | 1 · Core Rework | █████ 100% | RunManager, weapon, data resources — adapted to GDD |
 | 2 · Warriors | █████ 100% | Complete rewrite — medieval warrior AI replaces modern enemy snipers |
 | 3 · Battlefield | █████ 100% | Castle HP, extraction windows, destructibles, opportunities |
-| 4 · Progression | ░░░░░ 0% | Procedural mods, tiered skills, army upgrades, scoring |
-| 5 · Hub | ░░░░░ 0% | Rework stations for new economy (no credits, no contracts, no ammo shop) |
-| 6 · Level | ░░░░░ 0% | Castle Keep — three-zone blocks, medieval theme |
+| 4 · Progression | █████ 100% | Procedural mods, tiered skills, army upgrades, scoring |
+| 5 · Hub | █████ 100% | Rework stations for new economy (no credits, no contracts, no ammo shop) |
+| 6 · Level | █████ 100% | Castle Keep — three-zone blocks, medieval theme |
 | 7 · Content | ░░░░░ 0% | Models, animations, audio, textures for medieval setting |
 | 8 · Polish & Release | ░░░░░ 0% | Steam, controller, balance, marketing |
 
@@ -278,7 +278,7 @@ GDD §12: Add castle HP bar, opportunity timer. Remove run timer (no time limit)
 
 Between-run systems. Mod generation, skills, army upgrades.
 
-### 4.1 Procedural Mod Generation [ ]
+### 4.1 Procedural Mod Generation [x]
 
 GDD §9: Mods generated on extraction. Rarity determines stat budget + durability. Stats rolled randomly per slot.
 
@@ -292,7 +292,7 @@ GDD §9: Mods generated on extraction. Rarity determines stat budget + durabilit
 - [ ] Rarity pool weights shift: early runs favor Common, late runs favor Rare/Epic (GDD §9.1 table)
 - [ ] Repeat opportunity completion: +1 extra choice with rarity boost
 
-### 4.2 Mod Inventory & Durability [ ]
+### 4.2 Mod Inventory & Durability [x]
 
 GDD §9.1: 5 per slot (25 total). Durability ticks on extraction. Lost on failure.
 
@@ -304,7 +304,7 @@ GDD §9.1: 5 per slot (25 total). Durability ticks on extraction. Lost on failur
 - [ ] Stashed (unequipped) mods safe from failure and durability
 - [ ] Inventory cap: 5 mods per slot, reject if full
 
-### 4.3 Tiered Skills [ ]
+### 4.3 Tiered Skills [x]
 
 GDD §8.2: 4 skills with 3-4 tiers each. XP costs scale per tier.
 
@@ -318,7 +318,7 @@ GDD §8.2: 4 skills with 3-4 tiers each. XP costs scale per tier.
 - [ ] Weapon reads skill bonuses at run start: breath_max, bolt_cycle_time, lives, bullets
 - [ ] XP costs TBD (e.g. 100/300/600 scaling)
 
-### 4.4 Army Upgrades [ ]
+### 4.4 Army Upgrades [x]
 
 GDD §8.3: 6 upgrades, each unlocked by completing its paired opportunity for the first time.
 
@@ -329,7 +329,7 @@ GDD §8.3: 6 upgrades, each unlocked by completing its paired opportunity for th
 - [ ] Elite Guard: spawn armored knights at phases 5, 10, 15, 20
 - [ ] War Room hub station displays upgrade status + paired opportunity
 
-### 4.5 Run Result Screen [ ]
+### 4.5 Run Result Screen [x]
 
 GDD §12: Score breakdown, opportunity completions, army unlock notification, mod choices, XP earned.
 
@@ -346,7 +346,7 @@ GDD §12: Score breakdown, opportunity completions, army unlock notification, mo
 Current: Ammo Crate, Ammo Shop, Contract Panel, Deploy Board, Loadout Panel, Mod Bench, Mod Shop, Palette Station, Save Terminal, Skill Board, Skill Shop, Stats Panel, Stats Terminal.
 GDD §11: Armory, Skill Board, War Room, Level Select, Palettes, Stats Terminal, Deploy.
 
-### 5.1 Hub Stations [ ]
+### 5.1 Hub Stations [x]
 
 - [ ] **Delete** `ammo_crate.gd`, `ammo_shop.gd` — no ammo economy
 - [ ] **Delete** `contract_panel.gd` — no contracts
@@ -367,7 +367,7 @@ GDD §11: Armory, Skill Board, War Room, Level Select, Palettes, Stats Terminal,
 Current: Industrial Yard (modern industrial theme, greybox). Grid system with constraint solver ready.
 GDD §5: Three-zone layout. Level 1 = Castle Keep (stone castle, open meadow, wooden palisade enemy camp).
 
-### 6.1 Three-Zone Block System [ ]
+### 6.1 Three-Zone Block System [x]
 
 - [ ] Define zone types in grid system: CASTLE (Zone 1), BATTLEFIELD (Zone 2), ENEMY (Zone 3)
 - [ ] Zone 1 blocks: elevated walls, towers, ramparts, multiple firing positions, extraction points, castle gate
@@ -376,7 +376,7 @@ GDD §5: Three-zone layout. Level 1 = Castle Keep (stone castle, open meadow, wo
 - [ ] NavigationRegion3D for warrior pathfinding across battlefield
 - [ ] Sniper nest anchors on castle walls for sightline lane generation
 
-### 6.2 Castle Keep Blocks [ ]
+### 6.2 Castle Keep Blocks [x]
 
 - [ ] **Delete** `industrial_blocks.gd`, `industrial_yard_builder.gd`, `industrial_yard_grid_level.gd`, `industrial_yard_level.gd`
 - [ ] **New** `castle_keep_blocks.gd` — BlockBuilder for Castle Keep theme
@@ -388,13 +388,13 @@ GDD §5: Three-zone layout. Level 1 = Castle Keep (stone castle, open meadow, wo
 - [ ] BlockCatalog + GridLevelData .tres files
 - [ ] Spawn points per block: PLAYER (castle), ENEMY/FRIENDLY (Zone 2/3 edges), DESTRUCTIBLE (Zone 2/3), EXTRACTION (Zone 1)
 
-### 6.3 Level Data [ ]
+### 6.3 Level Data [x]
 
 - [ ] **Rewrite** `level_data.gd` — remove NPC pool, balloon config, entry_fee, unlock requirements (only 1 level). Add castle_hp, warrior pools (friendly + hostile), opportunity pool, extraction point config.
 - [ ] Castle Keep .tres with warrior pools, destructible pools, opportunity pool
 - [ ] Per-run variation: time of day, weather, layout, spawn timing, opportunity selection, extraction rotation
 
-### 6.4 BaseLevel Rework [ ]
+### 6.4 BaseLevel Rework [x]
 
 - [ ] Remove `_spawn_npcs()`, `_setup_balloon_spawner()`, NPC-related code
 - [ ] Replace `_spawn_enemies()` with `_setup_warrior_spawner()` (both sides)

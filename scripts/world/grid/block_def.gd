@@ -7,7 +7,7 @@ extends Resource
 ## ── Enums ────────────────────────────────────────────────────────────────────
 
 enum HeightType { GROUND, LOW, MEDIUM, TALL, TOWER }
-enum BlockType { EMPTY, PROPS, ENEMY, NPC, EVENT, SNIPER_NEST }
+enum BlockType { EMPTY, PROPS, ENEMY, NPC, EVENT, SNIPER_NEST, CASTLE, BATTLEFIELD, ENEMY_CAMP }
 
 ## ── Properties ───────────────────────────────────────────────────────────────
 

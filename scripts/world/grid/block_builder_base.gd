@@ -39,6 +39,15 @@ func mat_dark_metal() -> StandardMaterial3D: return _mat(Color(0.25, 0.25, 0.28)
 func mat_rust() -> StandardMaterial3D: return _mat(Color(0.55, 0.35, 0.20))
 func mat_yellow() -> StandardMaterial3D: return _mat(Color(0.75, 0.65, 0.15))
 
+## Medieval palette
+func mat_stone() -> StandardMaterial3D: return _mat(Color(0.50, 0.48, 0.44))
+func mat_stone_dark() -> StandardMaterial3D: return _mat(Color(0.35, 0.33, 0.30))
+func mat_wood() -> StandardMaterial3D: return _mat(Color(0.45, 0.30, 0.15))
+func mat_wood_dark() -> StandardMaterial3D: return _mat(Color(0.30, 0.20, 0.10))
+func mat_grass() -> StandardMaterial3D: return _mat(Color(0.30, 0.45, 0.20))
+func mat_dirt() -> StandardMaterial3D: return _mat(Color(0.45, 0.35, 0.25))
+func mat_banner() -> StandardMaterial3D: return _mat(Color(0.60, 0.15, 0.15))
+
 
 ## ── Geometry helpers ─────────────────────────────────────────────────────────
 
@@ -145,6 +154,19 @@ func add_activity_point(pos: Vector3, activity: ActivityPoint.Activity, facing_d
 	ap.point_group = group
 	root.add_child(ap)
 	return ap
+
+
+func add_group_marker(pos: Vector3, group_name: String, marker_name: String = "") -> Marker3D:
+	## Adds a Marker3D at pos and adds it to the specified group.
+	var marker := Marker3D.new()
+	if marker_name == "":
+		marker.name = "%s_%d" % [group_name, root.get_child_count()]
+	else:
+		marker.name = marker_name
+	marker.position = pos
+	root.add_child(marker)
+	marker.add_to_group(group_name)
+	return marker
 
 
 ## ── Randomization helpers ────────────────────────────────────────────────────

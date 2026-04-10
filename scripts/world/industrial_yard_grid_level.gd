@@ -30,22 +30,12 @@ func _create_grid_level_data() -> GridLevelData:
 	if level_data:
 		data.level_name = level_data.level_name
 		data.scene_path = level_data.scene_path
-		data.enemy_pool = level_data.enemy_pool
-		data.enemy_count_range = level_data.enemy_count_range
+		data.castle_hp = level_data.castle_hp
 		data.extraction_count = level_data.extraction_count
-		data.npc_pool = level_data.npc_pool
-		data.npc_count_range = level_data.npc_count_range
-		data.level_events_pool = level_data.level_events_pool
-		data.max_events_per_run = level_data.max_events_per_run
 		data.level_ambient = level_data.level_ambient
 		data.level_theme = level_data.level_theme
 		data.available_times_of_day = level_data.available_times_of_day
 		data.available_weather = level_data.available_weather
-		data.spawn_start_phase = level_data.spawn_start_phase
-		data.spawn_interval_initial = level_data.spawn_interval_initial
-		data.spawn_interval_final = level_data.spawn_interval_final
-		data.max_enemies_initial = level_data.max_enemies_initial
-		data.max_enemies_final = level_data.max_enemies_final
 
 	data.block_catalog = _create_catalog()
 	data.level_rules = _create_rules()

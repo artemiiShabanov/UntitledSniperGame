@@ -1,15 +1,17 @@
 extends Node3D
 ## Hub scene — player walks around, interacts with stations.
+## Stations: Deploy Board, Armory (mods), Skill Board, War Room, Stats, Palette, Save.
 
 ## Available levels — only Castle Keep for now
 var LEVEL_LIST: Array[String] = [
-	"res://data/levels/industrial_yard_grid_data.tres",
+	"res://data/levels/castle_keep_data.tres",
 ]
 
 @onready var deploy_board: Interactable = $DeployBoard
 @onready var save_terminal: Interactable = $SaveTerminal
 @onready var mod_bench: Interactable = $ModBench
 @onready var skill_board: Interactable = $SkillBoard
+@onready var war_room_station: Interactable = $WarRoomStation
 @onready var stats_terminal: Interactable = $StatsTerminal
 @onready var palette_station: Interactable = $PaletteStation
 
@@ -18,8 +20,9 @@ var LEVEL_LIST: Array[String] = [
 
 ## UI panels
 @onready var deploy_panel: Control = $StationUI/DeployPanel
-@onready var mod_shop: Control = $StationUI/ModShop
+@onready var armory: Control = $StationUI/Armory
 @onready var skill_shop: Control = $StationUI/SkillShop
+@onready var war_room: Control = $StationUI/WarRoom
 @onready var stats_panel: Control = $StationUI/StatsPanel
 @onready var palette_panel: Control = $StationUI/PalettePanel
 @onready var save_feedback: Label = $StationUI/SaveFeedback
@@ -28,7 +31,7 @@ var LEVEL_LIST: Array[String] = [
 @onready var mission_list: VBoxContainer = $StationUI/DeployPanel/VBox/MissionList
 
 ## XP display
-@onready var credits_label: Label = $StationUI/CreditsLabel
+@onready var xp_display: Label = $StationUI/XPLabel
 
 var active_panel: Control = null
 var selected_level_path: String = ""
@@ -62,9 +65,11 @@ func _ready() -> void:
 	deploy_board.deploy_requested.connect(_on_deploy_requested)
 	save_terminal.save_completed.connect(_on_save_completed)
 	mod_bench.mod_requested.connect(_on_mod_requested)
-	mod_shop.shop_closed.connect(_on_mod_shop_closed)
+	armory.shop_closed.connect(_on_armory_closed)
 	skill_board.skill_requested.connect(_on_skill_requested)
 	skill_shop.shop_closed.connect(_on_skill_shop_closed)
+	war_room_station.war_room_requested.connect(_on_war_room_requested)
+	war_room.panel_closed.connect(_on_war_room_closed)
 	stats_terminal.stats_requested.connect(_on_stats_requested)
 	stats_panel.closed.connect(_on_stats_closed)
 	palette_station.palette_requested.connect(_on_palette_requested)
@@ -72,8 +77,9 @@ func _ready() -> void:
 
 	# Close all panels
 	deploy_panel.visible = false
-	mod_shop.visible = false
+	armory.visible = false
 	skill_shop.visible = false
+	war_room.visible = false
 	stats_panel.visible = false
 	palette_panel.visible = false
 	save_feedback.visible = false
@@ -142,9 +148,10 @@ func _close_active_panel() -> void:
 func _load_level_list() -> void:
 	_level_data_cache.clear()
 	for path in LEVEL_LIST:
-		var data := load(path) as LevelData
-		if data:
-			_level_data_cache.append(data)
+		if ResourceLoader.exists(path):
+			var data := load(path) as LevelData
+			if data:
+				_level_data_cache.append(data)
 
 
 func _populate_mission_buttons() -> void:
@@ -171,14 +178,14 @@ func _on_level_selected(data: LevelData) -> void:
 	RunManager.deploy(selected_level_path)
 
 
-## ── Mod Bench ───────────────────────────────────────────────────────────
+## ── Armory ──────────────────────────────────────────────────────────────
 
 func _on_mod_requested() -> void:
-	mod_shop.open()
-	_open_panel(mod_shop)
+	armory.open()
+	_open_panel(armory)
 
 
-func _on_mod_shop_closed() -> void:
+func _on_armory_closed() -> void:
 	_close_active_panel()
 
 
@@ -190,6 +197,17 @@ func _on_skill_requested() -> void:
 
 
 func _on_skill_shop_closed() -> void:
+	_close_active_panel()
+
+
+## ── War Room ────────────────────────────────────────────────────────────
+
+func _on_war_room_requested() -> void:
+	war_room.open()
+	_open_panel(war_room)
+
+
+func _on_war_room_closed() -> void:
 	_close_active_panel()
 
 
@@ -233,5 +251,5 @@ func _on_window_focus() -> void:
 
 
 func _update_xp_display() -> void:
-	credits_label.text = "XP: %d" % SaveManager.get_xp()
-	credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
+	xp_display.text = "XP: %d" % SaveManager.get_xp()
+	xp_display.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))

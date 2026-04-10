@@ -1,7 +1,6 @@
 extends Control
-## Skill Shop — unlock permanent abilities with XP.
-## Each skill is a Button card with name, cost, and status.
-## Clicking an affordable skill shows a confirmation popup with full details.
+## Skill Shop — purchase tiered skills with XP.
+## Shows all 4 skills with current tier, next tier cost, and cumulative bonuses.
 
 signal shop_closed
 
@@ -50,7 +49,10 @@ func _rebuild_skill_list() -> void:
 	var buttons: Array[Button] = []
 
 	for skill in skills:
-		# Skill icon
+		var current_tier := SaveManager.get_skill_tier(skill.id)
+		var max_tier := skill.get_max_tier()
+
+		# Skill header with icon.
 		if skill.icon:
 			var icon_row := HBoxContainer.new()
 			icon_row.add_theme_constant_override("separation", 12)
@@ -68,13 +70,55 @@ func _rebuild_skill_list() -> void:
 			icon_row.add_child(skill_title)
 			item_list.add_child(icon_row)
 
-		var btn := _build_skill_button(skill)
+		# Tier progress bar.
+		var tier_text := "     Tier: %d / %d" % [current_tier, max_tier]
+		var tier_label := Label.new()
+		tier_label.text = tier_text
+		tier_label.add_theme_font_size_override("font_size", 22)
+		tier_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
+		item_list.add_child(tier_label)
+
+		# Current bonuses.
+		if current_tier > 0:
+			var bonus := skill.get_tier_stat_bonus(current_tier)
+			var bonus_text := _format_stat_bonus(bonus)
+			if bonus_text != "":
+				var bonus_label := Label.new()
+				bonus_label.text = "     Current: " + bonus_text
+				bonus_label.add_theme_font_size_override("font_size", 22)
+				bonus_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY))
+				item_list.add_child(bonus_label)
+
+		# Next tier button.
+		var btn := Button.new()
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		btn.custom_minimum_size = Vector2(0, 56)
+		if _bold_font:
+			btn.add_theme_font_override("font", _bold_font)
+
+		if current_tier >= max_tier:
+			btn.text = "  ✓  MAX TIER"
+			btn.disabled = true
+			btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
+		else:
+			var next_tier := current_tier + 1
+			var cost := skill.get_tier_cost(next_tier)
+			var desc := skill.get_tier_description(next_tier)
+			var can_afford := SaveManager.get_xp() >= cost
+
+			btn.text = "  ◆  Tier %d: %s    %d XP" % [next_tier, desc, cost]
+			if can_afford:
+				btn.pressed.connect(_on_skill_pressed.bind(skill, next_tier))
+				AudioManager.wire_button(btn, &"menu_confirm")
+			else:
+				btn.text += "  (need %d more)" % (cost - SaveManager.get_xp())
+				btn.disabled = true
+
 		item_list.add_child(btn)
 		buttons.append(btn)
 
-		# Add a detail label below each button
-		var detail := _build_detail_label(skill)
-		item_list.add_child(detail)
+		# Separator.
+		item_list.add_child(HSeparator.new())
 
 	buttons.append(close_btn)
 	UIUtils.chain_focus(buttons)
@@ -82,49 +126,13 @@ func _rebuild_skill_list() -> void:
 		buttons[0].grab_focus()
 
 
-func _build_skill_button(skill: PlayerSkill) -> Button:
-	var owned: bool = SaveManager.has_skill(skill.id)
-	var can_afford: bool = SaveManager.get_xp() >= skill.cost
-
-	var btn := Button.new()
-	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	btn.custom_minimum_size = Vector2(0, 64)
-	if _bold_font:
-		btn.add_theme_font_override("font", _bold_font)
-
-	if owned:
-		btn.text = "  ✓  %s    UNLOCKED" % skill.skill_name.to_upper()
-		btn.disabled = true
-		btn.add_theme_color_override("font_disabled_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
-	elif can_afford:
-		btn.text = "  ◆  %s    %d XP" % [skill.skill_name.to_upper(), skill.cost]
-		btn.pressed.connect(_on_skill_pressed.bind(skill))
-		AudioManager.wire_button(btn, &"menu_confirm")
-	else:
-		btn.text = "  ◇  %s    %d XP  (need %d more)" % [skill.skill_name.to_upper(), skill.cost, skill.cost - SaveManager.get_xp()]
-		btn.disabled = true
-
-	return btn
-
-
-func _build_detail_label(skill: PlayerSkill) -> Label:
-	## Small description shown below each skill button.
-	var label := Label.new()
-	var parts: Array[String] = [skill.description]
-	var bonus := _format_stat_bonus(skill)
-	if bonus != "":
-		parts.append(bonus)
-	label.text = "     " + " · ".join(parts)
-	label.add_theme_font_size_override("font_size", 22)
-	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_MID))
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	return label
-
-
 ## ── Buy confirmation ────────────────────────────────────────────────────────
 
-func _on_skill_pressed(skill: PlayerSkill) -> void:
+func _on_skill_pressed(skill: PlayerSkill, tier: int) -> void:
 	_close_confirm()
+
+	var cost := skill.get_tier_cost(tier)
+	var desc := skill.get_tier_description(tier)
 
 	_confirm_popup = PanelContainer.new()
 	var vbox := VBoxContainer.new()
@@ -132,30 +140,21 @@ func _on_skill_pressed(skill: PlayerSkill) -> void:
 	_confirm_popup.add_child(vbox)
 
 	var title := Label.new()
-	title.text = "UNLOCK %s?" % skill.skill_name.to_upper()
+	title.text = "UNLOCK %s TIER %d?" % [skill.skill_name.to_upper(), tier]
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 36)
 	if _bold_font:
 		title.add_theme_font_override("font", _bold_font)
 	vbox.add_child(title)
 
-	var desc := Label.new()
-	desc.text = skill.description
-	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	desc.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
-	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(desc)
-
-	var bonus_text := _format_stat_bonus(skill)
-	if bonus_text != "":
-		var bonus := Label.new()
-		bonus.text = bonus_text
-		bonus.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		bonus.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
-		vbox.add_child(bonus)
+	var desc_label := Label.new()
+	desc_label.text = desc
+	desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	desc_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
+	vbox.add_child(desc_label)
 
 	var cost_label := Label.new()
-	cost_label.text = "Cost: %d XP" % skill.cost
+	cost_label.text = "Cost: %d XP" % cost
 	cost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	cost_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 	if _bold_font:
@@ -170,7 +169,7 @@ func _on_skill_pressed(skill: PlayerSkill) -> void:
 	var confirm_btn := Button.new()
 	confirm_btn.text = "UNLOCK"
 	confirm_btn.custom_minimum_size = Vector2(180, 56)
-	confirm_btn.pressed.connect(_on_buy_confirmed.bind(skill))
+	confirm_btn.pressed.connect(_on_buy_confirmed.bind(skill.id))
 	AudioManager.wire_button(confirm_btn, &"menu_confirm")
 	btn_row.add_child(confirm_btn)
 
@@ -199,24 +198,23 @@ func _close_confirm_and_refocus() -> void:
 	_refresh()
 
 
-func _on_buy_confirmed(skill: PlayerSkill) -> void:
-	if SaveManager.purchase_skill(skill.id, skill.cost):
+func _on_buy_confirmed(skill_id: String) -> void:
+	if SaveManager.purchase_skill_tier(skill_id):
 		AudioManager.play_sfx_2d(&"menu_confirm")
 	_close_confirm()
 	_refresh()
 
 
-func _format_stat_bonus(skill: PlayerSkill) -> String:
+func _format_stat_bonus(bonus: Dictionary) -> String:
 	var parts: Array[String] = []
-	for key: String in skill.stat_bonus:
-		var val = skill.stat_bonus[key]
+	for key: String in bonus:
+		var val = bonus[key]
 		var display := key.replace("_", " ").capitalize()
 		if val is float:
-			if val < 1.0 and val > 0.0:
-				parts.append("%s ×%.1f" % [display, val])
+			if absf(val) < 1.0:
+				parts.append("%s %+.0f%%" % [display, val * 100.0])
 			else:
-				parts.append("%s +%.1f" % [display, val])
+				parts.append("%s %+.1f" % [display, val])
 		elif val is int:
-			parts.append("%s +%d" % [display, val])
+			parts.append("%s %+d" % [display, val])
 	return " · ".join(parts)
-

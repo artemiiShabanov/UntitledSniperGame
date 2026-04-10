@@ -4,7 +4,7 @@ extends Control
 
 @onready var title_label: Label = $Panel/VBox/Title
 @onready var stats_grid: GridContainer = $Panel/VBox/StatsGrid
-@onready var credits_label: Label = $Panel/VBox/CreditsRow/CreditsValue
+@onready var score_label: Label = $Panel/VBox/ScoreRow/ScoreValue
 @onready var xp_label: Label = $Panel/VBox/XPRow/XPValue
 @onready var continue_label: Label = $Panel/VBox/ContinuePrompt
 
@@ -78,13 +78,13 @@ func _process(delta: float) -> void:
 		_xp_current = t * _xp_target
 
 		if _score_target > 0:
-			credits_label.text = "+%d" % int(_score_current)
+			score_label.text = "+%d" % int(_score_current)
 		if _xp_target > 0:
 			xp_label.text = "+%d XP" % int(_xp_current)
 
 		if _count_timer >= COUNT_DURATION:
 			if _score_target > 0:
-				credits_label.text = "+%d" % _score_target
+				score_label.text = "+%d" % _score_target
 			if _xp_target > 0:
 				xp_label.text = "+%d XP" % _xp_target
 				AudioManager.play_sfx_2d(&"xp_gain")
@@ -177,14 +177,14 @@ func _populate(success: bool) -> void:
 	var score_earned: int = stats.get("score_earned", 0)
 	if success:
 		_score_target = score_earned
-		credits_label.text = "+0"
-		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
+		score_label.text = "+0"
+		score_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 	else:
 		_score_target = 0
-		credits_label.text = "0 (lost)"
-		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
+		score_label.text = "0 (lost)"
+		score_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 	if _bold_font:
-		credits_label.add_theme_font_override("font", _bold_font)
+		score_label.add_theme_font_override("font", _bold_font)
 
 	# XP
 	var xp_earned: int = stats.get("xp_earned", 0)

@@ -1,25 +1,12 @@
-[gd_resource type="Resource" script_class="LevelData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="LevelData" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/level_data.gd" id="1_script"]
-[ext_resource type="Resource" path="res://data/levels/industrial_yard_pool.tres" id="2_pool"]
-[ext_resource type="Resource" path="res://data/levels/industrial_yard_npc_pool.tres" id="3_npc_pool"]
-[ext_resource type="AudioStream" path="res://data/audio/Ambient/warehouse_ambient.mp3" id="4_ambient"]
-[ext_resource type="AudioStream" path="res://data/audio/Music/warehouse_theme.mp3" id="5_theme"]
 
 [resource]
 script = ExtResource("1_script")
 level_name = "Industrial Yard (Grid)"
 scene_path = "res://scenes/levels/industrial_yard_grid.tscn"
-run_time_override = 360.0
-entry_fee = 0
-unlock_extractions = 0
-enemy_pool = ExtResource("2_pool")
-enemy_count_range = Vector2i(5, 10)
+castle_hp = 100
 extraction_count = 1
-npc_pool = ExtResource("3_npc_pool")
-npc_count_range = Vector2i(3, 5)
-max_events_per_run = 2
-level_ambient = ExtResource("4_ambient")
-level_theme = ExtResource("5_theme")
 available_times_of_day = PackedStringArray("morning", "day", "evening", "night")
 available_weather = PackedStringArray("clear", "snow", "rain", "overcast")

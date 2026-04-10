@@ -10,6 +10,7 @@ var _builders: Dictionary = {}  ## { block_id: Callable }
 
 func _init() -> void:
 	_register_industrial()
+	_register_castle_keep()
 
 
 ## ── Registration ─────────────────────────────────────────────────────────────
@@ -32,6 +33,26 @@ func _register_industrial() -> void:
 	_builders["npc_work_area"] = IndustrialBlocks.build_npc_work_area
 	_builders["npc_rest_area"] = IndustrialBlocks.build_npc_rest_area
 	_builders["wall_segment"] = IndustrialBlocks.build_wall_segment
+
+
+func _register_castle_keep() -> void:
+	# Castle (Zone 1)
+	_builders["castle_wall"] = CastleKeepBlocks.build_castle_wall
+	_builders["castle_tower"] = CastleKeepBlocks.build_castle_tower
+	_builders["castle_gate"] = CastleKeepBlocks.build_castle_gate
+	_builders["rampart"] = CastleKeepBlocks.build_rampart
+	# Battlefield (Zone 2)
+	_builders["flat_meadow"] = CastleKeepBlocks.build_flat_meadow
+	_builders["rocky_field"] = CastleKeepBlocks.build_rocky_field
+	_builders["trench"] = CastleKeepBlocks.build_trench
+	_builders["barricade_cluster"] = CastleKeepBlocks.build_barricade_cluster
+	_builders["hill"] = CastleKeepBlocks.build_hill
+	# Enemy Camp (Zone 3)
+	_builders["enemy_camp"] = CastleKeepBlocks.build_enemy_camp
+	_builders["siege_position"] = CastleKeepBlocks.build_siege_position
+	_builders["archer_post"] = CastleKeepBlocks.build_archer_post
+	_builders["palisade_wall"] = CastleKeepBlocks.build_palisade_wall
+	_builders["spawn_area"] = CastleKeepBlocks.build_spawn_area
 
 
 ## ── Lookup ───────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 extends Interactable
-## Mod Bench station — opens rifle modifications UI.
+## Armory station — opens mod equip/browse UI.
 
 signal mod_requested
 
@@ -9,4 +9,4 @@ func interact(player: CharacterBody3D) -> void:
 
 
 func get_interact_prompt() -> String:
-	return "[E] Mod Bench"
+	return "[E] Armory"
