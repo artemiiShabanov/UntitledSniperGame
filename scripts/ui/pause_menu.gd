@@ -91,8 +91,7 @@ func _close_settings() -> void:
 
 func _abandon_run() -> void:
 	_resume()
-	RunManager.carried_ammo = {}
-	RunManager.run_credits = 0
+	RunManager.run_score = 0
 	RunManager.is_dead = true
 	SaveManager.increment_stat("total_deaths")
 	SaveManager.commit_run_stats(RunManager.run_stats.to_dict(), RunManager.current_level_path, false)

@@ -1,22 +1,39 @@
 class_name PlayerSkill
 extends Resource
-## A permanent passive ability purchased with XP.
+## A tiered passive skill purchased with XP.
+## Each skill has 3-4 tiers with escalating cost and effect.
 
 @export var id: String = ""
 @export var skill_name: String = ""
 @export var description: String = ""
-@export var cost: int = 0  ## XP cost
-@export var effect_key: String = ""  ## Used by systems to check if skill is active
-@export var stat_bonus: Dictionary = {}  ## Optional stat modifiers (additive)
-@export var icon: Texture2D  ## UI icon (assets/icons/skills/)
+@export var icon: Texture2D
+## Array of tier dictionaries: { "cost": int, "description": String, "stat_bonus": Dictionary }
+## Tier 0 = not purchased. Tier indices are 1-based in this array (index 0 = tier 1).
+@export var tiers: Array[Dictionary] = []
 
 
-static func create(p_id: String, p_name: String, p_desc: String, p_cost: int, p_effect: String, p_stats: Dictionary = {}) -> PlayerSkill:
-	var skill := PlayerSkill.new()
-	skill.id = p_id
-	skill.skill_name = p_name
-	skill.description = p_desc
-	skill.cost = p_cost
-	skill.effect_key = p_effect
-	skill.stat_bonus = p_stats
-	return skill
+func get_max_tier() -> int:
+	return tiers.size()
+
+
+func get_tier_cost(tier: int) -> int:
+	## tier is 1-based (1 = first purchase).
+	if tier < 1 or tier > tiers.size():
+		return -1
+	return tiers[tier - 1].get("cost", 0)
+
+
+func get_tier_description(tier: int) -> String:
+	if tier < 1 or tier > tiers.size():
+		return ""
+	return tiers[tier - 1].get("description", "")
+
+
+func get_tier_stat_bonus(tier: int) -> Dictionary:
+	## Returns cumulative stat bonus up to and including the given tier.
+	var result := {}
+	for i in range(mini(tier, tiers.size())):
+		var bonus: Dictionary = tiers[i].get("stat_bonus", {})
+		for key: String in bonus:
+			result[key] = result.get(key, 0.0) + bonus[key]
+	return result

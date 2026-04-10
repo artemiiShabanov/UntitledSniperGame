@@ -6,18 +6,15 @@ extends CharacterBody3D
 @export var bullet_gravity: float = 9.8
 @export var lifetime: float = 5.0
 @export var damage: float = 100.0
-@export var penetration: bool = false
 
 var direction: Vector3 = Vector3.FORWARD
 var spread_angle: float = 0.0  ## Radians, applied on spawn
 var time_alive: float = 0.0
 var is_enemy_bullet: bool = false  ## Set by enemy to change collision mask + color
-var _already_hit: Array[Node] = []  ## Track penetrated targets to avoid double-hit
 
-## Ammo type properties (set by weapon before adding to scene)
-var ammo_type: AmmoType = null
-var is_shock: bool = false
-var stun_duration: float = 4.0
+
+## Bullet properties (set by weapon before adding to scene)
+var speed: float = 300.0
 var tracer_color: Color = Color.WHITE
 var tracer_emission: float = 1.0
 
@@ -64,14 +61,9 @@ func _physics_process(delta: float) -> void:
 	var collision := move_and_collide(velocity * delta)
 	if collision:
 		var collider := collision.get_collider()
-		var hit_enemy := false
-		if collider and collider not in _already_hit:
+		if collider:
 			if collider.has_method("on_bullet_hit"):
 				collider.on_bullet_hit(self, collision)
-				hit_enemy = collider.is_in_group("enemy")
-			elif is_shock and collider.has_method("stun"):
-				collider.stun(stun_duration)
-				hit_enemy = collider.is_in_group("enemy")
 		# Spawn impact VFX + audio
 		var hit_normal := collision.get_normal()
 		var hit_pos := collision.get_position()
@@ -91,13 +83,7 @@ func _physics_process(delta: float) -> void:
 		# Only player bullets alert enemies to impact sounds
 		if not is_enemy_bullet:
 			_propagate_impact_sound(hit_pos)
-		# Penetrating rounds pass through enemies (not world geometry)
-		if penetration and hit_enemy:
-			_already_hit.append(collider)
-			damage *= 0.5  # Halve damage per penetration
-			AudioManager.play_sfx(&"bullet_penetrate", hit_pos)
-		else:
-			queue_free()
+		queue_free()
 
 
 ## ── Bullet whizz ──────────────────────────────────────────────────────────

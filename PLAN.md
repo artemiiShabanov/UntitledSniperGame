@@ -15,7 +15,7 @@ save system with migration, loading screen, settings, film grain overlay.
 
 | Section | Progress | Summary |
 |---------|----------|---------|
-| 1 · Core Rework | ░░░░░ 0% | RunManager, weapon, data resources — adapt existing systems to GDD |
+| 1 · Core Rework | █████ 100% | RunManager, weapon, data resources — adapted to GDD |
 | 2 · Warriors | ░░░░░ 0% | Complete rewrite — medieval warrior AI replaces modern enemy snipers |
 | 3 · Battlefield | ░░░░░ 0% | Castle HP, extraction windows, destructibles, opportunities |
 | 4 · Progression | ░░░░░ 0% | Procedural mods, tiered skills, army upgrades, scoring |
@@ -30,7 +30,7 @@ save system with migration, loading screen, settings, film grain overlay.
 
 Adapt existing systems to the GDD. No new gameplay yet — just data structures and flow.
 
-### 1.1 RunManager Rework [ ]
+### 1.1 RunManager Rework [x]
 
 Current: 10 phases, 5min countdown timer, credits economy, ammo loadout dictionary, contract system.
 GDD: 20 phases × 60s each, count-up timer (no time limit — run ends by extraction/death/castle), score replaces credits, fixed 30 bullets, no contracts, castle HP as fail condition.
@@ -54,7 +54,7 @@ GDD: 20 phases × 60s each, count-up timer (no time limit — run ends by extrac
 
 > **Reuse:** State machine (HUB→DEPLOYING→IN_RUN→EXTRACTING→RESULT), extraction hold-E flow, lives system, hit cooldown, RunStats tracking. All signals stay, some renamed.
 
-### 1.2 Weapon Simplification [ ]
+### 1.2 Weapon Simplification [x]
 
 Current: AmmoManager with multiple ammo types, magazine+reserve, type switching, inspect action.
 GDD: Single ammo pool of 30 bullets (no types, no reserve, no reload). Fixed bolt-action, 5 mod slots.
@@ -70,7 +70,7 @@ GDD: Single ammo pool of 30 bullets (no types, no reserve, no reload). Fixed bol
 - [ ] Initial bullets = 30 + Deep Pockets skill bonus
 - [ ] Keep: scope, sway, breath, bolt cycling, hipfire spread, bullet spawning, sound propagation
 
-### 1.3 Data Resources Rework [ ]
+### 1.3 Data Resources Rework [x]
 
 Current: `RifleMod` (fixed id/name/cost/stats), `PlayerSkill` (flat cost), `AmmoType`, `Contract`.
 GDD: Procedural mods (rarity/budget/durability), tiered skills (4 skills × 3-4 tiers), opportunities, army upgrades.
@@ -86,7 +86,7 @@ GDD: Procedural mods (rarity/budget/durability), tiered skills (4 skills × 3-4 
 - [ ] **New** `opportunity_registry.gd` — 6 opportunities loaded from .tres
 - [ ] **New** `army_upgrade_registry.gd` — 6 upgrades loaded from .tres
 
-### 1.4 SaveManager Rework [ ]
+### 1.4 SaveManager Rework [x]
 
 Current: Credits, ammo inventory, flat skill purchases, fixed mod IDs, contract tracking.
 GDD: Score (not saved between runs), XP + tiered skills, procedural mod inventory with durability, army upgrade unlocks, opportunity completion counts.
@@ -105,7 +105,7 @@ GDD: Score (not saved between runs), XP + tiered skills, procedural mod inventor
 - [ ] `is_army_upgrade_unlocked(id) → bool`, `unlock_army_upgrade(id)`
 - [ ] Save version bump + migration from v4
 
-### 1.5 Scoring System [ ]
+### 1.5 Scoring System [x]
 
 GDD §3: Score determines mod rarity on extraction. Sources: kills (per-type base), headshot 2x, destructibles, opportunity completion. No distance multiplier.
 

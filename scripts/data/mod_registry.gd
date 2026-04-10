@@ -1,166 +1,111 @@
 extends Node
-## Mod Registry — autoloaded singleton.
-## Central catalog of all rifle modifications.
+## Mod Generator — autoloaded singleton (was ModRegistry).
+## Generates procedural rifle mods from rarity + slot using budget allocation.
 
-const SLOTS := ["barrel", "stock", "bolt", "magazine", "scope"]
-
-var _mods: Dictionary = {}  ## { id: RifleMod }
+const SLOTS := RifleMod.SLOT_NAMES
 
 
-func _ready() -> void:
-	_register_all()
+func generate(slot: RifleMod.Slot, rarity: RifleMod.Rarity) -> RifleMod:
+	## Generates a single procedural mod for the given slot and rarity.
+	var mod := RifleMod.new()
+	mod.slot = slot
+	mod.rarity = rarity
+	mod.stat_budget = RifleMod.RARITY_BUDGETS[rarity]
+	mod.max_durability = RifleMod.RARITY_DURABILITY[rarity]
+	mod.durability = mod.max_durability
+	mod.visual_type = randi_range(1, 3)
+	mod.stats = _roll_stats(slot, mod.stat_budget)
+	return mod
 
 
-func get_mod(id: String) -> RifleMod:
-	return _mods.get(id, null)
+func generate_choices(score: int, phase: int, count: int = 3) -> Array[RifleMod]:
+	## Generates mod choices for post-extraction reward screen.
+	## Each choice gets a random slot and a rarity drawn from a weighted pool.
+	var choices: Array[RifleMod] = []
+	var rarity_weights := _calc_rarity_weights(score, phase)
+	for i in range(count):
+		var rarity := _pick_weighted_rarity(rarity_weights)
+		var slot := randi_range(0, RifleMod.Slot.SCOPE) as RifleMod.Slot
+		choices.append(generate(slot, rarity))
+	return choices
 
 
-func get_mods_for_slot(slot: String) -> Array[RifleMod]:
-	var result: Array[RifleMod] = []
-	for mod: RifleMod in _mods.values():
-		if mod.slot == slot:
-			result.append(mod)
-	return result
+func _roll_stats(slot: RifleMod.Slot, budget: int) -> Dictionary:
+	var table: Dictionary = RifleMod.SLOT_STAT_TABLES[slot]
+	var stats := {}
+	var remaining := budget
+
+	# Separate boolean and range stats.
+	var boolean_keys: Array[String] = []
+	var range_keys: Array[String] = []
+	for key: String in table:
+		var entry: Array = table[key]
+		if entry.size() == 1:
+			boolean_keys.append(key)
+		else:
+			range_keys.append(key)
+
+	# Roll boolean stats first — each has a fixed cost.
+	for key in boolean_keys:
+		var cost: int = int(table[key][0])
+		if remaining >= cost and randf() < _boolean_chance(budget, cost):
+			stats[key] = true
+			remaining -= cost
+
+	# Distribute remaining budget across range stats.
+	if range_keys.size() > 0 and remaining > 0:
+		# Generate random weights for each stat.
+		var weights: Array[float] = []
+		var total_weight := 0.0
+		for key in range_keys:
+			var w := randf_range(0.2, 1.0)
+			weights.append(w)
+			total_weight += w
+
+		# Allocate budget proportionally and lerp within [min, max].
+		for i in range(range_keys.size()):
+			var key: String = range_keys[i]
+			var entry: Array = table[key]
+			var min_val: float = entry[0]
+			var max_val: float = entry[1]
+			var share := weights[i] / total_weight
+			# t ranges 0-1 based on budget share relative to max possible.
+			var max_budget := float(RifleMod.RARITY_BUDGETS[RifleMod.Rarity.EPIC])
+			var allocated := share * float(remaining)
+			var t := clampf(allocated / (max_budget * share), 0.0, 1.0)
+			stats[key] = lerpf(min_val, max_val, t)
+
+	return stats
 
 
-func get_default_mod(slot: String) -> RifleMod:
-	return _mods.get(slot + "_standard", null)
+func _boolean_chance(total_budget: int, cost: int) -> float:
+	## Higher budget relative to cost = higher chance of purchasing the boolean.
+	## At minimum budget to afford it: ~30% chance. At epic budget: ~80% chance.
+	var ratio := float(total_budget) / float(cost)
+	return clampf(ratio * 0.2, 0.1, 0.8)
 
 
-## ── Mod Definitions ─────────────────────────────────────────────────────────
-
-func _register_all() -> void:
-	# ── Barrel ────────────────────────────────────────────────────────────
-	_add(RifleMod.create(
-		"barrel_standard", "Standard Barrel", "barrel", 0,
-		"Balanced barrel. No surprises.",
-		{"muzzle_velocity": 300.0, "bullet_gravity": 9.8}
-	))
-	_add(RifleMod.create(
-		"barrel_extended", "Extended Barrel", "barrel", 300,
-		"Longer barrel for higher muzzle velocity. Less bullet drop at range.",
-		{"muzzle_velocity": 420.0, "bullet_gravity": 9.8}
-	))
-	_add(RifleMod.create(
-		"barrel_improvised_suppressor", "Improvised Suppressor", "barrel", 150,
-		"A bottle jammed on the muzzle. Quieter shots, but velocity suffers.",
-		{"muzzle_velocity": 240.0, "bullet_gravity": 9.8,
-		 "gunshot_loudness": 15.0, "impact_loudness": 8.0},
-		"suppressed"
-	))
-	_add(RifleMod.create(
-		"barrel_tactical", "Tactical Barrel", "barrel", 500,
-		"Integrated suppressor. Silent and precise — no velocity penalty.",
-		{"muzzle_velocity": 300.0, "bullet_gravity": 9.8,
-		 "gunshot_loudness": 20.0, "impact_loudness": 10.0},
-		"suppressed"
-	))
-
-	# ── Stock ─────────────────────────────────────────────────────────────
-	_add(RifleMod.create(
-		"stock_standard", "Standard Stock", "stock", 0,
-		"Basic stock. Gets the job done.",
-		{"sway_amplitude": 0.003, "move_speed": 5.0, "sprint_speed": 8.0}
-	))
-	_add(RifleMod.create(
-		"stock_light", "Light Stock", "stock", 200,
-		"Lightweight polymer. Run faster, same sway.",
-		{"sway_amplitude": 0.003, "move_speed": 5.5, "sprint_speed": 9.0}
-	))
-	_add(RifleMod.create(
-		"stock_padded", "Padded Stock", "stock", 300,
-		"Rubber-lined cheek rest. Steadier aim, standard mobility.",
-		{"sway_amplitude": 0.002, "move_speed": 5.0, "sprint_speed": 8.0}
-	))
-	_add(RifleMod.create(
-		"stock_heavy", "Heavy Stock", "stock", 400,
-		"Solid hardwood. Rock-steady aim, but it weighs you down.",
-		{"sway_amplitude": 0.0015, "move_speed": 4.5, "sprint_speed": 7.0}
-	))
-	_add(RifleMod.create(
-		"stock_competition", "Competition Stock", "stock", 500,
-		"Precision-tuned adjustable stock. Steadier aim with agile handling.",
-		{"sway_amplitude": 0.002, "move_speed": 5.5, "sprint_speed": 8.5}
-	))
-
-	# ── Bolt ──────────────────────────────────────────────────────────────
-	_add(RifleMod.create(
-		"bolt_standard", "Standard Bolt", "bolt", 0,
-		"Factory bolt action. Reliable.",
-		{"bolt_cycle_time": 1.2}
-	))
-	_add(RifleMod.create(
-		"bolt_quick", "Quick Bolt", "bolt", 200,
-		"Polished action for faster cycling. Still kicks you out of scope.",
-		{"bolt_cycle_time": 0.9}
-	))
-	_add(RifleMod.create(
-		"bolt_smooth", "Smooth Action", "bolt", 400,
-		"Buttery-smooth cycling. Stay scoped between shots.",
-		{"bolt_cycle_time": 1.2},
-		"continuous_bolt"
-	))
-	_add(RifleMod.create(
-		"bolt_prototype", "Prototype Bolt", "bolt", 350,
-		"Experimental rapid-cycle mechanism. Blazing fast, but reloading is a nightmare.",
-		{"bolt_cycle_time": 0.6, "reload_time_mult": 2.0}
-	))
-	_add(RifleMod.create(
-		"bolt_light", "Light Bolt", "bolt", 600,
-		"Lightweight precision bolt. Fast cycling and stay scoped — the best of both worlds.",
-		{"bolt_cycle_time": 0.9},
-		"continuous_bolt"
-	))
-
-	# ── Magazine ──────────────────────────────────────────────────────────
-	_add(RifleMod.create(
-		"magazine_standard", "Standard Mag", "magazine", 0,
-		"5-round internal magazine.",
-		{"magazine_size": 5}
-	))
-	_add(RifleMod.create(
-		"magazine_fast", "Fast Mag", "magazine", 250,
-		"Spring-assisted detachable magazine. Snappy reloads, but holds fewer rounds.",
-		{"magazine_size": 4, "reload_time_mult": 0.7}
-	))
-	_add(RifleMod.create(
-		"magazine_extended", "Extended Mag", "magazine", 350,
-		"Oversized box magazine. More rounds, but slower to swap.",
-		{"magazine_size": 8, "reload_time_mult": 1.3}
-	))
-
-	# ── Scope ─────────────────────────────────────────────────────────────
-	_add(RifleMod.create(
-		"scope_standard", "Iron Sights", "scope", 0,
-		"Open sights. Wide field of view, limited zoom.",
-		{"scoped_fov": 30.0, "scope_lerp_speed": 12.0}
-	))
-	_add(RifleMod.create(
-		"scope_red_dot", "Red Dot", "scope", 150,
-		"Reflex sight. Barely any zoom, but lightning-fast target acquisition.",
-		{"scoped_fov": 40.0, "scope_lerp_speed": 18.0}
-	))
-	_add(RifleMod.create(
-		"scope_grandma", "Grandma's Scope", "scope", 300,
-		"Ancient hunting optic. Extreme magnification, but slow and foggy.",
-		{"scoped_fov": 8.0, "scope_lerp_speed": 6.0}
-	))
-	_add(RifleMod.create(
-		"scope_cheap", "Cheap Scope", "scope", 350,
-		"Budget optic from a flea market. Decent zoom, questionable alignment.",
-		{"scoped_fov": 18.0, "scope_lerp_speed": 12.0}
-	))
-	_add(RifleMod.create(
-		"scope_tactical", "Tactical Scope", "scope", 700,
-		"Military-grade variable optic. Scroll to adjust zoom. Remembers your setting.",
-		{"scoped_fov": 15.0, "scope_lerp_speed": 12.0},
-		"variable_zoom"
-	))
+func _calc_rarity_weights(score: int, phase: int) -> Array[float]:
+	## Returns [common, uncommon, rare, epic] weights based on score and phase.
+	## Early runs favor common; high score + late phase favors rare/epic.
+	var power := (float(score) / 500.0) + (float(phase) / 20.0)
+	power = clampf(power, 0.0, 3.0)
+	return [
+		maxf(1.0 - power * 0.3, 0.05),       # common
+		clampf(0.5 + power * 0.1, 0.1, 0.5), # uncommon
+		clampf(power * 0.2 - 0.1, 0.0, 0.4), # rare
+		clampf(power * 0.1 - 0.2, 0.0, 0.2), # epic
+	]
 
 
-func _add(mod: RifleMod) -> void:
-	if not mod.icon:
-		var icon_path := "res://assets/icons/mods/%s.png" % mod.id
-		if ResourceLoader.exists(icon_path):
-			mod.icon = load(icon_path)
-	_mods[mod.id] = mod
+func _pick_weighted_rarity(weights: Array[float]) -> RifleMod.Rarity:
+	var total := 0.0
+	for w in weights:
+		total += w
+	var roll := randf() * total
+	var cumulative := 0.0
+	for i in range(weights.size()):
+		cumulative += weights[i]
+		if roll <= cumulative:
+			return i as RifleMod.Rarity
+	return RifleMod.Rarity.COMMON

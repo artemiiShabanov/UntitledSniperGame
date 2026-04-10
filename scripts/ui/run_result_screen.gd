@@ -1,6 +1,6 @@
 extends Control
 ## Full-screen overlay shown after a run ends (success or failure).
-## Stats reveal one-by-one with a stagger, credits/XP count up, and a rating is shown.
+## Stats reveal one-by-one with a stagger, score/XP count up, and a rating is shown.
 
 @onready var title_label: Label = $Panel/VBox/Title
 @onready var stats_grid: GridContainer = $Panel/VBox/StatsGrid
@@ -10,10 +10,10 @@ extends Control
 
 var _active: bool = false
 var _bold_font: Font = null
-var _rating_icons: Dictionary = {}  ## { "S": Texture2D, ... }
+var _rating_icons: Dictionary = {}
 
 ## Reveal animation state
-var _reveal_queue: Array[Dictionary] = []  ## [{ "name": Label, "value": Label }]
+var _reveal_queue: Array[Dictionary] = []
 var _reveal_timer: float = 0.0
 var _reveal_index: int = 0
 const REVEAL_INTERVAL: float = 0.12
@@ -21,8 +21,8 @@ const REVEAL_INTERVAL: float = 0.12
 ## Counter animation state
 var _counting: bool = false
 var _count_timer: float = 0.0
-var _credits_target: int = 0
-var _credits_current: float = 0.0
+var _score_target: int = 0
+var _score_current: float = 0.0
 var _xp_target: int = 0
 var _xp_current: float = 0.0
 const COUNT_DURATION: float = 1.2
@@ -45,7 +45,6 @@ func _ready() -> void:
 func _on_run_completed(success: bool) -> void:
 	_populate(success)
 	visible = true
-	# Short delay before accepting input to prevent accidental skip
 	await get_tree().create_timer(1.0).timeout
 	_active = true
 
@@ -65,30 +64,27 @@ func _process(delta: float) -> void:
 			AudioManager.play_sfx_2d_varied(&"scope_zoom", 0.3, -12.0)
 			_reveal_index += 1
 
-		# Start counting after all stats revealed
 		if _reveal_index >= _reveal_queue.size() and not _counting:
 			_counting = true
 			_count_timer = 0.0
 
-	# Counter animation for credits/XP
+	# Counter animation for score/XP
 	if _counting and _count_timer < COUNT_DURATION:
 		_count_timer += delta
 		var t := minf(_count_timer / COUNT_DURATION, 1.0)
-		# Ease out quad for satisfying deceleration
 		t = 1.0 - (1.0 - t) * (1.0 - t)
 
-		_credits_current = t * _credits_target
+		_score_current = t * _score_target
 		_xp_current = t * _xp_target
 
-		if _credits_target > 0:
-			credits_label.text = "+$%d" % int(_credits_current)
+		if _score_target > 0:
+			credits_label.text = "+%d" % int(_score_current)
 		if _xp_target > 0:
 			xp_label.text = "+%d XP" % int(_xp_current)
 
 		if _count_timer >= COUNT_DURATION:
-			# Snap to final values
-			if _credits_target > 0:
-				credits_label.text = "+$%d" % _credits_target
+			if _score_target > 0:
+				credits_label.text = "+%d" % _score_target
 			if _xp_target > 0:
 				xp_label.text = "+%d XP" % _xp_target
 				AudioManager.play_sfx_2d(&"xp_gain")
@@ -115,7 +111,6 @@ func _input(event: InputEvent) -> void:
 func _populate(success: bool) -> void:
 	var stats: Dictionary = RunManager.run_stats.to_dict()
 
-	# Reset animation state
 	_reveal_queue.clear()
 	_reveal_index = 0
 	_reveal_timer = 0.0
@@ -125,7 +120,7 @@ func _populate(success: bool) -> void:
 	continue_label.visible = false
 	continue_label.modulate.a = 0.0
 
-	# Title — big and bold
+	# Title
 	if _bold_font:
 		title_label.add_theme_font_override("font", _bold_font)
 	title_label.add_theme_font_size_override("font_size", 48)
@@ -133,13 +128,11 @@ func _populate(success: bool) -> void:
 		title_label.text = "EXTRACTION SUCCESSFUL"
 		title_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
 	else:
-		title_label.text = "MISSION FAILED"
+		title_label.text = "CASTLE FALLEN" if RunManager.castle_hp <= 0 else "FALLEN IN BATTLE"
 		title_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 
-	# Clear previous stat rows
 	UIUtils.clear_children(stats_grid)
 
-	# Build stat rows (hidden — revealed by animation)
 	var kills: int = stats.get("kills", 0)
 	var headshots: int = stats.get("headshots", 0)
 	var shots_fired: int = stats.get("shots_fired", 0)
@@ -156,6 +149,7 @@ func _populate(success: bool) -> void:
 	_add_stat_row("Shots Fired", str(shots_fired))
 	_add_stat_row("Accuracy", "%.0f%%" % accuracy, _accuracy_color(accuracy))
 	_add_stat_row("Time Survived", FormatUtils.format_time(time_survived))
+	_add_stat_row("Phase Reached", str(RunManager.threat_phase))
 	if longest_kill > 0.0:
 		_add_stat_row("Longest Kill", "%.0fm" % longest_kill, PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 
@@ -163,46 +157,36 @@ func _populate(success: bool) -> void:
 	if targets_destroyed > 0:
 		_add_stat_row("Targets Destroyed", str(targets_destroyed))
 
-	var npc_kills: int = stats.get("npc_kills", 0)
-	if npc_kills > 0:
-		_add_stat_row("Civilians Killed", str(npc_kills), PaletteManager.get_color(PaletteManager.SLOT_DANGER))
+	var friendly_kills: int = stats.get("friendly_kills", 0)
+	if friendly_kills > 0:
+		_add_stat_row("Friendly Kills", str(friendly_kills), PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 
-	# Contract result
-	if RunManager.active_contract:
-		var contract: Contract = RunManager.active_contract
-		if success and RunManager.contract_completed:
-			_add_stat_row("Contract: " + contract.contract_name, "COMPLETED", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
-			var bonus_parts: Array[String] = []
-			if stats.get("contract_bonus_credits", 0) > 0:
-				bonus_parts.append("+$%d" % stats.get("contract_bonus_credits", 0))
-			if stats.get("contract_bonus_xp", 0) > 0:
-				bonus_parts.append("+%d XP" % stats.get("contract_bonus_xp", 0))
-			if bonus_parts.size() > 0:
-				_add_stat_row("Contract Bonus", " ".join(bonus_parts), PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
-		elif success:
-			_add_stat_row("Contract: " + contract.contract_name, "FAILED", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
-		else:
-			_add_stat_row("Contract: " + contract.contract_name, "LOST", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
+	var opps: int = stats.get("opportunities_completed", 0)
+	if opps > 0:
+		_add_stat_row("Opportunities", str(opps), PaletteManager.get_color(PaletteManager.SLOT_REWARD))
+
+	if not success:
+		_add_stat_row("Equipped Mods", "LOST", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 
 	# Rating
 	var rating := _calculate_rating(stats, success)
-	_add_stat_row("", "")  # Spacer row
+	_add_stat_row("", "")
 	_add_rating_row(rating)
 
-	# Credits — start at 0 for count-up animation
-	var credits_earned: int = stats.get("credits_earned", 0)
+	# Score — count-up animation
+	var score_earned: int = stats.get("score_earned", 0)
 	if success:
-		_credits_target = credits_earned
-		credits_label.text = "+$0"
+		_score_target = score_earned
+		credits_label.text = "+0"
 		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
-		if _bold_font:
-			credits_label.add_theme_font_override("font", _bold_font)
 	else:
-		_credits_target = 0
-		credits_label.text = "$0 (lost)"
+		_score_target = 0
+		credits_label.text = "0 (lost)"
 		credits_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
+	if _bold_font:
+		credits_label.add_theme_font_override("font", _bold_font)
 
-	# XP — start at 0 for count-up animation
+	# XP
 	var xp_earned: int = stats.get("xp_earned", 0)
 	_xp_target = xp_earned
 	xp_label.text = "+0 XP"
@@ -210,7 +194,6 @@ func _populate(success: bool) -> void:
 	if _bold_font:
 		xp_label.add_theme_font_override("font", _bold_font)
 
-	# Continue prompt (hidden until counters finish)
 	continue_label.text = "Press E to continue"
 
 
@@ -244,7 +227,6 @@ func _add_rating_row(rating: String) -> void:
 	spacer.visible = false
 	stats_grid.add_child(spacer)
 
-	# Rating value — icon + text in an HBox
 	var rating_container := HBoxContainer.new()
 	rating_container.alignment = BoxContainer.ALIGNMENT_END
 	rating_container.add_theme_constant_override("separation", 12)
@@ -268,7 +250,6 @@ func _add_rating_row(rating: String) -> void:
 	rating_container.add_child(rating_label)
 
 	stats_grid.add_child(rating_container)
-
 	_reveal_queue.append({ "name": spacer, "value": rating_container })
 
 
@@ -279,33 +260,25 @@ func _calculate_rating(stats: Dictionary, success: bool) -> String:
 		return "D"
 
 	var score: float = 0.0
-
-	# Kills (up to 30 points)
 	var kills: int = stats.get("kills", 0)
 	score += minf(kills * 5.0, 30.0)
 
-	# Accuracy (up to 30 points)
 	var shots_fired: int = stats.get("shots_fired", 0)
 	var shots_hit: int = stats.get("shots_hit", 0)
 	if shots_fired > 0:
-		var acc := float(shots_hit) / float(shots_fired)
-		score += acc * 30.0
+		score += (float(shots_hit) / float(shots_fired)) * 30.0
 
-	# Headshots (up to 20 points)
 	var headshots: int = stats.get("headshots", 0)
 	score += minf(headshots * 5.0, 20.0)
 
-	# Survival time bonus (up to 10 points)
 	var time_survived: float = stats.get("time_survived", 0.0)
-	score += minf(time_survived / 30.0, 10.0)
+	score += minf(time_survived / 60.0, 10.0)
 
-	# Contract bonus (10 points)
-	if RunManager.contract_completed:
-		score += 10.0
+	var opps: int = stats.get("opportunities_completed", 0)
+	score += opps * 10.0
 
-	# Civilian penalty
-	var npc_kills: int = stats.get("npc_kills", 0)
-	score -= npc_kills * 10.0
+	var friendly_kills: int = stats.get("friendly_kills", 0)
+	score -= friendly_kills * 10.0
 
 	score = maxf(score, 0.0)
 

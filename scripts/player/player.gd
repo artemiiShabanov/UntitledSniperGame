@@ -67,7 +67,7 @@ func _ready() -> void:
 	apply_modifications()
 	weapon.state_changed.connect(_on_weapon_state_changed)
 	weapon.shot_fired.connect(_on_shot_fired)
-	weapon.ammo_type_changed.connect(_on_ammo_type_changed)
+	weapon.bullets_changed.connect(_on_bullets_changed)
 	RunManager.run_completed.connect(_on_run_completed)
 	# Force initial HUD update (weapon._ready() fires before player connects)
 	hud.set_scope_style(weapon.scope_style)
@@ -76,22 +76,16 @@ func _ready() -> void:
 
 
 func apply_modifications() -> void:
-	## Apply mod stat overrides that affect the player (e.g. move_speed, sprint_speed).
-	var multipliers: Dictionary = {}
-	var loadout: Dictionary = SaveManager.get_equipped_loadout()
-	for slot: String in loadout:
-		var mod: RifleMod = ModRegistry.get_mod(loadout[slot])
-		if not mod:
+	## Apply mod stat overrides that affect the player (e.g. move_speed from stock mod).
+	var equipped: Dictionary = SaveManager.get_equipped_loadout()
+	for slot_name: String in equipped:
+		var mod_data: Dictionary = SaveManager.get_mod_at(equipped[slot_name])
+		if mod_data.is_empty():
 			continue
-		for prop: String in mod.stat_overrides:
-			if prop.ends_with("_mult"):
-				var base_prop := prop.trim_suffix("_mult")
-				multipliers[base_prop] = multipliers.get(base_prop, 1.0) * mod.stat_overrides[prop]
-			elif prop in self:
-				set(prop, mod.stat_overrides[prop])
-	for prop: String in multipliers:
-		if prop in self:
-			set(prop, get(prop) * multipliers[prop])
+		var stats: Dictionary = mod_data.get("stats", {})
+		if slot_name == "stock" and stats.has("move_speed"):
+			move_speed *= stats["move_speed"]
+			sprint_speed *= stats["move_speed"]
 
 
 func _notification(what: int) -> void:
@@ -382,7 +376,7 @@ func _on_shot_fired() -> void:
 	hud.update_weapon_display(weapon)
 
 
-func _on_ammo_type_changed(_ammo_type: AmmoType) -> void:
+func _on_bullets_changed(_remaining: int) -> void:
 	hud.update_weapon_display(weapon)
 
 

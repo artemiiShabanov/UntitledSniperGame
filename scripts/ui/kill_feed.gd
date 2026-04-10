@@ -1,17 +1,15 @@
 extends VBoxContainer
-## Displays kill notifications with distance and bonus info.
+## Displays kill notifications with distance and score info.
 ## Each entry fades out after a few seconds.
 
 const DISPLAY_DURATION: float = 4.0
 const FADE_DURATION: float = 1.0
 const KILL_FONT_SIZE: int = 28
 
-var _entries: Array[Dictionary] = []  ## [{label: Label, timer: float}]
+var _entries: Array[Dictionary] = []  ## [{label: Node, timer: float}]
 var _bold_font: Font
 var _kill_icon: Texture2D
 var _headshot_icon: Texture2D
-var _long_range_icon: Texture2D
-var _penetration_icon: Texture2D
 var _target_icon: Texture2D
 
 
@@ -19,11 +17,9 @@ func _ready() -> void:
 	_bold_font = PaletteTheme.bold_font
 	_kill_icon = _load_icon("kill")
 	_headshot_icon = _load_icon("headshot")
-	_long_range_icon = _load_icon("long_range")
-	_penetration_icon = _load_icon("penetration")
 	_target_icon = _load_icon("target_destroyed")
 	RunManager.enemy_killed_with_info.connect(_on_enemy_killed)
-	RunManager.npc_killed_with_info.connect(_on_npc_killed)
+	RunManager.friendly_killed_with_info.connect(_on_friendly_killed)
 	RunManager.target_destroyed_with_info.connect(_on_target_destroyed)
 	RunManager.event_announced.connect(_on_event_announced)
 
@@ -74,43 +70,18 @@ func _make_feed_row(icon: Texture2D = null) -> HBoxContainer:
 
 
 func _on_enemy_killed(info: Dictionary) -> void:
-	# Choose icon based on kill type
-	var icon: Texture2D = _kill_icon
-	if info.headshot:
-		icon = _headshot_icon
-	elif info.distance_multiplier > 1.0:
-		icon = _long_range_icon
-
+	var icon: Texture2D = _headshot_icon if info.headshot else _kill_icon
 	var row := _make_feed_row(icon)
 	var label := _make_feed_label()
 
-	# Build the kill text
-	var text := ""
-	var dist_m := int(info.distance)
-
-	# Distance
-	text += "%dm" % dist_m
-
-	# Multiplier info
-	var parts: PackedStringArray = []
+	var text := "%dm" % int(info.distance)
 	if info.headshot:
-		parts.append("HEADSHOT")
-	if info.distance_multiplier > 1.0:
-		parts.append("x%.1f RANGE" % info.distance_multiplier)
-	if parts.size() > 0:
-		text += " | " + " | ".join(parts)
-
-	# Credits earned
-	text += " | +$%d" % info.final_credits
+		text += " | HEADSHOT"
+	text += " | +%d" % info.final_score
 
 	label.text = text
 
-	# Color based on multiplier
-	if info.total_multiplier >= 3.0:
-		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
-	elif info.total_multiplier >= 2.0:
-		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
-	elif info.headshot:
+	if info.headshot:
 		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_HOSTILE))
 	else:
 		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY))
@@ -120,10 +91,10 @@ func _on_enemy_killed(info: Dictionary) -> void:
 	_entries.append({"label": row, "timer": DISPLAY_DURATION})
 
 
-func _on_npc_killed(info: Dictionary) -> void:
+func _on_friendly_killed(info: Dictionary) -> void:
 	var row := _make_feed_row(_kill_icon)
 	var label := _make_feed_label()
-	label.text = "CIVILIAN KILLED | -$%d" % info.penalty
+	label.text = "FRIENDLY KILLED | -%d" % info.penalty
 	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 	row.add_child(label)
 	add_child(row)
@@ -133,7 +104,7 @@ func _on_npc_killed(info: Dictionary) -> void:
 func _on_target_destroyed(info: Dictionary) -> void:
 	var row := _make_feed_row(_target_icon)
 	var label := _make_feed_label()
-	label.text = "TARGET DESTROYED | +$%d" % info.credits
+	label.text = "TARGET DESTROYED | +%d" % info.score
 	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
 	row.add_child(label)
 	add_child(row)

@@ -3,7 +3,7 @@ extends Node
 ## Handles save/load, multiple slots, and data structure.
 
 const SAVE_DIR := "user://saves/"
-const SAVE_VERSION := 4
+const SAVE_VERSION := 5
 const MAX_SLOTS := 3
 
 ## Currently loaded save data. Empty dict means no save loaded.
@@ -69,7 +69,6 @@ func slot_exists(slot: int) -> bool:
 
 
 func get_slot_summary(slot: int) -> Dictionary:
-	## Returns a lightweight summary for the slot selection screen.
 	if not slot_exists(slot):
 		return {}
 	var file := FileAccess.open(_slot_path(slot), FileAccess.READ)
@@ -81,27 +80,18 @@ func get_slot_summary(slot: int) -> Dictionary:
 	var d: Dictionary = json.data
 	return {
 		"slot": slot,
-		"credits": d.get("credits", 0),
 		"xp": d.get("xp", 0),
 		"total_extractions": d.get("stats", {}).get("total_extractions", 0),
 		"total_deaths": d.get("stats", {}).get("total_deaths", 0),
 	}
 
 
-## ── Data helpers ─────────────────────────────────────────────────────────────
-
-func add_credits(amount: int) -> void:
-	data["credits"] = maxi(data.get("credits", 0) + amount, 0)
-
+## ── XP ──────────────────────────────────────────────────────────────────────
 
 func add_xp(amount: int) -> void:
 	data["xp"] = data.get("xp", 0) + amount
 	if amount > 0:
 		increment_stat("total_xp_earned", amount)
-
-
-func get_credits() -> int:
-	return data.get("credits", 0)
 
 
 func get_xp() -> int:
@@ -111,6 +101,8 @@ func get_xp() -> int:
 func get_total_xp_earned() -> int:
 	return get_stat("total_xp_earned", 0)
 
+
+## ── Stats ───────────────────────────────────────────────────────────────────
 
 func update_stat(key: String, value: Variant) -> void:
 	var stats: Dictionary = data.get("stats", {})
@@ -129,100 +121,194 @@ func get_stat(key: String, default: Variant = 0) -> Variant:
 
 
 func update_stat_max(key: String, value: Variant) -> void:
-	## Only updates the stat if value exceeds the current record.
 	var stats: Dictionary = data.get("stats", {})
 	if value > stats.get(key, 0):
 		stats[key] = value
 	data["stats"] = stats
 
 
-## ── Modifications ───────────────────────────────────────────────────────────
+## ── Mod Inventory ──────────────────────────────────────────────────────────
 
-func owns_mod(id: String) -> bool:
-	var mods: Dictionary = data.get("modifications", {})
-	var owned: Array = mods.get("owned", [])
-	return id in owned
+func get_mod_inventory() -> Array:
+	return data.get("mod_inventory", [])
 
 
-func purchase_mod(id: String, cost: int) -> bool:
-	if owns_mod(id) or get_credits() < cost:
+func get_mod_at(index: int) -> Dictionary:
+	var inv: Array = get_mod_inventory()
+	if index < 0 or index >= inv.size():
+		return {}
+	return inv[index]
+
+
+func add_mod_to_inventory(mod: RifleMod) -> bool:
+	## Adds a mod to inventory. Returns false if slot is full (5 per slot cap).
+	var inv: Array = data.get("mod_inventory", [])
+	var slot_name := mod.get_slot_name()
+	var count := 0
+	for entry: Dictionary in inv:
+		if RifleMod.SLOT_NAMES[entry.get("slot", 0)] == slot_name:
+			count += 1
+	if count >= 5:
 		return false
-	add_credits(-cost)
-	var mods: Dictionary = data.get("modifications", {})
-	var owned: Array = mods.get("owned", [])
-	owned.append(id)
-	mods["owned"] = owned
-	data["modifications"] = mods
-	save()
+	inv.append(mod.serialize())
+	data["mod_inventory"] = inv
 	return true
 
 
-func equip_mod(id: String) -> void:
-	if not owns_mod(id):
+func remove_mod_from_inventory(index: int) -> void:
+	var inv: Array = data.get("mod_inventory", [])
+	if index < 0 or index >= inv.size():
 		return
-	var mod: RifleMod = ModRegistry.get_mod(id)
-	if not mod:
+	# Unequip if equipped
+	var equipped: Dictionary = data.get("equipped_mods", {})
+	for slot_name: String in equipped:
+		if equipped[slot_name] == index:
+			equipped.erase(slot_name)
+		elif equipped[slot_name] > index:
+			equipped[slot_name] = equipped[slot_name] - 1
+	data["equipped_mods"] = equipped
+	inv.remove_at(index)
+	data["mod_inventory"] = inv
+
+
+func equip_mod(index: int) -> void:
+	var mod_data := get_mod_at(index)
+	if mod_data.is_empty():
 		return
-	var mods: Dictionary = data.get("modifications", {})
-	var equipped: Dictionary = mods.get("equipped", {})
-	equipped[mod.slot] = id
-	mods["equipped"] = equipped
-	data["modifications"] = mods
+	var slot_name: String = RifleMod.SLOT_NAMES[mod_data.get("slot", 0)]
+	var equipped: Dictionary = data.get("equipped_mods", {})
+	equipped[slot_name] = index
+	data["equipped_mods"] = equipped
 	save()
 
 
-func get_equipped_mod(slot: String) -> String:
-	var mods: Dictionary = data.get("modifications", {})
-	var equipped: Dictionary = mods.get("equipped", {})
-	return equipped.get(slot, slot + "_standard")
+func unequip_mod(slot_name: String) -> void:
+	var equipped: Dictionary = data.get("equipped_mods", {})
+	equipped.erase(slot_name)
+	data["equipped_mods"] = equipped
+	save()
 
 
 func get_equipped_loadout() -> Dictionary:
-	var mods: Dictionary = data.get("modifications", {})
-	return mods.get("equipped", {}).duplicate()
+	## Returns { slot_name: inventory_index } for all equipped mods.
+	return data.get("equipped_mods", {}).duplicate()
 
 
-## ── Skills ──────────────────────────────────────────────────────────────────
+func strip_equipped_mods() -> void:
+	## Called on run failure — removes all equipped mods from inventory.
+	var equipped: Dictionary = data.get("equipped_mods", {})
+	# Collect indices in descending order to remove safely.
+	var indices: Array[int] = []
+	for slot_name: String in equipped:
+		indices.append(equipped[slot_name])
+	indices.sort()
+	indices.reverse()
+	for idx in indices:
+		var inv: Array = data.get("mod_inventory", [])
+		if idx >= 0 and idx < inv.size():
+			inv.remove_at(idx)
+	data["mod_inventory"] = data.get("mod_inventory", [])
+	data["equipped_mods"] = {}
 
-func has_skill(id: String) -> bool:
-	var skills: Array = data.get("skills", [])
-	return id in skills
+
+func tick_mod_durability() -> void:
+	## Called on successful extraction. Decrements durability of equipped mods.
+	## Removes depleted mods.
+	var equipped: Dictionary = data.get("equipped_mods", {})
+	var inv: Array = data.get("mod_inventory", [])
+	var to_remove: Array[int] = []
+	for slot_name: String in equipped:
+		var idx: int = equipped[slot_name]
+		if idx < 0 or idx >= inv.size():
+			continue
+		var mod_data: Dictionary = inv[idx]
+		mod_data["durability"] = mod_data.get("durability", 1) - 1
+		inv[idx] = mod_data
+		if mod_data["durability"] <= 0:
+			to_remove.append(idx)
+
+	# Remove depleted mods (descending order)
+	to_remove.sort()
+	to_remove.reverse()
+	for idx in to_remove:
+		remove_mod_from_inventory(idx)
+
+	data["mod_inventory"] = data.get("mod_inventory", [])
 
 
-func purchase_skill(id: String, xp_cost: int) -> bool:
-	if has_skill(id) or get_xp() < xp_cost:
+## ── Skills (Tiered) ────────────────────────────────────────────────────────
+
+func get_skill_tier(skill_id: String) -> int:
+	## Returns current tier (0 = not purchased).
+	var tiers: Dictionary = data.get("skill_tiers", {})
+	return tiers.get(skill_id, 0)
+
+
+func purchase_skill_tier(skill_id: String) -> bool:
+	## Purchases the next tier. Returns false if max tier or not enough XP.
+	var skill: PlayerSkill = SkillRegistry.get_skill(skill_id)
+	if not skill:
 		return false
-	add_xp(-xp_cost)
-	var skills: Array = data.get("skills", [])
-	skills.append(id)
-	data["skills"] = skills
+	var current_tier := get_skill_tier(skill_id)
+	var next_tier := current_tier + 1
+	if next_tier > skill.get_max_tier():
+		return false
+	var cost := skill.get_tier_cost(next_tier)
+	if get_xp() < cost:
+		return false
+	add_xp(-cost)
+	var tiers: Dictionary = data.get("skill_tiers", {})
+	tiers[skill_id] = next_tier
+	data["skill_tiers"] = tiers
 	save()
 	return true
 
 
-func get_owned_skills() -> Array:
-	return data.get("skills", [])
-
-
-func has_skill_effect(effect_key: String) -> bool:
-	## Check if any owned skill provides the given effect.
-	for skill_id in get_owned_skills():
-		var skill: PlayerSkill = SkillRegistry.get_skill(skill_id)
-		if skill and skill.effect_key == effect_key:
-			return true
-	return false
-
-
 func get_skill_stat_bonus(stat_key: String, default: float = 0.0) -> float:
-	## Sum all skill bonuses for a given stat key.
+	## Sum all skill bonuses for a given stat key across all purchased tiers.
 	var total := 0.0
-	for skill_id in get_owned_skills():
+	var tiers: Dictionary = data.get("skill_tiers", {})
+	for skill_id: String in tiers:
+		var tier: int = tiers[skill_id]
+		if tier <= 0:
+			continue
 		var skill: PlayerSkill = SkillRegistry.get_skill(skill_id)
-		if skill and skill.stat_bonus.has(stat_key):
-			total += skill.stat_bonus[stat_key]
+		if not skill:
+			continue
+		var bonus: Dictionary = skill.get_tier_stat_bonus(tier)
+		if bonus.has(stat_key):
+			total += bonus[stat_key]
 	if total == 0.0:
 		return default
 	return total
+
+
+## ── Army Upgrades ──────────────────────────────────────────────────────────
+
+func is_army_upgrade_unlocked(id: String) -> bool:
+	var unlocked: Array = data.get("army_upgrades_unlocked", [])
+	return id in unlocked
+
+
+func unlock_army_upgrade(id: String) -> void:
+	var unlocked: Array = data.get("army_upgrades_unlocked", [])
+	if id not in unlocked:
+		unlocked.append(id)
+		data["army_upgrades_unlocked"] = unlocked
+		save()
+
+
+## ── Opportunities ──────────────────────────────────────────────────────────
+
+func get_opportunity_completions(opp_id: String) -> int:
+	var completions: Dictionary = data.get("opportunity_completions", {})
+	return completions.get(opp_id, 0)
+
+
+func record_opportunity_completion(opp_id: String) -> void:
+	var completions: Dictionary = data.get("opportunity_completions", {})
+	completions[opp_id] = completions.get(opp_id, 0) + 1
+	data["opportunity_completions"] = completions
 
 
 ## ── Palette Unlocks ────────────────────────────────────────────────────────
@@ -244,18 +330,14 @@ func unlock_palette(palette_name: String) -> void:
 
 
 func check_and_unlock_palettes() -> Array[String]:
-	## Checks all achievement conditions and unlocks any earned palettes.
-	## Returns array of newly unlocked palette names (for UI notification).
 	var newly_unlocked: Array[String] = []
 	var stats: Dictionary = data.get("stats", {})
 
-	# Midnight — complete 5 extractions
 	if not has_palette("midnight"):
 		if stats.get("total_extractions", 0) >= 5:
 			unlock_palette("midnight")
 			newly_unlocked.append("midnight")
 
-	# Noir — get 50 total kills
 	if not has_palette("noir"):
 		if stats.get("total_kills", 0) >= 50:
 			unlock_palette("noir")
@@ -267,33 +349,23 @@ func check_and_unlock_palettes() -> Array[String]:
 ## ── Run stats aggregation ───────────────────────────────────────────────────
 
 func commit_run_stats(run_stats: Dictionary, level_path: String, success: bool) -> void:
-	## Called at end of every run. Aggregates per-run stats into lifetime
-	## totals, best records, and per-level stats.
-
-	# Lifetime totals
 	increment_stat("total_kills", run_stats.get("kills", 0))
 	increment_stat("total_headshots", run_stats.get("headshots", 0))
 	increment_stat("total_shots_fired", run_stats.get("shots_fired", 0))
 	increment_stat("total_shots_hit", run_stats.get("shots_hit", 0))
 	increment_stat("total_runs", 1)
 
-	# Best records (only update if new value is higher)
 	update_stat_max("best_survival_time", run_stats.get("time_survived", 0.0))
-	update_stat_max("best_credits_one_run", run_stats.get("credits_earned", 0))
+	update_stat_max("best_score_one_run", run_stats.get("score_earned", 0))
 	update_stat_max("best_kills_one_run", run_stats.get("kills", 0))
 	update_stat_max("longest_kill_distance", run_stats.get("longest_kill_distance", 0.0))
 
-	# Per-level stats
 	if level_path != "":
 		var per_level: Dictionary = data.get("per_level_stats", {})
 		if not per_level.has(level_path):
 			per_level[level_path] = {
-				"runs": 0,
-				"extractions": 0,
-				"deaths": 0,
-				"total_kills": 0,
-				"best_time": 0.0,
-				"best_credits": 0,
+				"runs": 0, "extractions": 0, "deaths": 0,
+				"total_kills": 0, "best_time": 0.0, "best_score": 0,
 			}
 		var ls: Dictionary = per_level[level_path]
 		ls["runs"] = ls.get("runs", 0) + 1
@@ -304,14 +376,13 @@ func commit_run_stats(run_stats: Dictionary, level_path: String, success: bool) 
 		ls["total_kills"] = ls.get("total_kills", 0) + run_stats.get("kills", 0)
 		if run_stats.get("time_survived", 0.0) > ls.get("best_time", 0.0):
 			ls["best_time"] = run_stats.get("time_survived", 0.0)
-		if run_stats.get("credits_earned", 0) > ls.get("best_credits", 0):
-			ls["best_credits"] = run_stats.get("credits_earned", 0)
+		if run_stats.get("score_earned", 0) > ls.get("best_score", 0):
+			ls["best_score"] = run_stats.get("score_earned", 0)
 		per_level[level_path] = ls
 		data["per_level_stats"] = per_level
 
 
 func get_accuracy_percent() -> float:
-	## Returns overall accuracy as 0.0 to 100.0.
 	var fired: int = get_stat("total_shots_fired", 0)
 	if fired == 0:
 		return 0.0
@@ -319,7 +390,6 @@ func get_accuracy_percent() -> float:
 
 
 func get_headshot_percent() -> float:
-	## Returns headshot percentage as 0.0 to 100.0.
 	var kills: int = get_stat("total_kills", 0)
 	if kills == 0:
 		return 0.0
@@ -327,7 +397,6 @@ func get_headshot_percent() -> float:
 
 
 func get_level_stats(level_path: String) -> Dictionary:
-	## Returns per-level stats dict, or empty dict if no data.
 	return data.get("per_level_stats", {}).get(level_path, {})
 
 
@@ -351,24 +420,13 @@ func _default_data(slot: int) -> Dictionary:
 	return {
 		"version": SAVE_VERSION,
 		"slot": slot,
-		"credits": 0,
 		"xp": 0,
-		"ammo_inventory": {},
-		"modifications": {
-			"owned": [
-				"barrel_standard", "stock_standard", "bolt_standard",
-				"magazine_standard", "scope_standard",
-			],
-			"equipped": {
-				"barrel": "barrel_standard",
-				"stock": "stock_standard",
-				"bolt": "bolt_standard",
-				"magazine": "magazine_standard",
-				"scope": "scope_standard",
-			},
-		},
-		"skills": [],
-		"unlocked_palettes": ["tactical"],  ## Default palette always unlocked
+		"mod_inventory": [],
+		"equipped_mods": {},
+		"skill_tiers": {},
+		"army_upgrades_unlocked": [],
+		"opportunity_completions": {},
+		"unlocked_palettes": ["tactical"],
 		"stats": {
 			"total_runs": 0,
 			"total_kills": 0,
@@ -379,7 +437,7 @@ func _default_data(slot: int) -> Dictionary:
 			"total_shots_hit": 0,
 			"total_xp_earned": 0,
 			"best_survival_time": 0.0,
-			"best_credits_one_run": 0,
+			"best_score_one_run": 0,
 			"best_kills_one_run": 0,
 			"longest_kill_distance": 0.0,
 		},
@@ -388,46 +446,48 @@ func _default_data(slot: int) -> Dictionary:
 
 
 func _migrate(save_data: Dictionary) -> Dictionary:
-	## Upgrades save format when version changes.
-	## Add migration steps here as SAVE_VERSION increments.
 	var ver: int = save_data.get("version", 0)
 
 	if ver < 2:
-		# v1 → v2: replace "upgrades" array with "modifications" dict
 		save_data.erase("upgrades")
 		if not save_data.has("modifications"):
 			save_data["modifications"] = {
-				"owned": [
-					"barrel_standard", "stock_standard", "bolt_standard",
-					"magazine_standard", "scope_standard",
-				],
-				"equipped": {
-					"barrel": "barrel_standard",
-					"stock": "stock_standard",
-					"bolt": "bolt_standard",
-					"magazine": "magazine_standard",
-					"scope": "scope_standard",
-				},
+				"owned": [], "equipped": {},
 			}
 
 	if ver < 3:
-		# v2 → v3: add total_xp_earned stat (reconstruct from current XP + spent on skills)
 		var stats: Dictionary = save_data.get("stats", {})
 		if not stats.has("total_xp_earned"):
-			var current_xp: int = save_data.get("xp", 0)
-			var spent_xp: int = 0
-			for skill_id in save_data.get("skills", []):
-				var skill: PlayerSkill = SkillRegistry.get_skill(skill_id)
-				if skill:
-					spent_xp += skill.cost
-			stats["total_xp_earned"] = current_xp + spent_xp
+			stats["total_xp_earned"] = save_data.get("xp", 0)
 			save_data["stats"] = stats
 
 	if ver < 4:
-		# v3 → v4: replace "cosmetics" with "unlocked_palettes"
 		save_data.erase("cosmetics")
 		if not save_data.has("unlocked_palettes"):
 			save_data["unlocked_palettes"] = ["tactical"]
+
+	if ver < 5:
+		# v4 → v5: Medieval pivot — new data schema
+		save_data.erase("credits")
+		save_data.erase("ammo_inventory")
+		save_data.erase("modifications")
+		save_data.erase("skills")
+		if not save_data.has("mod_inventory"):
+			save_data["mod_inventory"] = []
+		if not save_data.has("equipped_mods"):
+			save_data["equipped_mods"] = {}
+		if not save_data.has("skill_tiers"):
+			save_data["skill_tiers"] = {}
+		if not save_data.has("army_upgrades_unlocked"):
+			save_data["army_upgrades_unlocked"] = []
+		if not save_data.has("opportunity_completions"):
+			save_data["opportunity_completions"] = {}
+		# Rename best_credits_one_run → best_score_one_run
+		var stats: Dictionary = save_data.get("stats", {})
+		if stats.has("best_credits_one_run"):
+			stats["best_score_one_run"] = stats.get("best_credits_one_run", 0)
+			stats.erase("best_credits_one_run")
+			save_data["stats"] = stats
 
 	save_data["version"] = SAVE_VERSION
 	return save_data
