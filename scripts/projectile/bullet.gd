@@ -29,11 +29,7 @@ func _ready() -> void:
 		direction = direction.rotated(direction.cross(random_axis).normalized(), randf_range(-spread_angle, spread_angle))
 		direction = direction.normalized()
 
-	# Use speed if set (ranged warriors set this), otherwise muzzle_velocity.
-	if speed != muzzle_velocity:
-		velocity = direction * speed
-	else:
-		velocity = direction * muzzle_velocity
+	velocity = direction * muzzle_velocity
 
 	if is_enemy_bullet:
 		# Enemy bullets hit Environment (1) + Player (2) = mask 3

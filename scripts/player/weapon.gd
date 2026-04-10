@@ -335,8 +335,8 @@ func _spawn_bullet() -> void:
 	if not is_scoped:
 		bullet.spread_angle = deg_to_rad(hipfire_spread_deg)
 
-	bullet.speed = muzzle_velocity
-	bullet.gravity = bullet_gravity
+	bullet.muzzle_velocity = muzzle_velocity
+	bullet.bullet_gravity = bullet_gravity
 	bullet.impact_loudness = impact_loudness
 
 	get_tree().root.add_child(bullet)

@@ -131,7 +131,7 @@ func _shoot_at_player(player: Node3D) -> void:
 		projectile.setup(dir, projectile_speed)
 	else:
 		projectile.direction = dir
-		projectile.speed = projectile_speed
+		projectile.muzzle_velocity = projectile_speed
 
 	projectile.is_enemy_bullet = true
 	get_tree().root.add_child(projectile)
