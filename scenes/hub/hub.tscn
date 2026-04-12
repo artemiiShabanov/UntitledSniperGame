@@ -11,9 +11,9 @@
 [ext_resource type="Script" uid="uid://wqdmtojsm1x" path="res://scripts/hub/stats_terminal.gd" id="14_stats_terminal"]
 [ext_resource type="Script" uid="uid://b8wr37oyicjrx" path="res://scripts/hub/palette_station.gd" id="15_palette_station"]
 [ext_resource type="Script" uid="uid://bgtx08a13qrut" path="res://scripts/hub/palette_panel.gd" id="16_palette_panel"]
-[ext_resource type="Script" path="res://scripts/hub/armory.gd" id="17_armory"]
-[ext_resource type="Script" path="res://scripts/hub/war_room.gd" id="18_war_room"]
-[ext_resource type="Script" path="res://scripts/hub/war_room_station.gd" id="19_war_room_station"]
+[ext_resource type="Script" uid="uid://dgrvtt66j53vp" path="res://scripts/hub/armory.gd" id="17_armory"]
+[ext_resource type="Script" uid="uid://c2nx0gjbjnnrv" path="res://scripts/hub/war_room.gd" id="18_war_room"]
+[ext_resource type="Script" uid="uid://dg3td7lgnufg6" path="res://scripts/hub/war_room_station.gd" id="19_war_room_station"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_station1"]
 size = Vector3(1.5, 2, 0.3)

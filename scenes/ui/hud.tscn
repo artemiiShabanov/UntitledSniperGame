@@ -13,9 +13,9 @@
 [ext_resource type="Script" uid="uid://b0qu6ksdlvl4v" path="res://scripts/ui/hit_flash.gd" id="11_hit_flash"]
 [ext_resource type="Script" uid="uid://gho1w5184ybl" path="res://scripts/ui/run_timer_display.gd" id="12_run_timer"]
 [ext_resource type="Script" uid="uid://dlnvjab51i8ck" path="res://scripts/ui/threat_display.gd" id="13_threat"]
-[ext_resource type="Script" path="res://scripts/ui/castle_hp_bar.gd" id="14_castle_hp"]
-[ext_resource type="Script" path="res://scripts/ui/extraction_window_display.gd" id="15_extraction_window"]
-[ext_resource type="Script" path="res://scripts/ui/opportunity_display.gd" id="16_opportunity"]
+[ext_resource type="Script" uid="uid://bjg2wod2hy71d" path="res://scripts/ui/castle_hp_bar.gd" id="14_castle_hp"]
+[ext_resource type="Script" uid="uid://dnlx11i5lcp52" path="res://scripts/ui/extraction_window_display.gd" id="15_extraction_window"]
+[ext_resource type="Script" uid="uid://b2bkixu23d6bj" path="res://scripts/ui/opportunity_display.gd" id="16_opportunity"]
 
 [node name="HUD" type="CanvasLayer"]
 layer = 10
@@ -245,6 +245,8 @@ mouse_filter = 2
 script = ExtResource("8_palette_indicator")
 
 [node name="CastleHPBar" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
 offset_left = 20.0
 offset_top = 100.0
 offset_right = 240.0
