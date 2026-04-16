@@ -89,7 +89,8 @@ func _process_firing(delta: float) -> void:
 
 func _process_repositioning(delta: float) -> void:
 	_move_along_nav(delta)
-	if nav_agent.is_navigation_finished():
+	var dist := global_position.distance_to(_move_target)
+	if dist < 2.0:
 		ranged_state = RangedState.FIRING
 		_shoot_timer = shoot_interval * randf_range(0.3, 0.7)
 

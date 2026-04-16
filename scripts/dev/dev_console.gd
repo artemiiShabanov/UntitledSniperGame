@@ -20,6 +20,9 @@ func _ready() -> void:
 		"knight": preload("res://scenes/warrior/warrior_knight.tscn"),
 		"bombardier": preload("res://scenes/warrior/warrior_bombardier.tscn"),
 		"archer": preload("res://scenes/warrior/warrior_archer.tscn"),
+		"heavy_archer": preload("res://scenes/warrior/warrior_heavy_archer.tscn"),
+		"crossbowman": preload("res://scenes/warrior/warrior_crossbowman.tscn"),
+		"bird_trainer": preload("res://scenes/warrior/warrior_bird_trainer.tscn"),
 	}
 
 
@@ -36,15 +39,15 @@ func _input(event: InputEvent) -> void:
 
 func _build_ui() -> void:
 	_panel = PanelContainer.new()
-	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
+	_panel.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
 	_panel.offset_left = 10
-	_panel.offset_top = -250
-	_panel.offset_right = 280
-	_panel.offset_bottom = 250
+	_panel.offset_top = 40
+	_panel.offset_right = 500
+	_panel.offset_bottom = -10
 	add_child(_panel)
 
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(260, 480)
+	scroll.custom_minimum_size = Vector2(470, 700)
 	_panel.add_child(scroll)
 
 	var vbox := VBoxContainer.new()
@@ -60,11 +63,22 @@ func _build_ui() -> void:
 	vbox.add_child(HSeparator.new())
 
 	# ── Warrior spawning ──
-	_add_section(vbox, "WARRIORS")
-	_add_btn(vbox, "Spawn Hostile Swordsman", _spawn_warrior.bind("swordsman", WarriorBase.Faction.HOSTILE))
-	_add_btn(vbox, "Spawn Friendly Swordsman", _spawn_warrior.bind("swordsman", WarriorBase.Faction.FRIENDLY))
-	_add_btn(vbox, "Spawn Hostile Knight", _spawn_warrior.bind("knight", WarriorBase.Faction.HOSTILE))
-	_add_btn(vbox, "Spawn Hostile Archer", _spawn_warrior.bind("archer", WarriorBase.Faction.HOSTILE))
+	_add_section(vbox, "MELEE WARRIORS")
+	_add_btn(vbox, "Hostile Swordsman", _spawn_warrior.bind("swordsman", WarriorBase.Faction.HOSTILE))
+	_add_btn(vbox, "Friendly Swordsman", _spawn_warrior.bind("swordsman", WarriorBase.Faction.FRIENDLY))
+	_add_btn(vbox, "Hostile Big Guy", _spawn_warrior.bind("big_guy", WarriorBase.Faction.HOSTILE))
+	_add_btn(vbox, "Friendly Big Guy", _spawn_warrior.bind("big_guy", WarriorBase.Faction.FRIENDLY))
+	_add_btn(vbox, "Hostile Knight", _spawn_warrior.bind("knight", WarriorBase.Faction.HOSTILE))
+	_add_btn(vbox, "Friendly Knight", _spawn_warrior.bind("knight", WarriorBase.Faction.FRIENDLY))
+	_add_btn(vbox, "Hostile Bombardier", _spawn_warrior.bind("bombardier", WarriorBase.Faction.HOSTILE))
+
+	_add_section(vbox, "RANGED WARRIORS (hostile only)")
+	_add_btn(vbox, "Archer", _spawn_warrior.bind("archer", WarriorBase.Faction.HOSTILE))
+	_add_btn(vbox, "Heavy Archer", _spawn_warrior.bind("heavy_archer", WarriorBase.Faction.HOSTILE))
+	_add_btn(vbox, "Crossbowman", _spawn_warrior.bind("crossbowman", WarriorBase.Faction.HOSTILE))
+	_add_btn(vbox, "Bird Trainer", _spawn_warrior.bind("bird_trainer", WarriorBase.Faction.HOSTILE))
+
+	_add_section(vbox, "")
 	_add_btn(vbox, "Kill All Warriors", _kill_all_warriors)
 
 	vbox.add_child(HSeparator.new())
@@ -145,6 +159,8 @@ func _kill_all_warriors() -> void:
 
 func _adjust_phase(delta: int) -> void:
 	var new_phase := clampi(RunManager.threat_phase + delta, 1, RunManager.THREAT_PHASE_MAX)
+	# Must set run_elapsed too, otherwise _update_threat_phase() overwrites next frame.
+	RunManager.run_elapsed = (new_phase - 1) * RunManager.PHASE_DURATION
 	RunManager.threat_phase = new_phase
 	RunManager.threat_phase_changed.emit(new_phase)
 

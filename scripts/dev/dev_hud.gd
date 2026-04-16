@@ -9,7 +9,12 @@ func _ready() -> void:
 	layer = 100
 	_label = Label.new()
 	_label.name = "DevHUDLabel"
-	_label.position = Vector2(10, 10)
+	_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_label.offset_left = 10
+	_label.offset_bottom = -10
+	_label.offset_top = -250
+	_label.offset_right = 350
+	_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_label.add_theme_font_size_override("font_size", 14)
 	_label.add_theme_color_override("font_color", Color(0.0, 1.0, 0.0))
 	_label.add_theme_color_override("font_outline_color", Color.BLACK)

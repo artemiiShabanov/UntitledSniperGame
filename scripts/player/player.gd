@@ -3,11 +3,17 @@ extends CharacterBody3D
 ## Movement tuning
 @export var move_speed: float = 5.0
 @export var sprint_speed: float = 8.0
-@export var jump_velocity: float = 12.0
+@export var jump_velocity: float = 7.2
 @export var crouch_speed: float = 2.5
 
 ## Gravity
 @export var gravity: float = 20.0
+
+## Movement inertia
+const MOVE_ACCEL: float = 45.0       ## Units/sec² — ramp-up speed
+const MOVE_DECEL: float = 30.0       ## Units/sec² — stopping speed
+const JUMP_SPEED_BOOST: float = 1.5  ## Extra horizontal speed on jump
+const COYOTE_TIME: float = 0.12      ## Seconds after leaving ground you can still jump
 
 ## Crouch settings
 const STAND_HEIGHT: float = 1.8
@@ -26,6 +32,7 @@ var is_crouching: bool = false
 var is_sliding: bool = false
 var slide_timer: float = 0.0
 var slide_direction: Vector3 = Vector3.ZERO
+var _coyote_timer: float = 0.0
 
 ## Footstep timing
 const FOOTSTEP_WALK_INTERVAL: float = 0.5
@@ -148,6 +155,18 @@ func _physics_process(delta: float) -> void:
 
 	_process_interaction()
 
+	# God mode flight — noclip style.
+	if RunManager.has_meta("god_mode") and RunManager.get_meta("god_mode"):
+		_process_fly()
+		move_and_slide()
+		return
+
+	# Coyote time — track how long since last grounded.
+	if is_on_floor():
+		_coyote_timer = COYOTE_TIME
+	else:
+		_coyote_timer -= delta
+
 	_apply_gravity(delta)
 	_process_crouch_and_slide(delta)
 	_update_collision_shape(delta)
@@ -231,8 +250,16 @@ func _update_collision_shape(delta: float) -> void:
 ## ── Jump ─────────────────────────────────────────────────────────────────────
 
 func _process_jump() -> void:
-	if Input.is_action_just_pressed("jump") and is_on_floor() and not is_crouching:
+	var can_jump := (is_on_floor() or _coyote_timer > 0.0) and not is_crouching
+	if Input.is_action_just_pressed("jump") and can_jump:
 		velocity.y = jump_velocity
+		_coyote_timer = 0.0  # Consume coyote time.
+		# Small forward boost on jump.
+		var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+		if input_dir.length_squared() > 0.01:
+			var dir := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+			velocity.x += dir.x * JUMP_SPEED_BOOST
+			velocity.z += dir.z * JUMP_SPEED_BOOST
 
 
 ## ── Movement ─────────────────────────────────────────────────────────────────
@@ -244,15 +271,44 @@ func _process_movement() -> void:
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
+	var target_x: float
+	var target_z: float
 	if direction:
-		velocity.x = direction.x * current_speed
-		velocity.z = direction.z * current_speed
+		target_x = direction.x * current_speed
+		target_z = direction.z * current_speed
 	else:
-		velocity.x = move_toward(velocity.x, 0, current_speed)
-		velocity.z = move_toward(velocity.z, 0, current_speed)
+		target_x = 0.0
+		target_z = 0.0
+
+	var accel := MOVE_ACCEL if direction else MOVE_DECEL
+	velocity.x = move_toward(velocity.x, target_x, accel * get_physics_process_delta_time())
+	velocity.z = move_toward(velocity.z, target_z, accel * get_physics_process_delta_time())
 
 	# Footstep sounds
 	_process_footsteps(direction, is_sprinting)
+
+
+## ── Fly (god mode) ──────────────────────────────────────────────────────
+
+const FLY_SPEED: float = 15.0
+const FLY_FAST_MULT: float = 3.0
+
+func _process_fly() -> void:
+	var speed := FLY_SPEED
+	if Input.is_action_pressed("sprint"):
+		speed *= FLY_FAST_MULT
+
+	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+
+	velocity.x = direction.x * speed
+	velocity.z = direction.z * speed
+	velocity.y = 0.0
+
+	if Input.is_action_pressed("jump"):
+		velocity.y = speed
+	elif Input.is_action_pressed("crouch"):
+		velocity.y = -speed
 
 
 ## ── Footsteps ───────────────────────────────────────────────────────────

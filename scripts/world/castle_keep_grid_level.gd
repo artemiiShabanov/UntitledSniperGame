@@ -19,7 +19,6 @@ func _build_grid_level() -> void:
 
 	_create_player_spawn(result)
 	_create_extraction_zones(result)
-	_create_navigation_region()
 
 
 ## ── Grid Data ───────────────────────────────────────────────────────────────
@@ -209,30 +208,6 @@ func _create_extraction_zones(result: GridBuildResult) -> void:
 		ez.name = "ExtractionZone_%d" % (i + 1)
 		ez.position = result.extraction_blocks[i].position
 		add_child(ez)
-
-
-## ── Navigation ──────────────────────────────────────────────────────────────
-
-func _create_navigation_region() -> void:
-	## Creates a NavigationRegion3D for warrior pathfinding across the battlefield.
-	var nav := NavigationRegion3D.new()
-	nav.name = "NavigationRegion3D"
-
-	var nav_mesh := NavigationMesh.new()
-	nav_mesh.agent_radius = 0.5
-	nav_mesh.agent_height = 2.0
-	nav_mesh.cell_size = 0.5
-	nav_mesh.cell_height = 0.25
-	# Bake the entire level area.
-	nav_mesh.filter_baking_aabb = AABB(
-		Vector3(-10, -5, -10),
-		Vector3(12 * 15.0 + 20, 20, 15 * 15.0 + 20)
-	)
-	nav.navigation_mesh = nav_mesh
-	add_child(nav)
-
-	# Deferred bake after all geometry is added.
-	nav.bake_navigation_mesh.call_deferred()
 
 
 ## ── Helpers ─────────────────────────────────────────────────────────────────

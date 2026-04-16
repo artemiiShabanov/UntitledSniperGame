@@ -6,16 +6,16 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 1: Basic Controls
 
-- [ ] 1.1 Movement — WASD in hub, collides with walls
-- [ ] 1.2 Sprint — Shift+W faster movement
-- [ ] 1.3 Crouch — Ctrl lowers camera
-- [ ] 1.4 Jump — Spacebar
-- [ ] 1.5 Look — Mouse rotates camera
-- [ ] 1.6 Shoot — LMB in run, bolt cycles, bullet count drops
-- [ ] 1.7 Scope — RMB narrows FOV, sway active
-- [ ] 1.8 Breath hold — Shift while scoped, meter depletes
-- [ ] 1.9 Interact — E near hub station opens panel
-- [ ] 1.10 Pause — Escape during run
+- [x] 1.1 Movement — WASD in hub, collides with walls
+- [x] 1.2 Sprint — Shift+W faster movement
+- [x] 1.3 Crouch — Ctrl lowers camera
+- [x] 1.4 Jump — Spacebar
+- [x] 1.5 Look — Mouse rotates camera
+- [x] 1.6 Shoot — LMB in run, bolt cycles, bullet count drops
+- [x] 1.7 Scope — RMB narrows FOV, sway active
+- [x] 1.8 Breath hold — Shift while scoped, meter depletes
+- [x] 1.9 Interact — E near hub station opens panel
+- [x] 1.10 Pause — Escape during run
 
 **Notes:**
 
@@ -24,13 +24,13 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 2: Warrior AI
 
-- [ ] 2.1 Hostile spawn — Swordsmen appear at phase 1
-- [ ] 2.2 Friendly spawn — Friendlies appear ~2s after run start
-- [ ] 2.3 Hostile advance — Walks toward castle wall point
-- [ ] 2.4 Friendly advance — Walks to frontline, then patrols
-- [ ] 2.5 Melee pairing — CombatManager pairs opposing warriors
-- [ ] 2.6 Melee combat — Paired warriors exchange hits, one dies
-- [ ] 2.7 Bombardier — Ignores pairing, walks to castle
+- [x] 2.1 Hostile spawn — Swordsmen appear at phase 1
+- [x] 2.2 Friendly spawn — Friendlies appear ~2s after run start
+- [x] 2.3 Hostile advance — Walks toward castle wall point
+- [x] 2.4 Friendly advance — Walks to frontline, then patrols
+- [x] 2.5 Melee pairing — CombatManager pairs opposing warriors
+- [x] 2.6 Melee combat — Paired warriors exchange hits, one dies
+- [x] 2.7 Bombardier — Ignores pairing, walks to castle
 - [ ] 2.8 Phase gating — Only phase-appropriate types spawn
 - [ ] 2.9 Ranged advance — Archer stops at firing range
 - [ ] 2.10 Ranged shooting — Shoots arrow at player
@@ -177,17 +177,17 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Dev Tools
 
-- [ ] F3 — Dev HUD shows phase, HP, warriors, FPS
-- [ ] Backtick — Dev Console opens with buttons
-- [ ] Spawn warrior — Appears and advances
-- [ ] Kill all — All warriors removed
-- [ ] Phase +1/+5 — Phase updates, new types spawn
-- [ ] Castle HP adjust — Bar updates
-- [ ] Open extraction — Window opens, zone activates
-- [ ] Trigger opportunity — Appears on HUD
-- [ ] Give mod — Appears in armory
-- [ ] God mode — No damage taken
-- [ ] Refill bullets — Bullet count resets
+- [x] F3 — Dev HUD shows phase, HP, warriors, FPS
+- [x] Backtick — Dev Console opens with buttons
+- [x] Spawn warrior — Appears and advances
+- [x] Kill all — All warriors removed
+- [x] Phase +1/+5 — Phase updates, new types spawn
+- [x] Castle HP adjust — Bar updates
+- [x] Open extraction — Window opens, zone activates
+- [x] Trigger opportunity — Appears on HUD
+- [x] Give mod — Appears in armory
+- [x] God mode — No damage taken
+- [x] Refill bullets — Bullet count resets
 
 **Notes:**
 
