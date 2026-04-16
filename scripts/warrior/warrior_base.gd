@@ -271,14 +271,18 @@ func take_melee_damage(amount: int) -> void:
 		_die(false)
 
 
+const HEADSHOT_DAMAGE_MULT: float = 5.0  ## Headshots deal 5x damage (bypasses armor)
+
 func on_bullet_hit(bullet: Node, collision: KinematicCollision3D) -> void:
-	## Called by player's bullet. Headshot bypasses armor.
+	## Called by player's bullet. Headshot bypasses armor and deals 5x damage.
 	RunManager.record_shot_hit()
 	var hit_pos := collision.get_position()
 	var headshot := _check_headshot(hit_pos)
 	var damage: int = bullet.damage
 
-	if not headshot:
+	if headshot:
+		damage = int(damage * HEADSHOT_DAMAGE_MULT)
+	else:
 		damage = maxi(damage - armor, 1)
 
 	hp -= damage
@@ -400,6 +404,19 @@ func _apply_faction_color() -> void:
 	if body is MeshInstance3D:
 		body.material_override = mat
 
+	# Head sphere at headshot position.
+	var head_mesh := MeshInstance3D.new()
+	head_mesh.name = "Head"
+	var sphere := SphereMesh.new()
+	sphere.radius = headshot_radius
+	sphere.height = headshot_radius * 2.0
+	head_mesh.mesh = sphere
+	head_mesh.position = Vector3(0, headshot_y_offset, 0)
+	var head_mat := StandardMaterial3D.new()
+	head_mat.albedo_color = color.lightened(0.3)
+	head_mesh.material_override = head_mat
+	add_child(head_mesh)
+
 
 ## ── Debug visuals ───────────────────────────────────────────────────────────
 
@@ -451,9 +468,12 @@ func _create_debug_visuals() -> void:
 
 
 func _update_debug_sphere() -> void:
+	_set_debug_sphere_color(STATE_COLORS.get(state, Color.WHITE))
+
+
+func _set_debug_sphere_color(color: Color) -> void:
 	if not _debug_state_sphere:
 		return
-	var color: Color = STATE_COLORS.get(state, Color.WHITE)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

@@ -31,14 +31,14 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 - [x] 2.5 Melee pairing — CombatManager pairs opposing warriors
 - [x] 2.6 Melee combat — Paired warriors exchange hits, one dies
 - [x] 2.7 Bombardier — Ignores pairing, walks to castle
-- [ ] 2.8 Phase gating — Only phase-appropriate types spawn
-- [ ] 2.9 Ranged advance — Archer stops at firing range
-- [ ] 2.10 Ranged shooting — Shoots arrow at player
-- [ ] 2.11 Headshot kill — 1-shot kill bypasses armor
-- [ ] 2.12 Body shot armor — Damage reduced on armored types
-- [ ] 2.13 Kill scoring — Score increases per kill
-- [ ] 2.14 Friendly kill penalty — Score decreases
-- [ ] 2.15 Warrior death cleanup — Body freed after delay
+- [x] 2.8 Phase gating — Only phase-appropriate types spawn
+- [x] 2.9 Ranged advance — Archer stops at firing range
+- [x] 2.10 Ranged shooting — Shoots arrow at player
+- [x] 2.11 Headshot kill — 1-shot kill bypasses armor
+- [x] 2.12 Body shot armor — Damage reduced on armored types
+- [x] 2.13 Kill scoring — Score increases per kill
+- [x] 2.14 Friendly kill penalty — Score decreases
+- [x] 2.15 Warrior death cleanup — Body freed after delay
 
 **Notes:**
 

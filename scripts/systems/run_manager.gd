@@ -290,6 +290,8 @@ func take_hit() -> void:
 		return
 	if hit_cooldown > 0.0:
 		return
+	if has_meta("god_mode") and get_meta("god_mode"):
+		return
 
 	if game_state == GameState.EXTRACTING:
 		cancel_extraction()

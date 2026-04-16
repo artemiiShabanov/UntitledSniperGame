@@ -16,4 +16,5 @@ func _ready() -> void:
 	projectile_speed = 55.0
 	reposition_chance = 0.2
 	reposition_radius = 8.0
+	arrow_scene = preload("res://scenes/projectile/arrow.tscn")
 	super._ready()

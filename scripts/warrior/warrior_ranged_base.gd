@@ -5,6 +5,12 @@ extends WarriorBase
 
 enum RangedState { ADVANCING_TO_RANGE, FIRING, REPOSITIONING }
 
+const RANGED_STATE_COLORS := {
+	RangedState.ADVANCING_TO_RANGE: Color(0.2, 0.6, 1.0),  # Blue — moving
+	RangedState.FIRING: Color(1.0, 0.5, 0.0),               # Orange — shooting
+	RangedState.REPOSITIONING: Color(0.8, 0.8, 0.2),        # Yellow — relocating
+}
+
 @export var firing_range: float = 90.0      ## Stop advancing at this distance from player
 @export var accuracy: float = 0.3           ## Hit chance per shot (0-1)
 @export var shoot_interval: float = 2.5     ## Seconds between shots
@@ -32,6 +38,8 @@ func is_pairable() -> bool:
 func _physics_process(delta: float) -> void:
 	if state == State.DEAD:
 		return
+
+	_set_debug_sphere_color(RANGED_STATE_COLORS.get(ranged_state, Color.WHITE))
 
 	match ranged_state:
 		RangedState.ADVANCING_TO_RANGE:
@@ -135,8 +143,12 @@ func _shoot_at_player(player: Node3D) -> void:
 		projectile.muzzle_velocity = projectile_speed
 
 	projectile.is_enemy_bullet = true
+	# Spawn ahead of the archer so it doesn't hit the shooter.
+	var forward_offset := dir * 1.5
 	get_tree().root.add_child(projectile)
-	projectile.global_position = spawn_pos
+	projectile.global_position = spawn_pos + forward_offset
+	# Also add collision exception for the shooter.
+	projectile.add_collision_exception_with(self)
 
 
 func _get_player() -> Node3D:
