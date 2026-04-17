@@ -107,11 +107,23 @@ func _add_cylinder(part_name: String, radius: float, height: float, pos: Vector3
 func _apply_loadout() -> void:
 	var loadout: Dictionary = SaveManager.get_equipped_loadout()
 
-	_build_barrel(loadout.get("barrel", "barrel_standard"))
-	_build_stock(loadout.get("stock", "stock_standard"))
-	_build_magazine(loadout.get("magazine", "magazine_standard"))
-	_build_scope(loadout.get("scope", "scope_standard"))
-	_build_bolt(loadout.get("bolt", "bolt_standard"))
+	# Loadout is { slot_name: inventory_index }. Convert index to visual type string.
+	_build_barrel(_get_visual_id(loadout, "barrel", "barrel_standard"))
+	_build_stock(_get_visual_id(loadout, "stock", "stock_standard"))
+	_build_magazine(_get_visual_id(loadout, "magazine", "magazine_standard"))
+	_build_scope(_get_visual_id(loadout, "scope", "scope_standard"))
+	_build_bolt(_get_visual_id(loadout, "bolt", "bolt_standard"))
+
+
+func _get_visual_id(loadout: Dictionary, slot: String, fallback: String) -> String:
+	## Converts equipped loadout index to a visual ID string for the viewmodel.
+	if not loadout.has(slot):
+		return fallback
+	var mod_data: Dictionary = SaveManager.get_mod_at(loadout[slot])
+	if mod_data.is_empty():
+		return fallback
+	var visual_type: int = mod_data.get("visual_type", 1)
+	return "%s_%d" % [slot, visual_type]
 
 
 func _clear_mod(slot: String) -> void:

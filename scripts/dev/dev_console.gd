@@ -93,6 +93,13 @@ func _build_ui() -> void:
 
 	vbox.add_child(HSeparator.new())
 
+	# ── Destructibles ──
+	_add_section(vbox, "DESTRUCTIBLES")
+	_add_btn(vbox, "Spawn Powder Keg", _spawn_at_crosshair.bind("res://scenes/world/destructibles/powder_keg.tscn"))
+	_add_btn(vbox, "Spawn Siege Equipment", _spawn_at_crosshair.bind("res://scenes/world/destructibles/siege_equipment.tscn"))
+
+	vbox.add_child(HSeparator.new())
+
 	# ── Extraction & Opportunity ──
 	_add_section(vbox, "EVENTS")
 	_add_btn(vbox, "Open Extraction (15s)", _open_extraction.bind(15.0))
@@ -106,6 +113,8 @@ func _build_ui() -> void:
 	_add_btn(vbox, "Add 500 XP", func(): RunManager.add_run_xp(500))
 	_add_btn(vbox, "Add 1000 XP (save)", _add_xp_to_save.bind(1000))
 	_add_btn(vbox, "Give Random Mod", _give_random_mod)
+	_add_btn(vbox, "Give Barrel Mod", _give_mod_for_slot.bind(0))
+	_add_btn(vbox, "Give Scope Mod", _give_mod_for_slot.bind(4))
 
 	vbox.add_child(HSeparator.new())
 
@@ -133,6 +142,25 @@ func _add_btn(parent: VBoxContainer, text: String, callback: Callable) -> void:
 
 
 ## ── Commands ──────────────────────────────────────────────────────────────
+
+func _spawn_at_crosshair(scene_path: String) -> void:
+	var players := get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return
+	var player: Node3D = players[0]
+	var forward := -player.global_transform.basis.z
+	forward.y = 0.0
+	forward = forward.normalized()
+	var pos := player.global_position + forward * 15.0
+	pos.y = 0.0
+
+	var scene: PackedScene = load(scene_path)
+	if not scene:
+		return
+	var instance := scene.instantiate()
+	get_tree().root.add_child(instance)
+	instance.global_position = pos
+
 
 func _spawn_warrior(type: String, faction: WarriorBase.Faction) -> void:
 	if not _warrior_scenes.has(type):
@@ -208,6 +236,15 @@ func _give_random_mod() -> void:
 		RunManager.announce_event("DEV: Got %s %s mod" % [RifleMod.RARITY_NAMES[rarity], RifleMod.SLOT_NAMES[slot]])
 	else:
 		RunManager.announce_event("DEV: Inventory full for slot")
+
+
+func _give_mod_for_slot(slot: int) -> void:
+	var rarity: int = randi() % 4
+	var mod: RifleMod = ModRegistry.generate(slot, rarity)
+	if SaveManager.add_mod_to_inventory(mod):
+		RunManager.announce_event("DEV: Got %s %s mod" % [RifleMod.RARITY_NAMES[rarity], RifleMod.SLOT_NAMES[slot]])
+	else:
+		RunManager.announce_event("DEV: %s slot full (5/5)" % RifleMod.SLOT_NAMES[slot])
 
 
 func _toggle_god_mode() -> void:

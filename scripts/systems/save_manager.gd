@@ -167,6 +167,27 @@ func add_mod_to_inventory(mod: RifleMod) -> bool:
 	return true
 
 
+func replace_mod_in_inventory(index: int, new_mod: RifleMod) -> bool:
+	## Replaces the mod at given index with a new one. Used when a slot is full.
+	## The replaced mod is removed. Returns false if index invalid or slot mismatch.
+	var inv: Array = data.get("mod_inventory", [])
+	if index < 0 or index >= inv.size():
+		return false
+	var old: Dictionary = inv[index]
+	# Ensure slots match.
+	if old.get("slot", 0) != new_mod.slot:
+		return false
+	# Unequip if equipped at this index.
+	var equipped: Dictionary = data.get("equipped_mods", {})
+	for slot_name: String in equipped.keys():
+		if equipped[slot_name] == index:
+			equipped.erase(slot_name)
+	data["equipped_mods"] = equipped
+	inv[index] = new_mod.serialize()
+	data["mod_inventory"] = inv
+	return true
+
+
 func remove_mod_from_inventory(index: int) -> void:
 	var inv: Array = data.get("mod_inventory", [])
 	if index < 0 or index >= inv.size():

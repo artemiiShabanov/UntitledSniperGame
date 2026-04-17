@@ -9,6 +9,7 @@ extends Control
 @onready var continue_label: Label = $Panel/VBox/ContinuePrompt
 
 var _active: bool = false
+var _mod_choice_pending: bool = false  ## True until player picks a mod.
 var _bold_font: Font = null
 var _rating_icons: Dictionary = {}
 
@@ -102,6 +103,8 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not _active:
 		return
+	if _mod_choice_pending:
+		return  # Must pick a mod first.
 	if event.is_action_pressed("interact") or event.is_action_pressed("shoot") or event.is_action_pressed("ui_accept"):
 		_active = false
 		visible = false
@@ -172,6 +175,11 @@ func _populate(success: bool) -> void:
 	var rating := _calculate_rating(stats, success)
 	_add_stat_row("", "")
 	_add_rating_row(rating)
+
+	# Mod choices (success only).
+	_mod_choice_pending = false
+	if success and not RunManager.last_mod_choices.is_empty():
+		_add_mod_choice_row(RunManager.last_mod_choices)
 
 	# Score — count-up animation
 	var score_earned: int = stats.get("score_earned", 0)
@@ -324,3 +332,171 @@ func _headshot_color(headshots: int, kills: int) -> Color:
 		return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT)
 	else:
 		return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
+
+
+## ── Mod Choice ─────────────────────────────────────────────────────────────
+
+func _add_mod_choice_row(choices: Array[RifleMod]) -> void:
+	_mod_choice_pending = true
+
+	# Header spanning both columns.
+	var header := Label.new()
+	header.text = "CHOOSE A MOD"
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
+	if _bold_font:
+		header.add_theme_font_override("font", _bold_font)
+	header.add_theme_font_size_override("font_size", 28)
+	header.visible = false
+	stats_grid.add_child(header)
+
+	var spacer := Control.new()
+	spacer.visible = false
+	stats_grid.add_child(spacer)
+	_reveal_queue.append({"name": header, "value": spacer})
+
+	# One button per mod choice.
+	for mod in choices:
+		var slot_name: String = RifleMod.SLOT_NAMES[mod.slot]
+		var rarity_name: String = RifleMod.RARITY_NAMES[mod.rarity]
+
+		var name_label := Label.new()
+		name_label.text = "%s %s" % [rarity_name, slot_name.capitalize()]
+		name_label.add_theme_color_override("font_color", _rarity_color(mod.rarity))
+		name_label.visible = false
+		stats_grid.add_child(name_label)
+
+		var btn := Button.new()
+		btn.text = _format_mod_stats(mod)
+		btn.pressed.connect(_on_mod_chosen.bind(mod))
+		btn.visible = false
+		AudioManager.wire_button(btn, &"menu_confirm")
+		stats_grid.add_child(btn)
+
+		_reveal_queue.append({"name": name_label, "value": btn})
+
+
+func _on_mod_chosen(mod: RifleMod) -> void:
+	if SaveManager.add_mod_to_inventory(mod):
+		RunManager.announce_event("Got %s %s mod!" % [RifleMod.RARITY_NAMES[mod.rarity], RifleMod.SLOT_NAMES[mod.slot].capitalize()])
+		_finish_mod_choice()
+		SaveManager.save()
+	else:
+		# Slot full — show replace picker.
+		_show_replace_picker(mod)
+
+
+func _show_replace_picker(new_mod: RifleMod) -> void:
+	# Disable the 3 top-level mod choice buttons.
+	for child in stats_grid.get_children():
+		if child is Button:
+			child.disabled = true
+
+	var slot_name: String = RifleMod.SLOT_NAMES[new_mod.slot]
+
+	# Header spanning both columns.
+	var header := Label.new()
+	header.text = "REPLACE WHICH %s MOD?" % slot_name.to_upper()
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
+	if _bold_font:
+		header.add_theme_font_override("font", _bold_font)
+	header.add_theme_font_size_override("font_size", 24)
+	stats_grid.add_child(header)
+
+	var spacer := Control.new()
+	stats_grid.add_child(spacer)
+
+	# One row per existing mod in this slot.
+	var existing_mods: Array = SaveManager.get_mods_for_slot(slot_name)
+	for entry in existing_mods:
+		var idx: int = entry["index"]
+		var mod_data: Dictionary = entry["mod_data"]
+		var rarity: int = mod_data.get("rarity", 0)
+		var durability: int = mod_data.get("durability", 0)
+		var max_durability: int = mod_data.get("max_durability", 0)
+
+		var label := Label.new()
+		label.text = "%s  %d/%d runs" % [RifleMod.RARITY_NAMES[rarity], durability, max_durability]
+		label.add_theme_color_override("font_color", _rarity_color(rarity))
+		stats_grid.add_child(label)
+
+		var btn := Button.new()
+		btn.text = _format_mod_stats_dict(mod_data)
+		btn.pressed.connect(_on_replace_chosen.bind(idx, new_mod))
+		AudioManager.wire_button(btn, &"menu_confirm")
+		stats_grid.add_child(btn)
+
+	# "Discard new mod" option.
+	var skip_label := Label.new()
+	skip_label.text = "Discard new mod"
+	skip_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
+	stats_grid.add_child(skip_label)
+
+	var skip_btn := Button.new()
+	skip_btn.text = "Keep existing mods"
+	skip_btn.pressed.connect(_on_replace_skip)
+	AudioManager.wire_button(skip_btn, &"menu_cancel")
+	stats_grid.add_child(skip_btn)
+
+
+func _on_replace_chosen(index: int, new_mod: RifleMod) -> void:
+	if SaveManager.replace_mod_in_inventory(index, new_mod):
+		RunManager.announce_event("Replaced with %s %s mod!" % [RifleMod.RARITY_NAMES[new_mod.rarity], RifleMod.SLOT_NAMES[new_mod.slot].capitalize()])
+	_finish_mod_choice()
+	SaveManager.save()
+
+
+func _on_replace_skip() -> void:
+	RunManager.announce_event("New mod discarded")
+	_finish_mod_choice()
+	SaveManager.save()
+
+
+func _finish_mod_choice() -> void:
+	_mod_choice_pending = false
+	continue_label.text = "Press E to continue"
+	# Disable all buttons in the grid so nothing else is clickable.
+	for child in stats_grid.get_children():
+		if child is Button:
+			child.disabled = true
+
+
+func _format_mod_stats_dict(mod_data: Dictionary) -> String:
+	var parts: Array[String] = []
+	var stats: Dictionary = mod_data.get("stats", {})
+	for key: String in stats:
+		var val = stats[key]
+		if val is bool:
+			if val:
+				parts.append(key.replace("_", " ").capitalize())
+		elif val is float:
+			if key == "capacity":
+				parts.append("+%d" % int(val))
+			else:
+				parts.append("%s %.2f" % [key.replace("_", " ").capitalize(), val])
+	return " | ".join(parts)
+
+
+func _format_mod_stats(mod: RifleMod) -> String:
+	var parts: Array[String] = []
+	for key: String in mod.stats:
+		var val = mod.stats[key]
+		if val is bool:
+			if val:
+				parts.append(key.replace("_", " ").capitalize())
+		elif val is float:
+			if key in ["capacity"]:
+				parts.append("+%d" % int(val))
+			else:
+				parts.append("%s %.2f" % [key.replace("_", " ").capitalize(), val])
+	parts.append("%d runs" % mod.durability)
+	return " | ".join(parts)
+
+
+func _rarity_color(rarity: int) -> Color:
+	match rarity:
+		0: return PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT)
+		1: return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
+		2: return PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT)
+		_: return PaletteManager.get_color(PaletteManager.SLOT_REWARD)

@@ -47,14 +47,14 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 3: Castle Defense
 
-- [ ] 3.1 Castle HP init — Bar shows 100/100 on deploy
-- [ ] 3.2 Wall arrival damage — Hostile reaching wall drains HP
-- [ ] 3.3 Bombardier damage — Heavy damage on arrival
-- [ ] 3.4 Siege equipment drain — Passive HP drain per second
-- [ ] 3.5 Destroy siege equip — Shooting stops drain, awards score
-- [ ] 3.6 Castle HP = 0 — Run fails "CASTLE FALLEN"
-- [ ] 3.7 HP bar color — Green > yellow > red
-- [ ] 3.8 Reinforced Gates — +40% HP with upgrade unlocked
+- [x] 3.1 Castle HP init — Bar shows 100/100 on deploy
+- [x] 3.2 Wall arrival damage — Hostile reaching wall drains HP
+- [x] 3.3 Bombardier damage — Heavy damage on arrival
+- [x] 3.4 Siege equipment drain — Passive HP drain per second
+- [x] 3.5 Destroy siege equip — Shooting stops drain, awards score
+- [x] 3.6 Castle HP = 0 — Run fails "CASTLE FALLEN"
+- [x] 3.7 HP bar color — Green > yellow > red
+- [ ] 3.8 Reinforced Gates — +40% HP with upgrade unlocked (moved to Layer 8)
 
 **Notes:**
 
@@ -63,14 +63,14 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 4: Extraction
 
-- [ ] 4.1 Window schedule — Opens after phase 2 ends
-- [ ] 4.2 Zone activation — One random zone becomes visible
-- [ ] 4.3 Hold to extract — E fills bar over 3s
-- [ ] 4.4 Successful extract — Result screen shows
-- [ ] 4.5 Damage cancels — Hit during extract cancels it
-- [ ] 4.6 Window closes — Timer expires, zone deactivates
-- [ ] 4.7 HUD countdown — Timer counts down accurately
-- [ ] 4.8 Multiple windows — Phases 2, 4, 6 each open one
+- [x] 4.1 Window schedule — Opens after phase 2 ends
+- [x] 4.2 Zone activation — One random zone becomes visible
+- [x] 4.3 Hold to extract — E fills bar over 3s
+- [x] 4.4 Successful extract — Result screen shows
+- [x] 4.5 Damage cancels — Hit during extract cancels it
+- [x] 4.6 Window closes — Timer expires, zone deactivates
+- [x] 4.7 HUD countdown — Timer counts down accurately
+- [x] 4.8 Multiple windows — Phases 2, 4, 6 each open one
 
 **Notes:**
 
@@ -79,13 +79,13 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 5: Opportunities
 
-- [ ] 5.1 Opportunity trigger — HUD shows name + timer
-- [ ] 5.2 Kill progress — Counter increments on kills
-- [ ] 5.3 Completion — XP awarded on meeting target
-- [ ] 5.4 Failure — Timer expires, "FAILED" announcement
-- [ ] 5.5 Army unlock — First completion unlocks upgrade
-- [ ] 5.6 Repeat completion — XP only, no duplicate unlock
-- [ ] 5.7 Max per run — No more than 2 offered
+- [x] 5.1 Opportunity trigger — HUD shows name + timer
+- [x] 5.2 Kill progress — Counter increments on kills
+- [x] 5.3 Completion — XP awarded on meeting target
+- [x] 5.4 Failure — Timer expires, "FAILED" announcement
+- [x] 5.5 Army unlock — First completion unlocks upgrade
+- [x] 5.6 Repeat completion — XP only, no duplicate unlock
+- [x] 5.7 Max per run — No more than 2 offered
 
 **Notes:**
 
@@ -94,11 +94,11 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 6: Destructibles
 
-- [ ] 6.1 Powder keg hit — Explodes on bullet
-- [ ] 6.2 Keg AoE damage — Warriors in radius take damage
-- [ ] 6.3 Keg score — 80 score awarded
-- [ ] 6.4 Siege equip hit — Stops drain, 150 score
-- [ ] 6.5 One-shot kill — Destroyed on first hit
+- [x] 6.1 Powder keg hit — Explodes on bullet
+- [x] 6.2 Keg AoE damage — Warriors in radius take damage
+- [x] 6.3 Keg score — 80 score awarded
+- [x] 6.4 Siege equip hit — Stops drain, 150 score
+- [x] 6.5 One-shot kill — Destroyed on first hit
 
 **Notes:**
 
@@ -107,15 +107,15 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 7: Progression (Between Runs)
 
-- [ ] 7.1 Mod generation — Choices offered on extraction
-- [ ] 7.2 Equip mod — Shows [EQUIPPED] in armory
-- [ ] 7.3 Unequip mod — Reverts to EQUIP button
-- [ ] 7.4 Durability tick — Decrements per extraction
-- [ ] 7.5 Mod depletion — Removed at 0 durability
-- [ ] 7.6 Mods lost on death — Equipped mods stripped
-- [ ] 7.7 Stashed mods safe — Unequipped survive death
-- [ ] 7.8 Slot cap — 5 per slot max
-- [ ] 7.9 Mod stats apply — Weapon stats change with mod
+- [x] 7.1 Mod generation — Choices offered on extraction
+- [x] 7.2 Equip mod — Shows [EQUIPPED] in armory
+- [x] 7.3 Unequip mod — Reverts to EQUIP button
+- [x] 7.4 Durability tick — Decrements per extraction
+- [x] 7.5 Mod depletion — Removed at 0 durability
+- [x] 7.6 Mods lost on death — Equipped mods stripped
+- [x] 7.7 Stashed mods safe — Unequipped survive death
+- [x] 7.8 Slot cap — 5 per slot max (or replace existing)
+- [x] 7.9 Mod stats apply — Weapon stats change with mod
 
 **Notes:**
 

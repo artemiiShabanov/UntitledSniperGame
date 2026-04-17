@@ -232,6 +232,8 @@ func _close_extraction_window() -> void:
 
 ## ── Run end ──────────────────────────────────────────────────────────────────
 
+var last_mod_choices: Array[RifleMod] = []  ## Set on success for result screen.
+
 func _end_run_success() -> void:
 	AudioManager.play_sfx_2d(&"extraction_complete")
 	_set_game_state(GameState.RESULT)
@@ -243,6 +245,9 @@ func _end_run_success() -> void:
 
 	# Tick durability on equipped mods
 	SaveManager.tick_mod_durability()
+
+	# Generate mod choices based on score + phase.
+	last_mod_choices = ModRegistry.generate_choices(run_score, threat_phase, 3)
 
 	SaveManager.commit_run_stats(run_stats.to_dict(), current_level_path, true)
 	SaveManager.save()

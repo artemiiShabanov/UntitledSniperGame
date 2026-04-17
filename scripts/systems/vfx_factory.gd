@@ -357,3 +357,53 @@ func _add_to_world(node: Node, pos: Vector3, cleanup_time: float) -> void:
 		if is_instance_valid(node):
 			node.queue_free()
 	)
+
+
+## ── Explosion ──────────────────────────────────────────────────────────────
+
+func spawn_explosion(pos: Vector3, radius: float) -> void:
+	## Quick burst of particles + expanding sphere flash.
+	var particles := GPUParticles3D.new()
+	particles.emitting = true
+	particles.one_shot = true
+	particles.amount = 32
+	particles.lifetime = 0.8
+	particles.explosiveness = 1.0
+	particles.visibility_aabb = AABB(Vector3(-radius, -radius, -radius), Vector3(radius, radius, radius) * 2.0)
+
+	var mat := ParticleProcessMaterial.new()
+	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	mat.emission_sphere_radius = radius * 0.3
+	mat.direction = Vector3(0, 1, 0)
+	mat.spread = 180.0
+	mat.initial_velocity_min = radius * 1.5
+	mat.initial_velocity_max = radius * 3.0
+	mat.gravity = Vector3(0, -5, 0)
+	mat.damping_min = 2.0
+	mat.damping_max = 4.0
+	mat.scale_min = 0.3
+	mat.scale_max = 0.8
+	mat.color = Color(1.0, 0.6, 0.1)
+
+	particles.process_material = mat
+	particles.draw_pass_1 = SphereMesh.new()
+	particles.draw_pass_1.radius = 0.15
+	particles.draw_pass_1.height = 0.3
+
+	var explosion_mat := StandardMaterial3D.new()
+	explosion_mat.albedo_color = Color(1.0, 0.6, 0.1)
+	explosion_mat.emission_enabled = true
+	explosion_mat.emission = Color(1.0, 0.5, 0.0)
+	explosion_mat.emission_energy_multiplier = 3.0
+	explosion_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	particles.material_override = explosion_mat
+
+	get_tree().root.add_child(particles)
+	particles.global_position = pos
+
+	AudioManager.play_sfx(&"explosion", pos)
+
+	get_tree().create_timer(1.5).timeout.connect(func():
+		if is_instance_valid(particles):
+			particles.queue_free()
+	)

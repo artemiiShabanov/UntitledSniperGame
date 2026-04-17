@@ -6,6 +6,7 @@ extends DestructibleTarget
 @export var castle_drain_per_second: float = 2.0
 
 var _draining: bool = true
+var _drain_accumulator: float = 0.0
 
 
 func _ready() -> void:
@@ -20,9 +21,10 @@ func _process(delta: float) -> void:
 	if RunManager.game_state != RunManager.GameState.IN_RUN:
 		return
 
-	# Passive castle HP drain.
-	var damage := int(castle_drain_per_second * delta * 10.0)  # Accumulate fractional damage
-	if damage > 0:
+	_drain_accumulator += castle_drain_per_second * delta
+	if _drain_accumulator >= 1.0:
+		var damage := int(_drain_accumulator)
+		_drain_accumulator -= damage
 		RunManager.castle_take_damage(damage)
 
 
