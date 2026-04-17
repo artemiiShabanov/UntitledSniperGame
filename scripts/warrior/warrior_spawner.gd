@@ -89,8 +89,18 @@ func _spawn_hostile(phase: int) -> void:
 
 	warrior.faction = WarriorBase.Faction.HOSTILE
 	warrior.advance_target = target.global_position
-	get_tree().root.add_child(warrior)
+	_spawn_into_level(warrior)
 	warrior.global_position = spawn.global_position
+
+
+func _spawn_into_level(warrior: WarriorBase) -> void:
+	# Add warrior as a child of the level scene (spawner's parent) so it's
+	# cleaned up on scene change instead of persisting on SceneTree root.
+	var parent := get_parent()
+	if parent:
+		parent.add_child(warrior)
+	else:
+		get_tree().root.add_child(warrior)
 
 
 func _spawn_friendly(phase: int) -> void:
@@ -107,7 +117,7 @@ func _spawn_friendly(phase: int) -> void:
 
 	warrior.faction = WarriorBase.Faction.FRIENDLY
 	warrior.advance_target = target.global_position
-	get_tree().root.add_child(warrior)
+	_spawn_into_level(warrior)
 	warrior.global_position = spawn.global_position
 
 

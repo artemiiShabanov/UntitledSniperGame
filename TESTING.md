@@ -54,7 +54,7 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 - [x] 3.5 Destroy siege equip — Shooting stops drain, awards score
 - [x] 3.6 Castle HP = 0 — Run fails "CASTLE FALLEN"
 - [x] 3.7 HP bar color — Green > yellow > red
-- [ ] 3.8 Reinforced Gates — +40% HP with upgrade unlocked (moved to Layer 8)
+- [x] 3.8 Reinforced Gates — +40% HP with upgrade unlocked
 
 **Notes:**
 
@@ -124,14 +124,14 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 8: Skills & Army Upgrades
 
-- [ ] 8.1 Skill display — 4 skills shown with tier
-- [ ] 8.2 Purchase tier 1 — XP deducted, tier up
-- [ ] 8.3 Tier 2 cost — Higher cost shown
-- [ ] 8.4 Max tier — Button disabled
-- [ ] 8.5 Insufficient XP — "need X more" shown
-- [ ] 8.6 Stat application — Deep Pockets adds bullets
-- [ ] 8.7 Army upgrade display — 6 upgrades in War Room
-- [ ] 8.8 Upgrade effect — Hardened Warriors +30% friendly HP
+- [x] 8.1 Skill display — 4 skills shown with tier
+- [x] 8.2 Purchase tier 1 — XP deducted, tier up
+- [x] 8.3 Tier 2 cost — Higher cost shown
+- [x] 8.4 Max tier — Button disabled
+- [x] 8.5 Insufficient XP — "need X more" shown
+- [x] 8.6 Stat application — Deep Pockets adds bullets
+- [x] 8.7 Army upgrade display — 6 upgrades in War Room
+- [x] 8.8 Upgrade effect — Hardened Warriors +30% friendly HP
 
 **Notes:**
 
@@ -140,17 +140,17 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 9: Hub Flow
 
-- [ ] 9.1 Hub load — Scene loads, player spawns
-- [ ] 9.2 Deploy station — Mission list shows Castle Keep
-- [ ] 9.3 Deploy flow — Level loads, run begins
-- [ ] 9.4 Armory station — Panel opens with slot tabs
-- [ ] 9.5 Skill station — Tiered display opens
-- [ ] 9.6 War Room station — Army upgrades displayed
-- [ ] 9.7 Stats station — Lifetime stats shown
-- [ ] 9.8 Palette station — Palette picker opens
-- [ ] 9.9 Save station — "GAME SAVED" feedback
-- [ ] 9.10 Panel close — Escape closes panel
-- [ ] 9.11 XP display — Correct XP total shown
+- [x] 9.1 Hub load — Scene loads, player spawns (scene cleanup fixed)
+- [x] 9.2 Deploy station — Mission list shows Castle Keep
+- [x] 9.3 Deploy flow — Level loads, run begins
+- [x] 9.4 Armory station — Panel opens with slot tabs
+- [x] 9.5 Skill station — Tiered display opens
+- [x] 9.6 War Room station — Army upgrades displayed
+- [x] 9.7 Stats station — Lifetime stats shown
+- [x] 9.8 Palette station — Palette picker opens
+- [x] 9.9 Save station — Removed (autosave handles it)
+- [x] 9.10 Panel close — Escape closes panel
+- [x] 9.11 XP display — Correct XP total shown
 
 **Notes:**
 

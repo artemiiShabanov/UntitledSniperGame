@@ -38,7 +38,11 @@ func _shoot_at_player(player: Node3D) -> void:
 
 	var bird: Node3D = bird_scene.instantiate()
 	var spawn_pos := global_position + Vector3.UP * 1.8
-	get_tree().root.add_child(bird)
+	var level := get_tree().current_scene
+	if level:
+		level.add_child(bird)
+	else:
+		get_tree().root.add_child(bird)
 	bird.global_position = spawn_pos
 
 	if bird.has_method("set_target"):

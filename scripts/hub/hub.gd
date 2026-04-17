@@ -8,7 +8,6 @@ var LEVEL_LIST: Array[String] = [
 ]
 
 @onready var deploy_board: Interactable = $DeployBoard
-@onready var save_terminal: Interactable = $SaveTerminal
 @onready var mod_bench: Interactable = $ModBench
 @onready var skill_board: Interactable = $SkillBoard
 @onready var war_room_station: Interactable = $WarRoomStation
@@ -25,7 +24,6 @@ var LEVEL_LIST: Array[String] = [
 @onready var war_room: Control = $StationUI/WarRoom
 @onready var stats_panel: Control = $StationUI/StatsPanel
 @onready var palette_panel: Control = $StationUI/PalettePanel
-@onready var save_feedback: Label = $StationUI/SaveFeedback
 
 ## Deploy UI
 @onready var mission_list: VBoxContainer = $StationUI/DeployPanel/VBox/MissionList
@@ -63,7 +61,6 @@ func _ready() -> void:
 	station_ui.move_child(_dimmer, 0)
 
 	deploy_board.deploy_requested.connect(_on_deploy_requested)
-	save_terminal.save_completed.connect(_on_save_completed)
 	mod_bench.mod_requested.connect(_on_mod_requested)
 	armory.shop_closed.connect(_on_armory_closed)
 	skill_board.skill_requested.connect(_on_skill_requested)
@@ -82,7 +79,6 @@ func _ready() -> void:
 	war_room.visible = false
 	stats_panel.visible = false
 	palette_panel.visible = false
-	save_feedback.visible = false
 
 	_load_level_list()
 	_update_xp_display()
@@ -232,15 +228,6 @@ func _on_palette_requested() -> void:
 
 func _on_palette_closed() -> void:
 	_close_active_panel()
-
-
-## ── Save Terminal ────────────────────────────────────────────────────────────
-
-func _on_save_completed() -> void:
-	save_feedback.visible = true
-	save_feedback.text = "GAME SAVED"
-	await get_tree().create_timer(2.0).timeout
-	save_feedback.visible = false
 
 
 ## ── XP Display ──────────────────────────────────────────────────────────────

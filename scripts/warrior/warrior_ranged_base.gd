@@ -145,7 +145,11 @@ func _shoot_at_player(player: Node3D) -> void:
 	projectile.is_enemy_bullet = true
 	# Spawn ahead of the archer so it doesn't hit the shooter.
 	var forward_offset := dir * 1.5
-	get_tree().root.add_child(projectile)
+	var level := get_tree().current_scene
+	if level:
+		level.add_child(projectile)
+	else:
+		get_tree().root.add_child(projectile)
 	projectile.global_position = spawn_pos + forward_offset
 	# Also add collision exception for the shooter.
 	projectile.add_collision_exception_with(self)

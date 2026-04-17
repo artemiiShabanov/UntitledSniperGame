@@ -158,8 +158,17 @@ func _spawn_at_crosshair(scene_path: String) -> void:
 	if not scene:
 		return
 	var instance := scene.instantiate()
-	get_tree().root.add_child(instance)
+	_add_to_level(instance)
 	instance.global_position = pos
+
+
+func _add_to_level(node: Node) -> void:
+	# Prefer adding to the active level scene so it cleans up on scene change.
+	var level := get_tree().current_scene
+	if level:
+		level.add_child(node)
+	else:
+		get_tree().root.add_child(node)
 
 
 func _spawn_warrior(type: String, faction: WarriorBase.Faction) -> void:
@@ -176,7 +185,7 @@ func _spawn_warrior(type: String, faction: WarriorBase.Faction) -> void:
 	var spawn_pos := player_pos + forward * 20.0
 	spawn_pos.y = 0.0
 	warrior.advance_target = player_pos  # Walk toward player
-	get_tree().root.add_child(warrior)
+	_add_to_level(warrior)
 	warrior.global_position = spawn_pos
 
 

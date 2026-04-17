@@ -339,7 +339,11 @@ func _spawn_bullet() -> void:
 	bullet.bullet_gravity = bullet_gravity
 	bullet.impact_loudness = impact_loudness
 
-	get_tree().root.add_child(bullet)
+	var level := get_tree().current_scene
+	if level:
+		level.add_child(bullet)
+	else:
+		get_tree().root.add_child(bullet)
 	bullet.global_position = spawn_pos
 
 	VFXFactory.spawn_muzzle_flash(spawn_pos + spawn_dir * 0.3, spawn_dir, false)

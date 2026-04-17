@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://s52rkyeu1kxe" path="res://scripts/hub/hub.gd" id="1_hub"]
 [ext_resource type="PackedScene" uid="uid://cu5r57bea486j" path="res://scenes/player/player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://cmocsbk6rgc2t" path="res://scripts/hub/deploy_board.gd" id="3_deploy"]
-[ext_resource type="Script" uid="uid://d17fgkr7081ri" path="res://scripts/hub/save_terminal.gd" id="5_save"]
 [ext_resource type="Script" uid="uid://iye08sxbqpay" path="res://scripts/hub/mod_bench.gd" id="9_mod_bench"]
 [ext_resource type="Script" uid="uid://d1g16ea7iyde7" path="res://scripts/hub/skill_shop.gd" id="10_skill_shop"]
 [ext_resource type="Script" uid="uid://cgtgbthc7ps50" path="res://scripts/hub/skill_board.gd" id="11_skill_board"]
@@ -78,21 +77,6 @@ size = Vector3(1.5, 2, 0.3)
 [node name="Label3D" type="Label3D" parent="DeployBoard"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
 text = "DEPLOY"
-font_size = 48
-
-[node name="SaveTerminal" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.5, 0)
-script = ExtResource("5_save")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SaveTerminal"]
-shape = SubResource("BoxShape3D_station1")
-
-[node name="MeshInstance3D" type="CSGBox3D" parent="SaveTerminal"]
-size = Vector3(1.5, 2, 0.3)
-
-[node name="Label3D" type="Label3D" parent="SaveTerminal"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.2)
-text = "SAVE"
 font_size = 48
 
 [node name="ModBench" type="StaticBody3D" parent="."]
@@ -384,23 +368,5 @@ theme_override_constants/separation = 12
 [node name="CloseButton" type="Button" parent="StationUI/PalettePanel/VBox"]
 layout_mode = 2
 text = "Close"
-
-[node name="SaveFeedback" type="Label" parent="StationUI"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -25.0
-offset_right = 100.0
-offset_bottom = 25.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 32
-text = "GAME SAVED"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [connection signal="pressed" from="StationUI/DeployPanel/VBox/CancelButton" to="." method="_close_active_panel"]

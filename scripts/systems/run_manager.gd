@@ -112,6 +112,7 @@ func _set_game_state(new_state: GameState) -> void:
 func go_to_hub() -> void:
 	_set_game_state(GameState.HUB)
 	is_dead = false
+	SaveManager.save()
 	LoadingScreen.transition(func() -> void:
 		get_tree().change_scene_to_file(HUB_SCENE)
 	)
