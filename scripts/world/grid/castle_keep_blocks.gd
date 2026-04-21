@@ -14,10 +14,11 @@ static func build_castle_wall(b: BlockBuilderBase) -> void:
 	# Crenellations (merlons).
 	for i in range(-5, 6, 3):
 		b.add_box(Vector3(i, 7.0, 1.0), Vector3(1.5, 1.5, 0.5), b.mat_stone(), "Merlon_%d" % i)
-	# Castle wall point markers along the base.
-	b.add_group_marker(Vector3(-4, 0, 2), "castle_wall_points")
-	b.add_group_marker(Vector3(0, 0, 2), "castle_wall_points")
-	b.add_group_marker(Vector3(4, 0, 2), "castle_wall_points")
+	# Castle wall point markers on the battlefield side (Z+ = toward enemy camp).
+	# Placed 3m in front of wall so warriors reliably reach them before wall collision.
+	b.add_group_marker(Vector3(-4, 0, 4.5), "castle_wall_points")
+	b.add_group_marker(Vector3(0, 0, 4.5), "castle_wall_points")
+	b.add_group_marker(Vector3(4, 0, 4.5), "castle_wall_points")
 
 
 static func build_castle_tower(b: BlockBuilderBase) -> void:
@@ -31,8 +32,8 @@ static func build_castle_tower(b: BlockBuilderBase) -> void:
 		var x := 3.5 * cos(deg_to_rad(angle))
 		var z := 3.5 * sin(deg_to_rad(angle))
 		b.add_box(Vector3(x, 13.0, z), Vector3(1.5, 1.5, 0.5), b.mat_stone(), "Battlement_%d" % angle)
-	# Castle wall point at base.
-	b.add_group_marker(Vector3(0, 0, 4), "castle_wall_points")
+	# Castle wall point at base (battlefield side, clear of tower collider).
+	b.add_group_marker(Vector3(0, 0, 6), "castle_wall_points")
 
 
 static func build_castle_gate(b: BlockBuilderBase) -> void:
@@ -47,10 +48,10 @@ static func build_castle_gate(b: BlockBuilderBase) -> void:
 	b.add_box(Vector3(0, 2.0, 0), Vector3(4, 4, 0.5), b.mat_wood_dark(), "Gate")
 	# Walkway.
 	b.add_box(Vector3(0, 6.2, -0.5), Vector3(13, 0.4, 4), b.mat_stone_dark(), "Walkway")
-	# Multiple castle wall points.
-	b.add_group_marker(Vector3(-4, 0, 2), "castle_wall_points")
-	b.add_group_marker(Vector3(0, 0, 2), "castle_wall_points")
-	b.add_group_marker(Vector3(4, 0, 2), "castle_wall_points")
+	# Multiple castle wall points (battlefield side, 3m clear of wall).
+	b.add_group_marker(Vector3(-4, 0, 4.5), "castle_wall_points")
+	b.add_group_marker(Vector3(0, 0, 4.5), "castle_wall_points")
+	b.add_group_marker(Vector3(4, 0, 4.5), "castle_wall_points")
 
 
 static func build_rampart(b: BlockBuilderBase) -> void:
@@ -58,7 +59,8 @@ static func build_rampart(b: BlockBuilderBase) -> void:
 	b.add_box(Vector3(0, 1.5, 0), Vector3(13, 3, 2), b.mat_stone(), "Rampart")
 	# Friendly spawn behind rampart.
 	b.add_group_marker(Vector3(0, 0, -3), "friendly_spawn_points")
-	b.add_group_marker(Vector3(0, 0, 3), "castle_wall_points")
+	# Castle wall point clearly in front (battlefield side).
+	b.add_group_marker(Vector3(0, 0, 4.5), "castle_wall_points")
 
 
 ## ── ZONE 2: Battlefield ─────────────────────────────────────────────────────
