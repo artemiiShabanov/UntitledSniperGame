@@ -49,7 +49,7 @@ func _create_catalog() -> BlockCatalog:
 		# Zone 1: Castle
 		BlockDef.create("castle_wall", "Castle Wall", null,
 			BlockDef.HeightType.MEDIUM, BlockDef.BlockType.CASTLE,
-			["castle"], 2.0, Vector2i(1, 1), -1, true),
+			["castle"], 2.0, Vector2i(1, 1), -1, true, false, true),
 		BlockDef.create("castle_tower", "Castle Tower", null,
 			BlockDef.HeightType.TOWER, BlockDef.BlockType.SNIPER_NEST,
 			["castle", "vantage"], 1.0, Vector2i(1, 1), 2, false, true),
@@ -58,12 +58,12 @@ func _create_catalog() -> BlockCatalog:
 			["castle", "gate"], 0.5, Vector2i(1, 1), 1, true),
 		BlockDef.create("rampart", "Rampart", null,
 			BlockDef.HeightType.LOW, BlockDef.BlockType.CASTLE,
-			["castle"], 1.5, Vector2i(1, 1), -1, true),
+			["castle"], 1.5, Vector2i(1, 1), -1, true, false, true),
 
 		# Zone 2: Battlefield
 		BlockDef.create("flat_meadow", "Flat Meadow", null,
 			BlockDef.HeightType.GROUND, BlockDef.BlockType.BATTLEFIELD,
-			["battlefield"], 3.0, Vector2i(1, 1), -1, true, false, true),
+			["battlefield"], 3.0, Vector2i(1, 1), -1, true),
 		BlockDef.create("rocky_field", "Rocky Field", null,
 			BlockDef.HeightType.GROUND, BlockDef.BlockType.BATTLEFIELD,
 			["battlefield", "cover"], 2.0, Vector2i(1, 1), -1, true),
@@ -101,16 +101,16 @@ func _create_catalog() -> BlockCatalog:
 
 func _create_rules() -> GridLevelRules:
 	var rules := GridLevelRules.new()
-	rules.grid_width = 12
+	rules.grid_width = 10
 	rules.grid_depth = 15
 	rules.cell_size = 15.0
 	rules.sightline_max_height = BlockDef.HeightType.LOW
 
-	# ── Anchors: 1-2 castle towers in castle zone ──
+	# ── Anchors: castle tower in castle zone ──
 	var anchor1 := AnchorPlacement.new()
 	anchor1.block_type_filter = BlockDef.BlockType.SNIPER_NEST
 	anchor1.zone_shape = ZoneRule.ZoneShape.RECT
-	anchor1.zone_rect = Rect2i(0, 0, 12, 3)  # Castle zone
+	anchor1.zone_rect = Rect2i(0, 0, 10, 2)  # Castle zone (rows 0-1)
 	anchor1.min_distance_to_anchors = 4
 	anchor1.facing_mode = AnchorPlacement.FacingMode.INWARD
 	anchor1.required = true
@@ -118,28 +118,28 @@ func _create_rules() -> GridLevelRules:
 	rules.anchor_placements = [anchor1]
 
 	# ── Zone Rules ──
-	# Zone 1: Castle (rows 0-2) — only castle + sniper_nest blocks
+	# Zone 1: Castle (rows 0-1) — only castle + sniper_nest blocks
 	var castle_zone := ZoneRule.new()
 	castle_zone.shape = ZoneRule.ZoneShape.RECT
-	castle_zone.rect = Rect2i(0, 0, 12, 3)
+	castle_zone.rect = Rect2i(0, 0, 10, 2)
 	castle_zone.allowed_types = [
 		BlockDef.BlockType.CASTLE,
 		BlockDef.BlockType.SNIPER_NEST,
 	]
 
-	# Zone 2: Battlefield (rows 3-9) — battlefield blocks only
+	# Zone 2: Battlefield (rows 2-11) — battlefield blocks only
 	var battlefield_zone := ZoneRule.new()
 	battlefield_zone.shape = ZoneRule.ZoneShape.RECT
-	battlefield_zone.rect = Rect2i(0, 3, 12, 7)
+	battlefield_zone.rect = Rect2i(0, 2, 10, 10)
 	battlefield_zone.allowed_types = [
 		BlockDef.BlockType.BATTLEFIELD,
 		BlockDef.BlockType.EMPTY,
 	]
 
-	# Zone 3: Enemy Camp (rows 10-14) — enemy blocks only
+	# Zone 3: Enemy Camp (rows 12-14) — enemy blocks only
 	var enemy_zone := ZoneRule.new()
 	enemy_zone.shape = ZoneRule.ZoneShape.RECT
-	enemy_zone.rect = Rect2i(0, 10, 12, 5)
+	enemy_zone.rect = Rect2i(0, 12, 10, 3)
 	enemy_zone.allowed_types = [
 		BlockDef.BlockType.ENEMY_CAMP,
 	]
@@ -160,14 +160,14 @@ func _create_rules() -> GridLevelRules:
 	var min_enemy_blocks := BlockBudget.new()
 	min_enemy_blocks.filter_by = BlockBudget.FilterBy.BLOCK_TYPE
 	min_enemy_blocks.filter_value = "ENEMY_CAMP"
-	min_enemy_blocks.min_count = 8
-	min_enemy_blocks.max_count = 20
+	min_enemy_blocks.min_count = 5
+	min_enemy_blocks.max_count = 15
 
 	var min_castle_blocks := BlockBudget.new()
 	min_castle_blocks.filter_by = BlockBudget.FilterBy.BLOCK_TYPE
 	min_castle_blocks.filter_value = "CASTLE"
-	min_castle_blocks.min_count = 6
-	min_castle_blocks.max_count = 15
+	min_castle_blocks.min_count = 4
+	min_castle_blocks.max_count = 10
 
 	rules.block_budgets = [min_enemy_blocks, min_castle_blocks]
 
@@ -206,7 +206,11 @@ func _create_extraction_zones(result: GridBuildResult) -> void:
 	for i in range(result.extraction_blocks.size()):
 		var ez := extraction_scene.instantiate()
 		ez.name = "ExtractionZone_%d" % (i + 1)
-		ez.position = result.extraction_blocks[i].position
+		# Raise to wall walkway level — castle_wall walkway is at ~6.2, rampart at ~1.5.
+		var block: Node3D = result.extraction_blocks[i]
+		var is_wall := block.name.begins_with("castle_wall")
+		var y_offset := 6.5 if is_wall else 3.2
+		ez.position = block.position + Vector3(0, y_offset, 0)
 		add_child(ez)
 
 

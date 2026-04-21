@@ -159,16 +159,16 @@ Status: `[ ]` not tested · `[~]` issue found · `[x]` passed
 
 ## Layer 10: Grid Level Generation
 
-- [ ] 10.1 Level generates — No errors on deploy
-- [ ] 10.2 Zone layout — Castle/battlefield/enemy zones correct
-- [ ] 10.3 Player spawn — On castle tower, elevated
-- [ ] 10.4 Extraction zones — Appear in battlefield
-- [ ] 10.5 Warrior paths — Navigate via NavMesh
-- [ ] 10.6 Hostile spawn markers — In enemy camp zone
-- [ ] 10.7 Friendly spawn markers — Behind castle zone
-- [ ] 10.8 Frontline markers — In battlefield zone
-- [ ] 10.9 Block variety — Different layout each restart
-- [ ] 10.10 Performance — FPS > 30 at phase 10+
+- [x] 10.1 Level generates — No errors on deploy
+- [x] 10.2 Zone layout — Castle 0-1, battlefield 2-11, enemy camp 12-14 (10x15)
+- [x] 10.3 Player spawn — On castle tower, elevated
+- [x] 10.4 Extraction zones — On castle walls/ramparts (not battlefield)
+- [x] 10.5 Warrior paths — Navigate around obstacles
+- [x] 10.6 Hostile spawn markers — In enemy camp zone
+- [x] 10.7 Friendly spawn markers — Behind castle zone
+- [x] 10.8 Frontline markers — In battlefield zone
+- [x] 10.9 Block variety — Different layout each restart
+- [x] 10.10 Performance — FPS > 30 at phase 10+
 
 **Notes:**
 
