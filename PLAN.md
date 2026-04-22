@@ -18,53 +18,130 @@ All 10 testing layers passed. Game is fully playable with placeholder assets.
 
 ## 7 · Content
 
-Models, animations, audio, textures — everything for the medieval setting.
+Models, animations, audio, UI — everything for the medieval setting.
 
-### 7.1 3D Models
+**Build order:**
+1. **§7.1 Palette shader + source palette** — foundation; every voxel authored afterward depends on the source-color → palette-slot mapping. Locks faction recolor and global palette swap.
+2. **§7.2 Prototype milestone** (Swordsman walk cycle → 50 instances at 60fps) — validates the whole pipeline end-to-end with the shader applied.
+3. **§7.2 Remaining warriors** — paint on the existing rig; parallelizable.
+4. **§7.2 Props / castle / siege / rifle** — independent tracks.
+5. **§7.3 Audio, §7.4 UI** — in parallel with §7.2 once the prototype is green.
 
-> **Pipeline:** Low-poly modeling (Blender) or asset packs → palette-colored materials → Godot import.
-> Strip textures, apply palette shader uniforms.
+### 7.1 Palette Shader & Source Palette
 
-<details>
-<summary>Characters (~8 models, shared humanoid skeleton)</summary>
+Foundation for all voxel content. No textures. Voxels carry color as **vertex colors**; a global shader remaps each source color to a palette slot uniform.
 
-**Melee Warriors (shared skeleton, distinguished by silhouette):**
-- [ ] Swordsman — medium build, sword + light shield
-- [ ] Big Guy — large build, heavy weapon (mace/hammer), padding
-- [ ] Knight — armored, sword + full shield, helmet
-- [ ] Bombardier — medium build, carries explosive barrel/sack (enemy-only)
+- [ ] Define canonical source-color → palette-slot mapping. Draft: `#000000` → `fg_dark`, `#808080` → `bg_mid`, `#E0E0E0` → `bg_light`, `#FF0000` → `accent_hostile`, `#0000FF` → `accent_friendly`, `#FFD700` → `accent_loot`, `#FF00FF` → `danger`, `#00FF00` → `reward`.
+- [ ] Document the mapping in `docs/voxel_palette.md` (single source of truth for all voxel authoring).
+- [ ] Export the source palette as a MagicaVoxel `.png` palette file — every voxel file loads this so source colors stay consistent.
+- [ ] Rewrite palette shader: input = vertex `COLOR`, output = palette-mapped color via `PaletteManager` uniforms (replaces texture-strip pipeline).
+- [ ] Faction recolor: per-instance uniform override swaps `accent_friendly` ↔ `accent_hostile` — same mesh, two factions, no duplicate assets.
+- [ ] Global palette swap: uniforms driven by `PaletteManager` already; verify voxel meshes pick it up for the "Palettes" unlock feature (GDD §8).
+- [ ] Film grain post-process retained from existing setup.
+- [ ] **Validation asset:** single test cube using all 8 source colors → exported to Godot → shader applied → faction swap verified at runtime → global palette swap verified.
 
-**Ranged Warriors:**
-- [ ] Archer — light build, bow
-- [ ] Heavy Archer — medium build, large bow, quiver
-- [ ] Crossbowman — medium build, crossbow
-- [ ] Bird Trainer — distinct silhouette, birds perched/caged
+### 7.2 3D Models & Animations
 
-</details>
+> **Pipeline:** All meshes authored in **MagicaVoxel** (free). Characters built as **jointed voxel puppets** — each body part is a separate voxel export, parented into a hierarchy in Godot, animated entirely via AnimationPlayer joint rotations. No skeletal rigging, no Mixamo, no Blender. Props/structures/rifle are single-mesh exports. Vertex colors are remapped to palette slots by a global shader (replaces the old "strip texture, apply uniform" pipeline).
+>
+> **Shared puppet rig:** Head, Torso, Upper Arm L/R, Lower Arm L/R + weapon attach point, Upper Leg L/R, Lower Leg L/R. Defined once, reused across all humanoid warriors. Animations authored once on this rig transfer to every warrior variant by parenting a different voxel body to the same joint hierarchy.
 
-<details>
-<summary>Props (~20 models)</summary>
+**Shared warrior animations (apply to all humanoid warriors below):** Idle · Walk · Run · Hit reaction · Death (fall) · Death (headshot)
 
-**Castle:** Stone wall sections, tower, gate (with damage states), rampart, battlement
-**Battlefield:** Rock formations, wooden barricade, trench edge, hay bale
-**Enemy Camp:** Wooden palisade, tent, siege catapult, battering ram, siege tower, war banner
-**Destructibles:** Powder keg (barrel with fuse), siege equipment (catapult, ram)
-**Shared:** Extraction marker, arrow (projectile), crossbow bolt, kamikaze bird
+All animations are Godot AnimationPlayer tracks on joint nodes — no imported animation clips. Estimate ~10–15 min per shared anim once the rig template exists.
 
-</details>
+#### A. Warrior Characters
 
-### 7.2 Animations (~20 via Mixamo or hand-animated)
+| # | Model | Faction | Role-Specific Animations | Notes |
+|---|-------|---------|--------------------------|-------|
+| 1 | Swordsman | Both | Melee attack (sword swing) | Medium build, sword + light shield. Phase 1+. |
+| 2 | Big Guy | Both | Melee attack (heavy swing) | Large build, mace/hammer, padding. Phase 6+. |
+| 3 | Knight | Both | Melee attack (sword swing), Block (optional) | Armored, sword + full shield, helmet. Phase 10+. |
+| 4 | Bombardier | Enemy only | Run with barrel, Arrive/place explosive, Detonate death | Low HP, runs straight to castle. Phase 6+. |
+| 5 | Archer | Enemy | Aim bow, Shoot bow, Reposition step | Light build. Phase 4+. |
+| 6 | Heavy Archer | Enemy | Aim bow, Shoot bow (drawn-out), Reposition walk | Medium build, large bow, quiver. Phase 7+. |
+| 7 | Crossbowman | Enemy | Aim crossbow, Shoot crossbow, Reload (slow) | Medium build, crossbow. Phase 9+. |
+| 8 | Bird Trainer | Enemy | Release bird, Whistle/call | Distinct silhouette (caged birds). Phase 11+. |
 
-<details>
-<summary>Animation list</summary>
+#### A-bis. Warrior Variants (same skeleton, gear/mesh swaps)
 
-**Warrior shared:** Walk, Run, Idle (standing), Melee attack (sword swing), Melee attack (heavy), Death (fall), Death (headshot), Hit reaction
-**Ranged:** Aim bow, Shoot bow, Aim crossbow, Shoot crossbow, Release bird
-**Bombardier:** Run with barrel, Arrive at castle (place explosive)
-**Siege:** Catapult swing cycle, Ram rock cycle, Siege tower roll
-**Player arms:** (Optional) bolt cycling, scope animation
+| # | Model | Based On | Purpose | Animations |
+|---|-------|----------|---------|------------|
+| 9 | Enemy Champion | Big Guy / Knight | Opportunity target (tougher variant) | Reuses base |
+| 10 | War Horn carrier | Swordsman | One-shot opportunity target | +Blow horn |
+| 11 | War Chief | Knight | Opportunity target, buffs nearby | +Command gesture idle |
+| 12 | Elite Knight | Knight | Army upgrade: Elite Guard | Reuses Knight |
+| 13 | Hardened Warrior overlay | Sword/Big/Knight | Army upgrade: helmets/padding | Attachments only |
+| 14 | Larger-weapon overlay | Ranged trio | Army upgrade: Battle Training | Weapon mesh swaps |
 
-</details>
+#### B. Projectiles & Creatures
+
+| # | Model | Animations | Notes |
+|---|-------|------------|-------|
+| 15 | Arrow | — | Rigid body, visible travel |
+| 16 | Crossbow bolt | — | Faster than arrow |
+| 17 | Kamikaze bird | Fly/flap loop, Dive, Explode-on-impact | Max 3 active |
+
+#### C. Siege Equipment & Destructibles
+
+| # | Model | Animations | Notes |
+|---|-------|------------|-------|
+| 18 | Powder Keg | Fuse flicker (optional), Explosion VFX | AoE one-shot. Phase 1+. |
+| 19 | Catapult | Swing/fire cycle, Destroyed state | Drains castle HP. Phase 6+. |
+| 20 | Battering Ram | Rock-forward cycle, Destroyed state | Drains castle HP. |
+| 21 | Siege Tower | Roll-forward loop, Arrive/stop, Destroyed state | Opportunity target. |
+
+#### D. Castle Structures (Zone 1)
+
+| # | Model | Animations | Notes |
+|---|-------|------------|-------|
+| 22 | Stone wall section | — | Modular, tileable |
+| 23 | Tower | — | Corner/keep piece, firing position |
+| 24 | Gate (standard) | Open/close, Damage states (intact → cracked → broken) | Enemy attack point |
+| 25 | Gate (reinforced) | Same as standard | Reinforced Gates upgrade variant |
+| 26 | Rampart / battlement | — | Walk surface on walls |
+| 27 | Extraction marker | Idle pulse, Active glow | Palette `accent_loot` |
+| 28 | Archer Tower (friendly turret) | Idle, Fire | Archer Tower upgrade |
+
+#### E. Battlefield Props (Zone 2)
+
+| # | Model | Animations | Notes |
+|---|-------|------------|-------|
+| 29 | Rock formation (2–3 variants) | — | Cover |
+| 30 | Wooden barricade | — | Cover |
+| 31 | Trench edge | — | Terrain feature |
+| 32 | Hay bale | — | Cover / set dressing |
+
+#### F. Enemy Camp (Zone 3)
+
+| # | Model | Animations | Notes |
+|---|-------|------------|-------|
+| 33 | Wooden palisade | — | Camp perimeter |
+| 34 | Tent | — | Set dressing |
+| 35 | War banner | Cloth sway (shader-based OK) | Faction identification |
+
+#### G. Player Rifle (modern, anachronistic)
+
+5 mod slots × 3 visual types each = 15 attachment meshes. Rarity = notch count on the same mesh, not separate models.
+
+| # | Model | Animations | Notes |
+|---|-------|------------|-------|
+| 36 | Rifle body (base) | Shoot, Bolt cycle, Dry fire, Scope in/out, Breath hold sway | Shared rig |
+| 37 | Barrel mods (×3) | — | Swap-on |
+| 38 | Stock mods (×3) | — | Swap-on |
+| 39 | Bolt mods (×3) | — | Swap-on |
+| 40 | Magazine mods (×3) | — | Swap-on |
+| 41 | Scope mods (×3) | — | Scope overlay is UI, not mesh |
+| 42 | First-person arms | Inherits rifle anims | Gloves/sleeves |
+
+**Totals:** 8 core warriors + 6 variants, 3 projectiles/creatures, 4 siege, 7 castle pieces, 4 battlefield props, 3 camp props, 1 rifle + 15 mod attachments + arms ≈ **52 meshes** (characters are ~10 voxel parts each; puppet rig template is shared, so authoring cost per warrior is mostly "paint the parts").
+
+**Tools:**
+- **MagicaVoxel** — all mesh authoring (free).
+- **Godot AnimationPlayer** — all animations, authored directly in-engine via joint rotations on the shared puppet rig.
+- **No Mixamo, no Blender, no external rigging** — the jointed-puppet approach eliminates the rigging/weight-painting pipeline entirely.
+
+**Prototype milestone (de-risks the whole pipeline):** Model Swordsman parts in MagicaVoxel → parent into Godot hierarchy → author one walk cycle in AnimationPlayer → instance 50 copies via MultiMeshInstance3D and verify 60fps. If that loop works, every other warrior is a paint job on the same rig.
 
 ### 7.3 Audio
 
@@ -84,16 +161,7 @@ Models, animations, audio, textures — everything for the medieval setting.
 
 > **Reuse:** Rifle sounds (5), UI sounds (8), some ambient. Replace: all enemy sounds, impact sounds, world sounds.
 
-### 7.4 Textures & Materials
-
-- [ ] Stone/brick (castle walls, towers)
-- [ ] Wood (palisade, barricades, siege equipment)
-- [ ] Grass/dirt (battlefield ground)
-- [ ] Metal (knight armor, weapons)
-- [ ] Fabric (tents, banners)
-- [ ] All palette-driven — base B&W with accent colors via shader uniforms
-
-### 7.5 UI Assets
+### 7.4 UI Assets
 
 - [ ] Medieval-inspired HUD frame/borders
 - [ ] Castle HP bar art

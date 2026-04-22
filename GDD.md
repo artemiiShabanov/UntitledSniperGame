@@ -279,11 +279,13 @@ The player's modern rifle should sound alien and powerful against the medieval s
 
 ## 14. Art Direction
 
-**Palette-driven minimal.** Clean low-poly geometry. B&W base world with palette accent colors: `accent_hostile` (enemies), `accent_friendly` (allies/castle), `accent_loot` (destructibles/extraction). `danger`/`reward` for feedback. Film grain overlay.
+**Palette-driven voxel minimal.** Clean voxel geometry throughout. B&W base world with palette accent colors: `accent_hostile` (enemies), `accent_friendly` (allies/castle), `accent_loot` (destructibles/extraction). `danger`/`reward` for feedback. Film grain overlay.
 
-**Warriors:** Simple humanoid meshes, distinguished by silhouette (swordsman = medium, big guy = large, knight = armored + shield). Ranged enemies by weapon shape. Friendly vs enemy by palette color.
+**Voxel pipeline:** All assets modeled in MagicaVoxel. Vertex colors are remapped to palette slots via a global shader — no textures. Greedy-meshed exports keep tri counts low.
 
-**Rifle:** Visually anachronistic. Each mod slot has 3 visual types. Rarity = model complexity (notches), not color.
+**Warriors:** Jointed voxel puppets (Minecraft/Crossy Road style). Each character is a hierarchy of separate voxel parts (head, torso, upper/lower arms, upper/lower legs) parented in Godot and animated via AnimationPlayer joint rotations — no skeletal rigging. Types distinguished by voxel silhouette: swordsman = medium, big guy = chunkier blocks and taller, knight = armored + shield voxels. Ranged enemies by weapon shape. Friendly vs enemy by palette color.
+
+**Rifle:** Voxel-modeled, visually anachronistic against the medieval set. Each mod slot has 3 visual types. Rarity = model complexity (notches), not color.
 
 **UI:** Clean, minimal, geometric. Monospace font. Subtle medieval-inspired borders. Palette-aware.
 
