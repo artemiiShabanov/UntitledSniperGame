@@ -14,6 +14,7 @@ func _ready() -> void:
 	RunManager.castle_hp_changed.connect(_on_castle_hp_changed)
 	RunManager.run_started.connect(_on_run_started)
 	RunManager.run_completed.connect(func(_s: bool) -> void: visible = false)
+	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void: queue_redraw())
 	visible = false
 
 
@@ -40,14 +41,14 @@ func _draw() -> void:
 	var bg_color := PaletteManager.get_color(PaletteManager.SLOT_FG_DARK)
 	draw_rect(Rect2(0, 0, BAR_WIDTH, BAR_HEIGHT), bg_color)
 
-	# Fill — green → yellow → red.
+	# Fill — good (healthy) → accent (warning) → bad (critical).
 	var fill_color: Color
 	if ratio > 0.5:
-		fill_color = Color(0.2, 0.8, 0.2)
+		fill_color = PaletteManager.get_color(PaletteManager.SLOT_GOOD)
 	elif ratio > 0.25:
-		fill_color = Color(0.9, 0.8, 0.1)
+		fill_color = PaletteManager.get_color(PaletteManager.SLOT_ACCENT)
 	else:
-		fill_color = Color(0.9, 0.2, 0.2)
+		fill_color = PaletteManager.get_color(PaletteManager.SLOT_BAD)
 
 	var fill_width := BAR_WIDTH * ratio
 	if fill_width > 0.0:

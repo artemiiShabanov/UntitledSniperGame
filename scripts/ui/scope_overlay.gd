@@ -7,8 +7,9 @@ enum Style { DEFAULT, RED_DOT, GRANDMA, CHEAP, TACTICAL }
 @export var crosshair_thickness: float = 1.0
 @export var scope_radius_ratio: float = 0.45  ## Fraction of screen height
 
-var ring_color: Color = Color(0, 0, 0, 0.85)
-var crosshair_color: Color = Color(0, 0, 0, 0.6)
+var ring_color: Color
+var crosshair_color: Color
+var dot_color: Color
 var style: Style = Style.DEFAULT
 
 
@@ -26,8 +27,9 @@ func set_style(new_style: int) -> void:
 
 
 func _on_palette_changed(_palette: PaletteResource) -> void:
-	ring_color = Color(PaletteManager.get_color(PaletteManager.SLOT_FG_DARK), 0.9)
-	crosshair_color = Color(PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY), 0.5)
+	ring_color = Color(PaletteManager.GS_DARK, 0.9)
+	crosshair_color = Color(PaletteManager.get_color(PaletteManager.SLOT_GOOD_MUTED), 0.5)
+	dot_color = Color(PaletteManager.get_color(PaletteManager.SLOT_BAD), 0.9)
 	if visible:
 		queue_redraw()
 
@@ -92,8 +94,7 @@ func _draw_default(center: Vector2, radius: float) -> void:
 
 
 func _draw_red_dot(center: Vector2, _radius: float) -> void:
-	## Minimal overlay — just a red dot in the center, no scope mask.
-	var dot_color := Color(1.0, 0.15, 0.1, 0.9)
+	## Minimal overlay — just a dot in the center, no scope mask.
 	draw_circle(center, 3.0, dot_color)
 	# Subtle outer ring
 	draw_arc(center, 6.0, 0, TAU, 32, Color(dot_color, 0.3), 1.0)

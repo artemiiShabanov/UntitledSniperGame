@@ -37,6 +37,12 @@ func _ready() -> void:
 	# Re-grab focus after alt-tab
 	get_tree().root.focus_entered.connect(_on_window_focus)
 
+	PaletteManager.palette_changed.connect(_on_palette_changed)
+
+
+func _on_palette_changed(_palette: PaletteResource) -> void:
+	_apply_quit_confirm_palette()
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
@@ -120,9 +126,9 @@ func _build_quit_confirm() -> void:
 	vbox.add_child(warning)
 
 	var sub_label := Label.new()
+	sub_label.name = "SubLabel"
 	sub_label.text = "Unsaved progress will be lost."
 	sub_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub_label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BG_LIGHT))
 	vbox.add_child(sub_label)
 
 	var btn_row := HBoxContainer.new()
@@ -138,14 +144,26 @@ func _build_quit_confirm() -> void:
 	btn_row.add_child(cancel_btn)
 
 	var confirm_btn := Button.new()
+	confirm_btn.name = "ConfirmBtn"
 	confirm_btn.text = "Quit"
 	confirm_btn.custom_minimum_size = Vector2(180, 56)
 	confirm_btn.pressed.connect(func(): get_tree().quit())
-	confirm_btn.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
 	AudioManager.wire_button(confirm_btn, &"menu_confirm")
 	btn_row.add_child(confirm_btn)
 
 	add_child(_quit_confirm)
+	_apply_quit_confirm_palette()
+
+
+func _apply_quit_confirm_palette() -> void:
+	if _quit_confirm == null:
+		return
+	var sub := _quit_confirm.find_child("SubLabel", true, false) as Label
+	if sub:
+		sub.add_theme_color_override("font_color", PaletteManager.GS_LIGHT)
+	var confirm := _quit_confirm.find_child("ConfirmBtn", true, false) as Button
+	if confirm:
+		confirm.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_BAD))
 
 
 func _on_window_focus() -> void:

@@ -132,17 +132,33 @@ Migrations run sequentially (v1→v2→v3→v4) so any save version can upgrade.
 
 ### How It Works
 
-1. **PaletteResource** (.tres) defines 8 color slots:
-   - `bg_light`, `bg_mid`, `fg_dark` — base grayscale tones
-   - `accent_hostile`, `accent_loot`, `accent_friendly` — gameplay colors
-   - `danger`, `reward` — feedback colors
+1. **PaletteResource** (.tres) defines **8 gameplay-signal colors** — 4 semantic roles × 2 saturations. Grayscale is permanent and lives as constants on `VoxelSourcePalette` (mirrored on `PaletteManager`).
+   - Good: `good`, `good_muted`
+   - Bad: `bad`, `bad_muted`
+   - Accent: `accent`, `accent_muted`
+   - Filler (material warmth): `filler`, `filler_muted`
+   - Grayscale constants (NOT in PaletteResource — fixed): `gs_light`, `gs_mid_light`, `gs_mid_dark`, `gs_dark`
 
-2. **PaletteManager** pushes these to **global shader uniforms** on every palette change:
+2. **PaletteManager** pushes the 8 palette slots to **global shader uniforms** on every palette change, plus the 4 gray constants (which never change):
    ```
-   palette_bg_light, palette_bg_mid, palette_fg_dark,
-   palette_accent_hostile, palette_accent_loot, palette_accent_friendly,
-   palette_danger, palette_reward
+   palette_good, palette_good_muted,
+   palette_bad, palette_bad_muted,
+   palette_accent, palette_accent_muted,
+   palette_filler, palette_filler_muted,
+   palette_gs_light, palette_gs_mid_light, palette_gs_mid_dark, palette_gs_dark
    ```
+
+3. **Voxel pipeline.** Voxel meshes use `voxel_palette.gdshader` with a material-level `mesh_type` uniform (`GOOD` / `BAD` / `ACCENT` / `FILLER` — see `VoxelMeshType`). Each mesh paints with only 6 source colors (`VoxelSourcePalette.GS_LIGHT` etc. + `PRIMARY` + `SECONDARY`); the shader rewrites `PRIMARY`/`SECONDARY` per `mesh_type` at render time. Faction swap = point mesh at a different pre-built shared material via `PaletteManager.get_voxel_material(type)`.
+
+### Voxel coloring rules (enforced — every asset must comply)
+
+Any voxel mesh imported into the project must satisfy all of the following, or it will render incorrectly:
+
+1. **Paint only with the 6 canonical source colors** defined in `VoxelSourcePalette`. Any other color renders magenta in-game (the shader's intentional error fallback). Load the source palette into MagicaVoxel before painting so the working colors stay locked.
+2. **Tag with exactly one `VoxelMeshType.Type`.** The mesh's material is one of the 4 shared materials from `PaletteManager.get_voxel_material(type)`. No runtime mesh_type changes on a single mesh — swap the material reference instead.
+3. **Split multi-role models into child meshes.** If a voxel object conceptually carries two roles (e.g. friendly archer body + wooden bow), model them as separate voxel parts and tag each independently. Jointed-puppet character structure already enforces this at the part level.
+4. **Do not bake palette colors into exports.** The `.glb` should contain the 6 source colors as vertex colors; never pre-resolve them to final palette colors or the palette swap feature breaks.
+5. **Magenta = bug.** Seeing magenta in-game means either (a) an unapproved source color in the `.vox`, (b) a mesh with no material / wrong shader, or (c) `mesh_type` uniform unset. Check in that order.
 
 3. **Shaders** (`palette_surface.gdshader`) read these uniforms to color meshes.
 
@@ -151,6 +167,14 @@ Migrations run sequentially (v1→v2→v3→v4) so any save version can upgrade.
    - `color_unscripted_meshes(root)` — bulk-colored with shared material (efficient)
 
 5. **UI** reads colors via `PaletteManager.get_color(slot)` and `PaletteTheme`.
+
+### UI & HUD coloring rules (enforced — every UI/HUD element must comply)
+
+1. **Palette + grayscale only.** Every color applied to a UI or HUD control must come from `PaletteManager` — one of the 8 palette `SLOT_*` constants or one of the 4 grayscale constants (`PaletteManager.GS_LIGHT`, `GS_MID_LIGHT`, `GS_MID_DARK`, `GS_DARK`). No hard-coded `Color(r, g, b)` literals for visible elements.
+2. **Reactive to palette swaps.** Any element that stores a color must refresh it on `PaletteManager.palette_changed`. Two sanctioned patterns:
+   - **Via `PaletteTheme`** — controls that inherit the viewport theme retune automatically. Preferred when possible.
+   - **Manual subscription** — `PaletteManager.palette_changed.connect(_refresh_colors)` in `_ready`, then fetch fresh values via `PaletteManager.get_color(slot)` inside the handler. Required for any color set via `add_theme_color_override` or custom-drawn pixels.
+   - **Forbidden:** caching a `Color` at `_ready` with no refresh path — palette swaps will leave it stale.
 
 ### Unlock System
 

@@ -16,6 +16,10 @@ func _ready() -> void:
 	close_btn.pressed.connect(func(): shop_closed.emit())
 	AudioManager.wire_button(close_btn, &"menu_cancel")
 	_bold_font = PaletteTheme.bold_font
+	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void:
+		if visible:
+			_refresh()
+	)
 
 
 func _input(event: InputEvent) -> void:

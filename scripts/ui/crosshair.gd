@@ -7,8 +7,8 @@ extends Control
 @export var gap: float = 6.0      ## Empty space around center
 @export var outline_width: float = 2.0
 
-var color: Color = Color.WHITE
-var outline_color: Color = Color(0, 0, 0, 0.6)
+var color: Color
+var outline_color: Color
 
 
 func _ready() -> void:
@@ -19,8 +19,8 @@ func _ready() -> void:
 
 
 func _on_palette_changed(_palette: PaletteResource) -> void:
-	color = PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY)
-	outline_color = Color(PaletteManager.get_color(PaletteManager.SLOT_FG_DARK), 0.6)
+	color = PaletteManager.get_color(PaletteManager.SLOT_GOOD_MUTED)
+	outline_color = Color(PaletteManager.GS_DARK, 0.6)
 	queue_redraw()
 
 

@@ -10,7 +10,17 @@ func _ready() -> void:
 	RunManager.extraction_window_opened.connect(_on_window_opened)
 	RunManager.extraction_window_closed.connect(_on_window_closed)
 	RunManager.run_completed.connect(func(_s: bool) -> void: _hide())
+	PaletteManager.palette_changed.connect(_on_palette_changed)
+	_apply_palette()
 	visible = false
+
+
+func _apply_palette() -> void:
+	add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT))
+
+
+func _on_palette_changed(_palette: PaletteResource) -> void:
+	_apply_palette()
 
 
 func _process(delta: float) -> void:
@@ -27,8 +37,6 @@ func _on_window_opened(duration: float) -> void:
 	_window_open = true
 	_time_remaining = duration
 	text = "EXTRACTION OPEN — %.0fs" % duration
-	var accent := PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT)
-	add_theme_color_override("font_color", accent)
 	visible = true
 
 

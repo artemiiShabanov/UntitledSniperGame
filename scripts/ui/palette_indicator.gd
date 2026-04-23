@@ -4,8 +4,10 @@ extends HBoxContainer
 
 const SWATCH_SIZE := Vector2(12, 12)
 const SLOTS: Array[StringName] = [
-	PaletteManager.SLOT_ACCENT_HOSTILE, PaletteManager.SLOT_ACCENT_LOOT, PaletteManager.SLOT_ACCENT_FRIENDLY,
-	PaletteManager.SLOT_DANGER, PaletteManager.SLOT_REWARD,
+	PaletteManager.SLOT_GOOD, PaletteManager.SLOT_GOOD_MUTED,
+	PaletteManager.SLOT_BAD, PaletteManager.SLOT_BAD_MUTED,
+	PaletteManager.SLOT_ACCENT, PaletteManager.SLOT_ACCENT_MUTED,
+	PaletteManager.SLOT_FILLER, PaletteManager.SLOT_FILLER_MUTED,
 ]
 
 var _swatches: Array[ColorRect] = []

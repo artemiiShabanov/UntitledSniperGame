@@ -54,7 +54,7 @@ func _ready() -> void:
 	_dimmer = ColorRect.new()
 	_dimmer.name = "Dimmer"
 	_dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_dimmer.color = Color(0, 0, 0, 0.7)
+	_dimmer.color = Color(PaletteManager.GS_DARK, 0.7)
 	_dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
 	_dimmer.visible = false
 	station_ui.add_child(_dimmer)

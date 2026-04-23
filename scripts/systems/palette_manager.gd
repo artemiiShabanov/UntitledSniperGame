@@ -10,15 +10,58 @@ extends Node
 ##     PaletteManager.get_color(&"accent_friendly")           # read once
 ##     PaletteManager.palette_changed.connect(_refresh_colors) # stay reactive
 
-## ── Slot name constants (use these instead of raw StringNames) ────────────
-const SLOT_BG_LIGHT := &"bg_light"
-const SLOT_BG_MID := &"bg_mid"
-const SLOT_FG_DARK := &"fg_dark"
-const SLOT_ACCENT_HOSTILE := &"accent_hostile"
-const SLOT_ACCENT_LOOT := &"accent_loot"
-const SLOT_ACCENT_FRIENDLY := &"accent_friendly"
-const SLOT_DANGER := &"danger"
-const SLOT_REWARD := &"reward"
+## ── Slot name constants ────────────────────────────────────────────────────
+## 8 palette slots (4 semantic roles × 2 saturations) + 4 grayscale constants.
+## Unsuffixed = punctuated/bright variant. `_muted` = ambient variant.
+##
+## Grayscale slots resolve to VoxelSourcePalette constants (they do NOT read
+## from the current palette — the 4 grays are permanent across all palettes).
+##
+## Legacy aliases at the bottom keep pre-refactor callsites working.
+
+# Grayscale (permanent — resolved from VoxelSourcePalette constants)
+const SLOT_GS_LIGHT     := &"gs_light"
+const SLOT_GS_MID_LIGHT := &"gs_mid_light"
+const SLOT_GS_MID_DARK  := &"gs_mid_dark"
+const SLOT_GS_DARK      := &"gs_dark"
+
+# Good — friendly / positive feedback
+const SLOT_GOOD       := &"good"         # punctuated: kill confirm, friendly trim
+const SLOT_GOOD_MUTED := &"good_muted"   # ambient: friendly faction body, UI text
+
+# Bad — hostile / negative feedback
+const SLOT_BAD       := &"bad"           # punctuated: damage flash, low-HP alert
+const SLOT_BAD_MUTED := &"bad_muted"     # ambient: enemy faction body
+
+# Accent — attention / gameplay-critical
+const SLOT_ACCENT       := &"accent"         # punctuated: extraction, victory
+const SLOT_ACCENT_MUTED := &"accent_muted"   # ambient: XP label, pickup
+
+# Filler — material warmth (wood, cloth, skin, hay)
+const SLOT_FILLER       := &"filler"         # punctuated: hay, warm highlight
+const SLOT_FILLER_MUTED := &"filler_muted"   # ambient: wood, skin, leather, cloth
+
+# ── Grayscale color constants (mirrors VoxelSourcePalette) ─────────────────
+# Exposed here for convenience so callsites can use PaletteManager.GS_LIGHT
+# without importing VoxelSourcePalette.
+const GS_LIGHT     := Color(0.910, 0.910, 0.910)
+const GS_MID_LIGHT := Color(0.565, 0.565, 0.565)
+const GS_MID_DARK  := Color(0.314, 0.314, 0.314)
+const GS_DARK      := Color(0.102, 0.102, 0.102)
+
+# ── Legacy aliases (do not remove — 30+ files reference these) ─────────────
+const SLOT_BG_LIGHT        := SLOT_GS_LIGHT
+const SLOT_BG_MID          := SLOT_GS_MID_LIGHT
+const SLOT_FG_DARK         := SLOT_GS_DARK
+const SLOT_ACCENT_HOSTILE  := SLOT_BAD_MUTED
+const SLOT_ACCENT_LOOT     := SLOT_ACCENT_MUTED
+const SLOT_ACCENT_FRIENDLY := SLOT_GOOD_MUTED
+const SLOT_DANGER          := SLOT_BAD
+const SLOT_REWARD          := SLOT_ACCENT
+const SLOT_GOOD_BRIGHT     := SLOT_GOOD
+const SLOT_BAD_BRIGHT      := SLOT_BAD
+const SLOT_ACCENT_BRIGHT   := SLOT_ACCENT
+const SLOT_FILLER_BRIGHT   := SLOT_FILLER
 
 ## Emitted whenever the palette changes (on cycle or explicit set).
 signal palette_changed(palette: PaletteResource)
@@ -43,6 +86,12 @@ var _bound: Dictionary = {}
 ## Shared materials for bulk-colored meshes (one per slot).
 ## Updating the shared material recolors ALL meshes using it in one go.
 var _shared_materials: Dictionary = {}  ## { StringName slot: StandardMaterial3D }
+
+## Shared voxel ShaderMaterials, one per VoxelMeshType.Type.
+## Pre-built lazily; all instances of the same type share one material so
+## palette swaps recolor everything via a single uniform write on the GPU side.
+var _voxel_materials: Dictionary = {}  ## { VoxelMeshType.Type: ShaderMaterial }
+const _VOXEL_SHADER_PATH := "res://shaders/voxel_palette.gdshader"
 
 
 func _ready() -> void:
@@ -156,11 +205,14 @@ func set_palette_by_name(palette_name: StringName) -> void:
 ## ── Public API: Color access ────────────────────────────────────────────────
 
 func get_color(slot: StringName) -> Color:
-	## Returns the current palette color for the given slot name.
-	## Slot names match PaletteResource properties:
-	##   &"bg_light", &"bg_mid", &"fg_dark",
-	##   &"accent_hostile", &"accent_loot", &"accent_friendly",
-	##   &"danger", &"reward"
+	## Returns the color for a palette slot. Grayscale slots resolve to the
+	## permanent VoxelSourcePalette constants; everything else reads from the
+	## current PaletteResource. Prefer the SLOT_* constants on this class.
+	match slot:
+		SLOT_GS_LIGHT:     return GS_LIGHT
+		SLOT_GS_MID_LIGHT: return GS_MID_LIGHT
+		SLOT_GS_MID_DARK:  return GS_MID_DARK
+		SLOT_GS_DARK:      return GS_DARK
 	if current == null:
 		return Color.MAGENTA
 	return current.get(slot) if slot in current else Color.MAGENTA
@@ -215,10 +267,10 @@ func bind_mesh_single(mesh_node: MeshInstance3D, slot: StringName) -> void:
 
 func color_unscripted_meshes(root: Node) -> void:
 	## Colors all MeshInstance3D descendants that are NOT already bound
-	## or managed by PaletteMesh. Uses bg_mid as the default world color.
+	## or managed by PaletteMesh. Uses gs_mid_light as the default world color.
 	## Uses a SHARED material so palette swaps update all meshes instantly.
 	## Call once in _ready — bound nodes handle their own updates.
-	var shared_mat := _get_shared_material(SLOT_BG_MID)
+	var shared_mat := _get_shared_material(SLOT_GS_MID_LIGHT)
 	for node in UIUtils.find_all_recursive(root):
 		if not (node is MeshInstance3D):
 			continue
@@ -232,6 +284,30 @@ func color_unscripted_meshes(root: Node) -> void:
 			continue
 		# All unscripted meshes share one material — no per-node tracking needed
 		node.material_override = shared_mat
+
+
+## ── Public API: Voxel shared materials ──────────────────────────────────────
+
+func get_voxel_material(type: int) -> ShaderMaterial:
+	## Returns the shared ShaderMaterial for a given VoxelMeshType.Type.
+	## Four materials total, one per type, reused across every voxel mesh.
+	## Palette swaps propagate automatically via global shader uniforms.
+	##
+	## Usage:
+	##   mesh_instance.material_override = PaletteManager.get_voxel_material(
+	##       VoxelMeshType.Type.GOOD
+	##   )
+	if _voxel_materials.has(type):
+		return _voxel_materials[type]
+	var shader: Shader = load(_VOXEL_SHADER_PATH)
+	if shader == null:
+		push_error("PaletteManager: voxel shader not found at %s" % _VOXEL_SHADER_PATH)
+		return null
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	mat.set_shader_parameter("mesh_type", type)
+	_voxel_materials[type] = mat
+	return mat
 
 
 ## ── Internal: shared materials ───────────────────────────────────────────────
@@ -366,11 +442,17 @@ func _load_pref() -> String:
 func _push_to_shaders() -> void:
 	if current == null:
 		return
-	RenderingServer.global_shader_parameter_set("palette_bg_light", current.bg_light)
-	RenderingServer.global_shader_parameter_set("palette_bg_mid", current.bg_mid)
-	RenderingServer.global_shader_parameter_set("palette_fg_dark", current.fg_dark)
-	RenderingServer.global_shader_parameter_set("palette_accent_hostile", current.accent_hostile)
-	RenderingServer.global_shader_parameter_set("palette_accent_loot", current.accent_loot)
-	RenderingServer.global_shader_parameter_set("palette_accent_friendly", current.accent_friendly)
-	RenderingServer.global_shader_parameter_set("palette_danger", current.danger)
-	RenderingServer.global_shader_parameter_set("palette_reward", current.reward)
+	# 8 palette slots (swap with palette)
+	RenderingServer.global_shader_parameter_set("palette_good", current.good)
+	RenderingServer.global_shader_parameter_set("palette_good_muted", current.good_muted)
+	RenderingServer.global_shader_parameter_set("palette_bad", current.bad)
+	RenderingServer.global_shader_parameter_set("palette_bad_muted", current.bad_muted)
+	RenderingServer.global_shader_parameter_set("palette_accent", current.accent)
+	RenderingServer.global_shader_parameter_set("palette_accent_muted", current.accent_muted)
+	RenderingServer.global_shader_parameter_set("palette_filler", current.filler)
+	RenderingServer.global_shader_parameter_set("palette_filler_muted", current.filler_muted)
+	# 4 grayscale constants (never change — push once in case shaders expect them)
+	RenderingServer.global_shader_parameter_set("palette_gs_light", GS_LIGHT)
+	RenderingServer.global_shader_parameter_set("palette_gs_mid_light", GS_MID_LIGHT)
+	RenderingServer.global_shader_parameter_set("palette_gs_mid_dark", GS_MID_DARK)
+	RenderingServer.global_shader_parameter_set("palette_gs_dark", GS_DARK)

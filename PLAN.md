@@ -29,16 +29,28 @@ Models, animations, audio, UI — everything for the medieval setting.
 
 ### 7.1 Palette Shader & Source Palette
 
-Foundation for all voxel content. No textures. Voxels carry color as **vertex colors**; a global shader remaps each source color to a palette slot uniform.
+Foundation for all voxel content. No textures. Voxels carry color as **vertex colors**; the voxel shader classifies each vertex against **6 canonical source colors**, then rewrites PRIMARY / SECONDARY based on each mesh's `mesh_type` (good / bad / accent / filler). Grayscale is permanent across palettes — only the 8 signal slots swap.
 
-- [ ] Define canonical source-color → palette-slot mapping. Draft: `#000000` → `fg_dark`, `#808080` → `bg_mid`, `#E0E0E0` → `bg_light`, `#FF0000` → `accent_hostile`, `#0000FF` → `accent_friendly`, `#FFD700` → `accent_loot`, `#FF00FF` → `danger`, `#00FF00` → `reward`.
-- [ ] Document the mapping in `docs/voxel_palette.md` (single source of truth for all voxel authoring).
-- [ ] Export the source palette as a MagicaVoxel `.png` palette file — every voxel file loads this so source colors stay consistent.
-- [ ] Rewrite palette shader: input = vertex `COLOR`, output = palette-mapped color via `PaletteManager` uniforms (replaces texture-strip pipeline).
-- [ ] Faction recolor: per-instance uniform override swaps `accent_friendly` ↔ `accent_hostile` — same mesh, two factions, no duplicate assets.
-- [ ] Global palette swap: uniforms driven by `PaletteManager` already; verify voxel meshes pick it up for the "Palettes" unlock feature (GDD §8).
+- [ ] Define canonical source colors in `scripts/voxel/voxel_source_palette.gd` (done — 6 colors):
+
+  | Source hex | Source constant | Role | Resolves to |
+  |------------|----------------|------|-------------|
+  | `#E8E8E8` | `GS_LIGHT` | grayscale (permanent) | `SLOT_GS_LIGHT` |
+  | `#909090` | `GS_MID_LIGHT` | grayscale (permanent) | `SLOT_GS_MID_LIGHT` |
+  | `#505050` | `GS_MID_DARK` | grayscale (permanent) | `SLOT_GS_MID_DARK` |
+  | `#1A1A1A` | `GS_DARK` | grayscale (permanent) | `SLOT_GS_DARK` |
+  | `#FF00FF` | `PRIMARY` | bright signal (rewritten by mesh_type) | `good` / `bad` / `accent` / `filler` |
+  | `#800080` | `SECONDARY` | muted signal (rewritten by mesh_type) | `*_muted` of same |
+
+- [ ] Export `docs/voxel_source_palette.png` — MagicaVoxel-importable palette file with these 6 colors.
+- [ ] Document authoring rules in `docs/voxel_source_palette.md`: rule of thumb, which assets get which mesh_type, how to handle mixed-role models (split into child meshes).
+- [ ] `shaders/voxel_palette.gdshader` — 6-branch classifier + 4-way mesh_type switch (done).
+- [ ] `VoxelMeshType` enum — `GOOD`, `BAD`, `ACCENT`, `FILLER` (done).
+- [ ] Shared-material helper on `PaletteManager`: 4 pre-built `ShaderMaterial` instances (one per `mesh_type`), reused by every voxel mesh. API: `PaletteManager.get_voxel_material(VoxelMeshType.Type.GOOD)`.
+- [ ] Faction swap via mesh_type: friendly warrior = `GOOD`, enemy warrior = `BAD`. Same `.vox`, same `.glb`, different material assignment. No per-instance uniform overrides needed — just point at a different shared material at spawn.
+- [ ] Global palette swap: uniforms driven by `PaletteManager._push_to_shaders()`; verify voxel meshes pick it up for the "Palettes" unlock feature (GDD §8).
 - [ ] Film grain post-process retained from existing setup.
-- [ ] **Validation asset:** single test cube using all 8 source colors → exported to Godot → shader applied → faction swap verified at runtime → global palette swap verified.
+- [ ] **Validation asset:** single test model using all 6 source colors → exported to Godot → voxel shader applied → cycle through all 4 `mesh_type` values at runtime → cycle through all palettes → confirm magenta-fallback appears only when a non-canonical source color is used.
 
 ### 7.2 3D Models & Animations
 

@@ -8,7 +8,17 @@ var _runner: OpportunityRunner = null
 func _ready() -> void:
 	RunManager.run_started.connect(_on_run_started)
 	RunManager.run_completed.connect(func(_s: bool) -> void: _hide())
+	PaletteManager.palette_changed.connect(_on_palette_changed)
+	_apply_palette()
 	visible = false
+
+
+func _apply_palette() -> void:
+	add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT))
+
+
+func _on_palette_changed(_palette: PaletteResource) -> void:
+	_apply_palette()
 
 
 func _on_run_started() -> void:
@@ -43,8 +53,6 @@ func _process(_delta: float) -> void:
 	else:
 		text = "%s  %s" % [opp.name.to_upper(), progress]
 
-	var accent := PaletteManager.get_color(PaletteManager.SLOT_REWARD)
-	add_theme_color_override("font_color", accent)
 	visible = true
 
 

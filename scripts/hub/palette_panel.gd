@@ -15,6 +15,10 @@ func _ready() -> void:
 	close_btn.pressed.connect(func(): panel_closed.emit())
 	AudioManager.wire_button(close_btn, &"menu_cancel")
 	_bold_font = PaletteTheme.bold_font
+	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void:
+		if visible:
+			_rebuild()
+	)
 
 
 func open() -> void:
@@ -52,9 +56,10 @@ func _rebuild() -> void:
 		var preview := HBoxContainer.new()
 		preview.add_theme_constant_override("separation", 4)
 		var preview_colors := [
-			palette.bg_light, palette.bg_mid, palette.fg_dark,
-			palette.accent_hostile, palette.accent_loot, palette.accent_friendly,
-			palette.danger, palette.reward,
+			palette.good, palette.good_muted,
+			palette.bad, palette.bad_muted,
+			palette.accent, palette.accent_muted,
+			palette.filler, palette.filler_muted,
 		]
 		for col: Color in preview_colors:
 			var swatch := ColorRect.new()

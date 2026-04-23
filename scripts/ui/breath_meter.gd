@@ -6,9 +6,10 @@ extends Control
 @export var bar_height: float = 12.0
 @export var bar_offset_y: float = 60.0  ## Pixels below center
 
-var bar_color: Color = Color(0.7, 0.85, 1.0, 0.8)
-var bar_bg_color: Color = Color(0.2, 0.2, 0.2, 0.5)
-var exhausted_color: Color = Color(1.0, 0.3, 0.3, 0.8)
+var bar_color: Color
+var bar_bg_color: Color
+var exhausted_color: Color
+var border_color: Color
 
 var breath_ratio: float = 1.0
 var is_exhausted: bool = false
@@ -23,9 +24,10 @@ func _ready() -> void:
 
 
 func _on_palette_changed(_palette: PaletteResource) -> void:
-	bar_color = Color(PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY), 0.8)
-	bar_bg_color = Color(PaletteManager.get_color(PaletteManager.SLOT_FG_DARK), 0.5)
-	exhausted_color = Color(PaletteManager.get_color(PaletteManager.SLOT_DANGER), 0.8)
+	bar_color = Color(PaletteManager.get_color(PaletteManager.SLOT_GOOD_MUTED), 0.8)
+	bar_bg_color = Color(PaletteManager.GS_DARK, 0.5)
+	exhausted_color = Color(PaletteManager.get_color(PaletteManager.SLOT_BAD), 0.8)
+	border_color = Color(PaletteManager.GS_LIGHT, 0.3)
 	if show_meter:
 		queue_redraw()
 
@@ -55,4 +57,4 @@ func _draw() -> void:
 	draw_rect(Rect2(bar_pos, Vector2(fill_width, bar_height)), fill_color)
 
 	# Border
-	draw_rect(Rect2(bar_pos, Vector2(bar_width, bar_height)), Color(1, 1, 1, 0.3), false, 1.0)
+	draw_rect(Rect2(bar_pos, Vector2(bar_width, bar_height)), border_color, false, 1.0)

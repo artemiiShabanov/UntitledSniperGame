@@ -6,8 +6,8 @@ extends MeshInstance3D
 
 ## Slot names matching PaletteResource property names.
 ## Using StringName directly avoids a duplicated enum.
-@export_enum("bg_light", "bg_mid", "fg_dark", "accent_hostile", "accent_loot", "accent_friendly", "danger", "reward")
-var palette_slot: String = "bg_mid"
+@export_enum("gs_light", "gs_mid_light", "gs_mid_dark", "gs_dark", "good", "good_muted", "bad", "bad_muted", "accent", "accent_muted", "filler", "filler_muted")
+var palette_slot: String = "gs_mid_light"
 
 ## Optional: blend with a base tint for variation (white = pure palette color).
 @export var tint: Color = Color.WHITE

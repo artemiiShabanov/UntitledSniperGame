@@ -20,6 +20,10 @@ func _ready() -> void:
 	AudioManager.wire_button(close_btn, &"menu_cancel")
 	_bold_font = PaletteTheme.bold_font
 	_build_tabs()
+	PaletteManager.palette_changed.connect(func(_p: PaletteResource) -> void:
+		if visible:
+			_refresh()
+	)
 
 
 func _input(event: InputEvent) -> void:

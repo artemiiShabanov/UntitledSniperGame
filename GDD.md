@@ -106,7 +106,7 @@ Procedural layout, time of day (morning/day/evening/night), weather (clear/fog/r
 
 ## 6. Warriors
 
-Warriors spawn from both sides, advance, and fight in melee. Friendly and enemy share the same types, distinguished by palette color (`accent_friendly` vs `accent_hostile`). The player doesn't control friendly warriors.
+Warriors spawn from both sides, advance, and fight in melee. Friendly and enemy share the same types, distinguished by palette color: same voxel mesh, rendered with `mesh_type = GOOD` for allies and `mesh_type = BAD` for enemies. The player doesn't control friendly warriors.
 
 ### Melee Types
 
@@ -185,8 +185,20 @@ Each upgrade unlocked by **completing its paired opportunity for the first time*
 First 4 are stat modifiers; Archer Tower and Elite Guard spawn new entities.
 
 ### Palettes
-Achievement-gated color palette unlocks. Entire world recolors via global shader uniforms.
-Slots: `bg_light`, `bg_mid`, `fg_dark`, `accent_hostile`, `accent_friendly`, `accent_loot`, `danger`, `reward`.
+Achievement-gated color palette unlocks. Only the **gameplay-signal colors** retune per palette — the **grayscale structure of the world is permanent** across every palette.
+
+**8 palette slots = 4 semantic roles × 2 saturation variants:**
+
+| Role | Punctuated | Ambient | Purpose |
+|------|-----------|---------|---------|
+| good | `good` | `good_muted` | Friendly warriors, kill confirm, success feedback |
+| bad | `bad` | `bad_muted` | Enemy warriors, damage/alert flash |
+| accent | `accent` | `accent_muted` | Pickups, XP, extraction active, victory |
+| filler | `filler` | `filler_muted` | Material warmth — wood, skin, cloth, hay |
+
+**4 grayscale constants (fixed — never change at runtime):** `gs_light`, `gs_mid_light`, `gs_mid_dark`, `gs_dark`. Stored on `VoxelSourcePalette` + mirrored on `PaletteManager`.
+
+Rule: grayscale carries form; palette carries meaning.
 
 ---
 
@@ -263,6 +275,10 @@ Dynamic in-run events. Each paired 1:1 with an army upgrade. All follow the patt
 
 **Menus:** Main menu, pause menu, run result screen (score breakdown, opportunity completions, army unlock, mod choices, XP), failure screen (mods lost, XP kept), settings.
 
+**Coloring rules (hard requirement — applies to every UI and HUD element):**
+1. **Palette + grayscale only.** Every color used in UI and hub must be either one of the 8 palette slots (`good` / `good_muted` / `bad` / `bad_muted` / `accent` / `accent_muted` / `filler` / `filler_muted`) or one of the 4 grayscale constants (`gs_light` / `gs_mid_light` / `gs_mid_dark` / `gs_dark`). Hard-coded RGB literals are not allowed.
+2. **Reactive to palette swaps.** All UI and HUD colors must update live when the active palette changes. Cache colors only behind signal subscriptions to `PaletteManager.palette_changed` — never by copying a color once at `_ready` with no refresh path.
+
 ---
 
 ## 13. Audio
@@ -279,9 +295,16 @@ The player's modern rifle should sound alien and powerful against the medieval s
 
 ## 14. Art Direction
 
-**Palette-driven voxel minimal.** Clean voxel geometry throughout. B&W base world with palette accent colors: `accent_hostile` (enemies), `accent_friendly` (allies/castle), `accent_loot` (destructibles/extraction). `danger`/`reward` for feedback. Film grain overlay.
+**Palette-driven voxel minimal.** Clean voxel geometry throughout. Grayscale-dominant world with 4 fixed gray tones (permanent — never change at runtime) plus 8 gameplay-signal palette slots that retune per palette unlock. 4 semantic roles (good / bad / accent / filler), each with punctuated and ambient variants. Enemies = bad, allies = good, extraction/pickups = accent, wood/cloth/skin = filler. See §8 Palettes for the full token list. Film grain overlay.
 
 **Voxel pipeline:** All assets modeled in MagicaVoxel. Vertex colors are remapped to palette slots via a global shader — no textures. Greedy-meshed exports keep tri counts low.
+
+**Coloring rule (hard requirement — applies to every voxel asset):**
+1. **Six source colors only.** Every voxel must be painted with one of the 6 canonical source colors defined in `VoxelSourcePalette`: `GS_LIGHT`, `GS_MID_LIGHT`, `GS_MID_DARK`, `GS_DARK`, `PRIMARY`, `SECONDARY`. No other color is permitted — anything else renders magenta in-game (the shader's error fallback).
+2. **One `mesh_type` per mesh.** Each voxel model declares exactly one role: `GOOD`, `BAD`, `ACCENT`, or `FILLER`. The shader uses this to resolve `PRIMARY`/`SECONDARY` to the correct palette slot pair.
+3. **Split on multi-role.** If a model visually carries two roles (e.g. an enemy War Chief with a faction-colored body and an attention-colored cape), split it into child meshes and tag each independently. Jointed-puppet structure already makes this natural for characters.
+4. **Grayscale is form.** The 4 grays are structural — they stay constant across palette swaps. Only `PRIMARY` and `SECONDARY` change with palette and mesh_type.
+5. **Magenta is a bug.** If any voxel renders magenta, an artist painted with an unapproved color. Fix the source `.vox` file.
 
 **Warriors:** Jointed voxel puppets (Minecraft/Crossy Road style). Each character is a hierarchy of separate voxel parts (head, torso, upper/lower arms, upper/lower legs) parented in Godot and animated via AnimationPlayer joint rotations — no skeletal rigging. Types distinguished by voxel silhouette: swordsman = medium, big guy = chunkier blocks and taller, knight = armored + shield voxels. Ranged enemies by weapon shape. Friendly vs enemy by palette color.
 

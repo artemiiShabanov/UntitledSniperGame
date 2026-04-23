@@ -6,7 +6,7 @@ const DISPLAY_DURATION: float = 4.0
 const FADE_DURATION: float = 1.0
 const KILL_FONT_SIZE: int = 28
 
-var _entries: Array[Dictionary] = []  ## [{label: Node, timer: float}]
+var _entries: Array[Dictionary] = []  ## [{label: Label, slot: StringName, timer: float}]
 var _bold_font: Font
 var _kill_icon: Texture2D
 var _headshot_icon: Texture2D
@@ -22,6 +22,14 @@ func _ready() -> void:
 	RunManager.friendly_killed_with_info.connect(_on_friendly_killed)
 	RunManager.target_destroyed_with_info.connect(_on_target_destroyed)
 	RunManager.event_announced.connect(_on_event_announced)
+	PaletteManager.palette_changed.connect(_on_palette_changed)
+
+
+func _on_palette_changed(_palette: PaletteResource) -> void:
+	for entry: Dictionary in _entries:
+		var label: Label = entry.get("text_label")
+		if label and is_instance_valid(label):
+			label.add_theme_color_override("font_color", PaletteManager.get_color(entry.slot))
 
 
 func _process(delta: float) -> void:
@@ -69,6 +77,13 @@ func _make_feed_row(icon: Texture2D = null) -> HBoxContainer:
 	return row
 
 
+func _push_entry(row: HBoxContainer, label: Label, slot: StringName, duration: float) -> void:
+	label.add_theme_color_override("font_color", PaletteManager.get_color(slot))
+	row.add_child(label)
+	add_child(row)
+	_entries.append({"label": row, "text_label": label, "slot": slot, "timer": duration})
+
+
 func _on_enemy_killed(info: Dictionary) -> void:
 	var icon: Texture2D = _headshot_icon if info.headshot else _kill_icon
 	var row := _make_feed_row(icon)
@@ -78,44 +93,28 @@ func _on_enemy_killed(info: Dictionary) -> void:
 	if info.headshot:
 		text += " | HEADSHOT"
 	text += " | +%d" % info.final_score
-
 	label.text = text
 
-	if info.headshot:
-		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_HOSTILE))
-	else:
-		label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_FRIENDLY))
-
-	row.add_child(label)
-	add_child(row)
-	_entries.append({"label": row, "timer": DISPLAY_DURATION})
+	var slot: StringName = PaletteManager.SLOT_BAD if info.headshot else PaletteManager.SLOT_GOOD_MUTED
+	_push_entry(row, label, slot, DISPLAY_DURATION)
 
 
 func _on_friendly_killed(info: Dictionary) -> void:
 	var row := _make_feed_row(_kill_icon)
 	var label := _make_feed_label()
 	label.text = "FRIENDLY KILLED | -%d" % info.penalty
-	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_DANGER))
-	row.add_child(label)
-	add_child(row)
-	_entries.append({"label": row, "timer": DISPLAY_DURATION})
+	_push_entry(row, label, PaletteManager.SLOT_BAD, DISPLAY_DURATION)
 
 
 func _on_target_destroyed(info: Dictionary) -> void:
 	var row := _make_feed_row(_target_icon)
 	var label := _make_feed_label()
 	label.text = "TARGET DESTROYED | +%d" % info.score
-	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_ACCENT_LOOT))
-	row.add_child(label)
-	add_child(row)
-	_entries.append({"label": row, "timer": DISPLAY_DURATION})
+	_push_entry(row, label, PaletteManager.SLOT_ACCENT_MUTED, DISPLAY_DURATION)
 
 
 func _on_event_announced(text: String) -> void:
 	var row := _make_feed_row()
 	var label := _make_feed_label()
 	label.text = text
-	label.add_theme_color_override("font_color", PaletteManager.get_color(PaletteManager.SLOT_REWARD))
-	row.add_child(label)
-	add_child(row)
-	_entries.append({"label": row, "timer": DISPLAY_DURATION * 1.5})
+	_push_entry(row, label, PaletteManager.SLOT_ACCENT, DISPLAY_DURATION * 1.5)
